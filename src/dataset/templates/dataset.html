@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dataset</title>
+</head>
+<body>
+    <h1>Dataset</h1>
+    <p>Number of jobs: {{jobs_number}}</p>
+    <ul>
+        {% for job in jobs_list%}
+            <li>{{job}}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,12 @@
+bin/
+etc/
+include
+lib/
+share/
+*.sqlite3
+*.db
+*.csv
+*.json
+src/**/*.txt
+
+
