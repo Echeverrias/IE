@@ -91,7 +91,7 @@ DOWNLOADER_MIDDLEWARES = {
 
 """
 #scrapy-rotating-proxies #'92.222.77.101:4444'
-ROTATING_PROXY_LIST = ['92.222.77.101:4444']
+ROTATING_PROXY_LIST = ['185.202.165.1:53281']
 
 
 
@@ -114,7 +114,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'ie_scrapy.pipelines.IEPipeline': 250,
+   'ie_scrapy.pipelines.CleanPipeline': 250,
    'ie_scrapy.pipelines.StorePipeline': 300
 }
 #

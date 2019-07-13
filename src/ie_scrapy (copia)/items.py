@@ -6,9 +6,12 @@
 # https://doc.scrapy.org/en/latest/topics/items.html
 
 from scrapy import Item, Field
+from scrapy_djangoitem import DjangoItem
+from jobs.models import Company, Job
+import copy
 
 
-class IeItem(Item):
+class BaseItem(DjangoItem):
 
     def tuple_of_values(self):
         return tuple(self.values())
@@ -22,16 +25,37 @@ class IeItem(Item):
     def tuple_of_keys(self):
         return tuple(self.keys())
 
-    def get_dict(self):
-        return dict(self.items())
-
     def get_list_of_tuples(self):
         return list(self.items())
 
     def get_name(self):
         return self.__class.__name__
 
+    def get_dict(self):
+        return dict(self.items())
 
+    def get_dict_deepcopy(self):
+        return copy.deepcopy(self.get_dict())
+
+
+class CompanyItem(BaseItem):
+
+    django_model = Company
+
+    def get_model_name(self):
+        return self.django_model.__name__
+
+
+class JobItem(BaseItem):
+
+    django_model = Job
+
+    def get_model_name(self):
+        return self.django_model.__name__
+
+
+
+"""
 class CompanyItem(IeItem):
     _id = Field()
     link = Field()
@@ -61,3 +85,5 @@ class JobItem(IeItem):
 
     def get_name(self):
         return 'JobItem'
+
+"""

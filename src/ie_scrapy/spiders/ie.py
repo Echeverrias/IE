@@ -2,7 +2,7 @@
 from scrapy.spiders import Spider,CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy import Request
-from ..items import JobItem, StateItems
+from ..items import JobItem, CompanyItem
 import math
 import re
 import random
@@ -16,6 +16,15 @@ class InfoempleoSpider(Spider):
     allowed_domains = ['infoempleo.com']
 
     start_urls = [
+        "https://www.infoempleo.com/primer-empleo/",
+    ]
+
+    start_urls3 = [
+        "https://www.infoempleo.com/primer-empleo/",
+        "https://www.infoempleo.com/ofertas-internacionales/",
+    ]
+
+    start_urls2 = [
                 "https://www.infoempleo.com/primer-empleo/",
                 "https://www.infoempleo.com/ofertas-internacionales/",
                 "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/",
@@ -52,11 +61,12 @@ class InfoempleoSpider(Spider):
         print(f'parse {response.url}')
         print(response.url)
         job_urls = response.xpath("//*[@id='main-content']/div[2]/ul/li/h2/a/@href").extract()
-        """
+
         for job_url in job_urls:
             print('# Go to job_url: %s', job_url)
             yield response.follow(job_url, self.parse_item, meta={"results_url": response.url})
-        """
+            break
+
         try:
             if self._is_there_next_page(response):
                 next_url = self._get_next_page_url(response.url)
@@ -75,7 +85,7 @@ class InfoempleoSpider(Spider):
             results_showed = response.xpath("//p[contains(text(),'Mostrando')]/text()").extract_first()
             text = results_showed.replace('-', ' ')  # Mostrando 1-20 de 1028 ofertas
             numbers = [int(s) for s in text.split() if s.isdigit()]
-            return numbers[1] < numbers[2]
+            return numbers[1] < 20 #numbers[2]
         except:
             try:
                 # page_not_found == 'Lo sentimos, hemos rastreado nuestra web y no hemos encontrado la página que buscas.'
@@ -116,11 +126,19 @@ class InfoempleoSpider(Spider):
 
 
 
-        ie_dict = {
+        company_dict = {
+            'company_link': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li/a/@href"),
+            'company_name': self._get_company_name(response),
+            'company_description': self._extract_info(response, "//div[@class='company']//pre/text()"),
+            'company_city_name': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[child::span]/text()"),
+            'company_category': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[@class='category']/text()"),
+            'company_offers': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[child::a]/a/text()")
+        }
+
+        job_dict = {
             'link': response.url,
             'registered_people': self._extract_info(response, "//div[@class='main-title']//ul[@class='meta']/li/span/text()"),
             'id': self._extract_info(response, "(//div[@class='main-title']//ul[@class='details inline']/li/text())[1]"),
-            'company_link': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li/a/@href"),
             'job_date': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][2]//li[2]/text()"),
             'summary': self._extract_info(response, "//div[@class='main-title']//p/text()"),
             'type': response.meta['results_url'],
@@ -137,18 +155,14 @@ class InfoempleoSpider(Spider):
             'area': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Área')]//following-sibling::p[1]/text()"),
             'category_level': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'ategoría')or contains(text(), 'ivel')]//following-sibling::p[1]/text()"),
             'vacancies': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Vacantes')]//following-sibling::p[1]/text()"),
-            'company_name': self._get_company_name(response),
-            'company_description': self._extract_info(response, "//div[@class='company']//pre/text()"),
-            'company_city_name': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[child::span]/text()"),
-            'company_category': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[@class='category']/text()"),
-            'company_offers': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[child::a]/a/text()")
         }
 
-        #
-        #'company': response.xpath("//div[@class='main-title']//ul[@class='details inline'][1]//li/a/text()").extract_first(),
-        # El orden en el que se asignan los valores será su  orden
-        #ie = JobItem(ie_dict)
-        yield ie_dict
+
+        company_item = CompanyItem(company_dict)
+        job_item = JobItem(job_dict)
+        job_item['company'] = company_item
+
+        yield job_item
 
     def _extract_info(self, response, xpath):
         try:

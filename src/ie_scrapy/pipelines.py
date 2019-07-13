@@ -16,8 +16,17 @@ from .items import JobItem, CompanyItem
 import time
 
 
+def trace(func):
+    def wrapper(*args, **kwargs):
+        print("TRACE: calling: {}() with {}, {}").format(func.__name__, args, kwargs)
+        func_result = func(*args, **kwargs)
+        print("TRACE: {}() returned {}").format(func.__name__, func_result)
+        return func_result
 
-class CleanupPipeline(object):
+    return wrapper
+
+
+class CleanupPipeline_(object):
 
     def str_cleanup(self, string):
         print('#str_cleanup: %s'%string)
@@ -30,17 +39,18 @@ class CleanupPipeline(object):
     def list_cleanup(self, some_list):
         return list(map(lambda e: e.strip(), some_list))
 
-    def int_cleanup(self, string):
-        try:
-            return int(re.findall(r'\d+', string)[0])
-        except:
-            return None
-
     def str_int_cleanup(self, string):
         try:
             return re.findall(r'\d+', string)[0]
         except:
             return None
+
+    def int_cleanup(self, string):
+        try:
+            return int(self.str_int_cleanup(string))
+        except:
+            return None
+
 
     def url_cleanup(self, pathname_or_href):
         origin = 'https://www.infoempleo.com/'
@@ -113,13 +123,16 @@ class CleanupPipeline(object):
         return date_date
 
 
-def process_item(self, item, spider):
-        return item
+class CleanPipeline(CleanupPipeline_):
 
+    def __init__(self):
 
-class IEPipeline(CleanupPipeline):
+        self.cleanup = {
+            'Job': self._job_cleanup,
+            'Company': self._company_cleanup,
+        }
 
-    def country_cleanup(self, string):
+    def _country_cleanup(self, string):
 
         if 'Empleo en' in string:
             country = string.replace('Empleo en Otros Paises', "").replace('Empleo en ', "")
@@ -131,7 +144,7 @@ class IEPipeline(CleanupPipeline):
                 country = ''
         return country
 
-    def province_cleanup(self, string):
+    def _province_cleanup(self, string):
         print('#province_cleanup')
         l = self.get_text_between_parenthesis(string)
         if l and len(l[-1]) > 3:
@@ -141,7 +154,7 @@ class IEPipeline(CleanupPipeline):
         print('#province: %s'%province)
         return province
 
-    def city_cleanup2(self, string):
+    def _city_cleanup2(self, string):
         city = string
         if '(' in city:
             city = city[0:city.find('(')].strip()
@@ -169,33 +182,33 @@ class IEPipeline(CleanupPipeline):
             city = parenthesis[0].capitalize() + " " + city
         return city
 
-    def cities_cleanup(self, string):
+    def _cities_cleanup(self, string):
         cities = self.get_a_list(string)
         return [self.__city_cleanup(city) for city in cities]
 
-    def type_jobs_results_cleanup(self, url):
+    def _type_jobs_results_cleanup(self, url):
         return re.findall('ofertas-internacionales|primer-empleo|trabajo', url)[0]
 
-    def type_cleanup(self, string):
+    def _type_cleanup(self, string):
         if 'extranjero' in string:
             return "ofertas-internacionales" #Trabajo en el extranjero
         else:
             return "trabajo" #Trabajo
 
-    def nationality_cleanup(self, string):
+    def _nationality_cleanup(self, string):
         if 'extranjero' in string:
             return "internacional"
         else:
             return "nacional"
 
-    def company_id_cleanup(self, url):
+    def _company_id_cleanup2(self, url):
         try:
             href = self.url_cleanup(url)
             return href.split('/')[-2]
         except:
             return "." #%
 
-    def job_date_cleanup(self, string):
+    def _job_date_cleanup(self, string):
         today = datetime.date.today()
         try:
             number = self.int_cleanup(string)
@@ -217,17 +230,17 @@ class IEPipeline(CleanupPipeline):
             info = ''
         return info
 
-    def get_experience(self, summary_list):
+    def _get_experience(self, summary_list):
         return self.__get_specify_info_from_summary_list('experiencia', summary_list)
 
-    def experience_cleanup(self, experience):
+    def _experience_cleanup(self, experience):
         exp = self.get_int_numbers(experience) # can have length 0,1 or 2
         exp = (exp + exp + [0, 0])[0:2]
         minimum_experience = exp[0]
         recommendable_experience = exp[1]
         return minimum_experience, recommendable_experience
 
-    def get_salary(self, summary_list):
+    def _get_salary(self, summary_list):
         try:
             salary_keys = ['salario', 'entre', 'retribución']
             salary = list(filter(lambda e: any(ele in e.lower() for ele in salary_keys), summary_list))[0]
@@ -235,44 +248,44 @@ class IEPipeline(CleanupPipeline):
             salary = ''
         return salary
 
-    def salary_cleanup(self, salary):
+    def _salary_cleanup(self, salary):
         money = self.get_int_numbers(salary) # can have length 0,1 or 2
         money = (money + money + [0, 0])[0:2]
         minimum_salary = money[0]
         maximum_salary = money[1]
         return minimum_salary, maximum_salary
 
-    def get_working_day(self, summary_list):
+    def _get_working_day(self, summary_list):
         return self.__get_specify_info_from_summary_list('jornada', summary_list)
 
-    def working_day_cleanup(self, working_day):
+    def _working_day_cleanup(self, working_day):
         return self.get_text_after_key('jornada', working_day)
 
-    def get_contract(self, summary_list):
+    def _get_contract(self, summary_list):
         return self.__get_specify_info_from_summary_list('contrato', summary_list)
 
-    def contract_cleanup(self, contract):
+    def _contract_cleanup(self, contract):
         return self.get_text_after_key('contrato', contract)
 
 
-    def summary_cleanup(self, item):
+    def _summary_cleanup(self, item):
         print('#summary_cleanup: %s'%item['summary'])
         summary = item['summary']
         summary_list = re.split('-', summary)
         summary_list = self.list_cleanup(summary_list)
         print('summary_list: %s'%summary_list)
-        experience = self.get_experience(summary_list)
+        experience = self._get_experience(summary_list)
         print('#experience: %s' % (experience))
-        item['minimum_years_of_experience'], item['recommendable_years_of_experience'] = self.experience_cleanup(experience)
-        salary = self.get_salary(summary_list)
+        item['minimum_years_of_experience'], item['recommendable_years_of_experience'] = self._experience_cleanup(experience)
+        salary = self._get_salary(summary_list)
         print('#salary: %s' % (salary))
-        item['minimum_salary'], item['maximum_salary'] = self.salary_cleanup(salary)
-        working_day = self.get_working_day(summary_list)
+        item['minimum_salary'], item['maximum_salary'] = self._salary_cleanup(salary)
+        working_day = self._get_working_day(summary_list)
         print('#working_day: %s' % (working_day))
-        item['working_day'] = self.working_day_cleanup(working_day)
-        contract = self.get_contract(summary_list)
+        item['working_day'] = self._working_day_cleanup(working_day)
+        contract = self._get_contract(summary_list)
         print('#contract: %s' % (contract))
-        item['contract'] = self.contract_cleanup(contract)
+        item['contract'] = self._contract_cleanup(contract)
         item['_experience'] = experience
         item['_salary'] = salary
         item['_working_day'] = working_day
@@ -284,7 +297,7 @@ class IEPipeline(CleanupPipeline):
         return summary_list
 
 
-
+    """
     def ie_item_cleanup(self, item):
         print('CleanupPipeline.job_item_cleanup')
         item['name'] = self.str_cleanup(item['name'])
@@ -305,14 +318,56 @@ class IEPipeline(CleanupPipeline):
         item['company_offers'] = self.int_cleanup(item['company_offers'])
         item['expiration_date'] = self.get_date_as_date(item['expiration_date'])
         return item
+    """
+
+
+    def _company_cleanup(self, item):
+        item['company_name'] = self.str_cleanup(item['company_name'])
+        item['company_link'] = self.url_cleanup(item['company_link'])
+        item['company_offers'] = self.int_cleanup(item['company_offers'])
+        return item
+
+    def _job_cleanup(self, item):
+        item['name'] = self.str_cleanup(item['name'])
+        item['type'] = self._type_jobs_results_cleanup(item['type'])
+        item['summary'] = self._summary_cleanup(item)
+        item['id'] = self.int_cleanup(item['id'])
+        item['job_date'] = self._job_date_cleanup(item['job_date'])
+        item['registered_people'] = self.int_cleanup(item['registered_people'])
+        item['province_name'] = self._province_cleanup(item['province_name'])
+        item['city_name'] = self._cities_cleanup(item['city_name'])
+        item['nationality'] = self._nationality_cleanup(item['nationality'])
+        if item['nationality'] == "nacional":
+            item['country_name'] = 'España'
+        else:
+            item['country_name'] = self._country_cleanup(item['country_name'])
+        item['expiration_date'] = self.get_date_as_date(item['expiration_date'])
+        try:
+            company = item['company']
+            item['company'] = self.cleanup[company.get_model_name()](company)
+        except Exception as e:
+            print(e)
+        return item
+
 
     def process_item(self, item, spider):
-        print('CleanUpPipeline.process_item')
-        return self.ie_item_cleanup(item)
-
+        try:
+            return self.cleanup[item.get_model_name()](item)
+        except Exception as e:
+            print('Error: {}'.format(e))
+            return item
+        #return self.ie_item_cleanup(item)
 
 
 class StorePipeline(object):
+
+
+    def __init__(self):
+
+        self.store= {
+            'Job': self._store_job,
+            'Company': self._store_company,
+        }
 
     def open_spider(self, spider):
         self.jobs = 0
@@ -325,7 +380,6 @@ class StorePipeline(object):
             except:
                 pass
         return item
-
 
 
     def __get_city(self, city_name, province=None, country=None):
@@ -391,14 +445,36 @@ class StorePipeline(object):
         print('#_get_location return: %s %s %s'%(cities, province, country))
         return cities, province, country
 
-    def store_job(self, item, company_item):
-        print('#Pipelines.store_job')
-        job_item = JobItem()
-        job_item = self.__set_item(job_item, item)
-        #print('#store_job_item: %s'%job_item)
-        job_dict = copy.deepcopy(job_item.get_dict())
+
+    def _store_company(self, item):
+        print('*store_company')
+        company_dict = item.get_dict_deepcopy()
+        company_id = company_dict.pop('company_name', None)
+        city = self.__get_city(company_dict['company_city_name'])
+        company_dict.setdefault('created_at', timezone.now())
+        company_dict.setdefault('company_city', city)
+        company = None
+        try:
+            company, is_a_new_company_created = Company.objects.get_or_create(company_name=company_id, defaults=company_dict)
+            if not is_a_new_company_created:
+                company.company_offers = company_dict['company_offers']
+                company.updated_at = timezone.now()
+                company.save()
+        except Exception as e:
+            print('Company.objects.get_or_create')
+            print(e)
+
+        return company
+
+
+    def _store_job(self, item):
+        try:
+            company = item['company']
+            item['company'] = self.store[company.get_model_name()](company)
+        except Exception as e:
+            print(e)
+        job_dict = copy.deepcopy(item.get_dict_deepcopy())
         job_id = job_dict.pop('id', None)
-        job_dict.setdefault('company', company_item)
         job_dict.setdefault('created_at', timezone.now())
         job, is_new_item_created = Job.objects.get_or_create(id=job_id, defaults=job_dict)
         if not is_new_item_created:
@@ -417,29 +493,14 @@ class StorePipeline(object):
         print('#store_job: %s'%job)
         return job
 
-    def store_company(self, item):
-        print('*store_company')
-        company_item = CompanyItem()
-        company_item = self.__set_item(company_item, item)
-        company_dict = copy.deepcopy(company_item.get_dict())
-        company_id = company_dict.pop('company_name', None)
-        city = self.__get_city(company_dict['company_city_name'])
-        company_dict.setdefault('created_at', timezone.now())
-        company_dict.setdefault('company_city', city)
-        company = None
-        try:
-            company, is_a_new_company_created = Company.objects.get_or_create(company_name=company_id, defaults=company_dict)
-            if not is_a_new_company_created:
-                company.company_offers = company_dict['company_offers']
-                company.updated_at = timezone.now()
-                company.save()
-        except Exception as e:
-            print('Company.objects.get_or_create')
-            print(e)
 
-        return company
 
     def process_item(self, item, spider):
+        try:
+            return self.store[item.get_model_name()](item)
+        except:
+            return item
+        """
         print()
         print('StorePipeline.process_item')
 
@@ -464,7 +525,7 @@ class StorePipeline(object):
         print()
         print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
         return item
-
+        """
 
 class SqlitePipeline(object):
 
