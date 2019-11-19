@@ -11,8 +11,10 @@
 
 #from .ea.proxies import ProxiesMaker
 import sys, os
+from .chrome_browser import ChromeBrowser
 
-# DJANGO
+## DJANGO INTEGRATION  ###########################################################
+
 print('ie_scrapy.settings')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print('BASE_DIR: %s' % BASE_DIR)
@@ -25,7 +27,7 @@ import django
 
 django.setup()
 
-# DJANGO INTEGRATION
+################################################################################
 
 
 BOT_NAME = 'earth616' #'ie'
@@ -55,7 +57,7 @@ DOWNLOAD_DELAY = 5
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-#COOKIES_ENABLED = False
+COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -68,9 +70,9 @@ DOWNLOAD_DELAY = 5
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    'ie_scrapy.middlewares.IeSpiderMiddleware': 543,
-#}
+SPIDER_MIDDLEWARES = {
+   'ie_scrapy.middlewares.IeSpiderMiddleware': 443,
+}
 
 
 """
@@ -91,14 +93,16 @@ DOWNLOADER_MIDDLEWARES = {
 
 """
 #scrapy-rotating-proxies #'92.222.77.101:4444'
-ROTATING_PROXY_LIST = ['185.202.165.1:53281']
+ROTATING_PROXY_LIST = [
+   ChromeBrowser.get_proxy(),
+]
 
 
 
 DOWNLOADER_MIDDLEWARES = {
    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
    'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
-   'rotating_proxies.middlewares.RotatingProxyMiddleware': 410
+   'rotating_proxies.middlewares.RotatingProxyMiddleware': 410,
 }
 
 #'ie_scrapy.middlewares.IeDownloaderMiddleware': 743
@@ -114,8 +118,8 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'ie_scrapy.pipelines.CleanPipeline': 250,
-   'ie_scrapy.pipelines.StorePipeline': 300
+   'ie_scrapy.pipelines.CleanPipeline': 500,
+   'ie_scrapy.pipelines.StorePipeline': 550,
 }
 #
 #'ie.pipelines.SqlitePipeline': 400,

@@ -1,0 +1,19 @@
+.ie-chart{
+    padding: 1em
+}
+
+.ie-chart div.row img{
+    margin: auto
+}
+
+li.nav-item.chart a.nav-link{
+    color:white;
+}
+
+.ie-chart div.section{
+    margin-bottom: 10em;
+}
+
+.ie-chart div.section .title{
+    margin-bottom: 3em;
+}

@@ -1,0 +1,82 @@
+{% extends 'chart/base.html' %}
+{% block chart %}
+
+{% load static %}
+{% load chart_extras %}
+
+<div class="main">
+   <ul>
+      Elige una opción:
+      <li>
+         <a href="/chart?charts_type=per_area">Vacantes e inscripciones por área</a>
+      </li>
+      <li>
+         <a href="/chart?charts_type=per_province">Vacantes e inscripciones por provincia</a>
+      </li>
+       <li>
+         <a href="/chart?charts_type=salaries_per_area">Salarios por área</a>
+      </li>
+   </ul>
+   <br><br>
+
+{% if charts_type and charts_type == "per_area" %}
+
+      <h3 class="title">Vacantes e inscripciones de ofertas nacionales</h3>
+      <div class="row">
+          <img src='{% static "img/chart/"|addstr:month|addstr:"/national_vacancies_per_area.png" %}'
+              onerror="this.src='/chart/vacancies-or-registered-people-per-area/national/vacancies'"
+              width="600px" height="auto"/><br>
+
+          <img src='{% static "img/chart/"|addstr:month|addstr:"/national_registered_people_per_area.png" %}'
+              onerror="this.src='/chart/vacancies-or-registered-people-per-area/national/registered_people'"
+              width="600px" height="auto"/><br>
+      </div><br>
+
+
+       <h3 class="title">Vacantes e inscripciones de ofertas internacionales</h3>
+      <div class="row">
+          <img src='{% static "img/chart/"|addstr:month|addstr:"/international_vacancies_per_area.png" %}'
+              onerror="this.src='/chart/vacancies-or-registered-people-per-area/international/vacancies'"
+              width="600px" height="auto"/><br>
+          <img src='{% static "img/chart/"|addstr:month|addstr:"/international_registered_people_per_area.png" %}'
+              onerror="this.src='/chart/vacancies-or-registered-people-per-area/international/registered_people'"
+              width="600px" height="auto"/><br>
+      </div>
+
+
+{% elif  charts_type and charts_type == "per_province" %}
+
+      <h3 class="title">Vacantes e inscripciones de ofertas</h3>
+      <div class="row">
+          <img src='{% static "img/chart/"|addstr:month|addstr:"/vacancies_per_province.png" %}'
+              onerror="this.src='/chart/vacancies-or-registered-people-per-province/vacancies'"
+              width="600px" height="auto"/><br>
+          <img src='{% static "img/chart/"|addstr:month|addstr:"/registered_people_per_province.png" %}'
+              onerror="this.src='/chart/vacancies-or-registered-people-per-province/registered_people'"
+              width="600px" height="auto"/><br>
+      </div><br>
+
+    {% elif  charts_type and charts_type == "salaries_per_area" %}
+
+      <h3 class="title">Salarios brutos anuales del mes</h3>
+      <div class="row">
+          <img src='{% static "img/chart/"|addstr:month|addstr:"/national_salaries_per_area.png"  %}'
+                onerror="this.src='/chart/salaries-per-area/national'"
+              width="600px" height="auto"/><br>
+          <img src='{% static "img/chart/"|addstr:month|addstr:"/international_salaries_per_area.png" %}'
+              onerror="this.src='/chart/salaries-per-area/international'"
+              width="600px" height="auto"/><br>
+      </div><br>
+
+{% endif %}
+
+
+{% if False %}
+   <h3>Some charts examples</h3>
+   <img src='/chart/vacancies-or-registered-people-per-area/vacancies/national' width="600px" /><br>
+   <img src='/chart/vacancies-or-registered-people-per-area/registered-people/national' width="600px" /><br>
+   <img src='{% url  view_name %}' width="600px" /><br>
+   <img src='{{ url }}' width="600px" /><br>
+{% endif %}
+</div>
+{% endblock %}

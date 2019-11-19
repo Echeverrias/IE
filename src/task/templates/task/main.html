@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load task_extras %}
+{% if is_running %}
+    <h4 class="title">La araña está corriendo - Fecha inicio: {{ init_datetime|date:'d-m-Y' }}</h4>
+    <p class="title">Se están procesando {{ scraped_items_number }} ofertas de trabajo</p>
+    <p class="title">{{ percentage|percentage }} aprox. de ofertas procesadas</p>
+{% else %}
+    <form action="." metho="GET">
+        <input type="hidden" name="crawl" value="True">
+        <button type="submit">Correr araña</button>
+    </form>
+{% endif %}
+{% endblock %}

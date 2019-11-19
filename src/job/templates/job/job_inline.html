@@ -1,0 +1,14 @@
+<div class="card">
+     <h5 class="card-title"><a href="{{ job.get_absolute_url }}">{{job.name}} - {% for city in job.cities.all %}{{ city.name }} - {% endfor %}   ({{ job.cities.all.first.country.name }})</a></h5>
+     <div class="card-body">
+         <p class="card-text">
+             <small class="text-muted">{{ job.created_date }}</small><br>
+                City: {{ job.cities.all.first.name }}
+                Requisitos: {{ job.requirements | linebreaks | truncatewords:30 }}
+                Se ofrece: {{ job.it_is_offered | linebreaks | truncatewords:30 }}
+         </p>
+         {% if not detail %}
+            <a href="{{ job.get_absolute_url }}">Ver</a>
+         {% endif %}
+     </div>
+ </div>

@@ -1,0 +1,20 @@
+{% extends 'job/base.html' %}
+{% block job %}
+
+    <form method="GET" action="." enctype="multipart/form-data">{% csrf_token %}
+        Nombre de la ciudad: {{ form.city_name }}
+        <button type="submit">Send</button>
+    </form><br>
+    {% if context_prueba %}
+        {{ context_prueba }}
+    {% endif %}
+    {% if object_list %}
+        <h3 class="title">Resultados encontrados</h3><br>
+        {% include 'job/job_list.html' with job_list=object_list %}
+    {% elif request.POST %}
+        <p>No se han encontrado ciudades con el nombre {{ city_name }}</p>
+    {% endif %}
+    {% include 'job/pagination.html' with is_paginated=is_paginated  page_obj=page_obj  paginator=paginator %}
+
+{% endblock %}
+

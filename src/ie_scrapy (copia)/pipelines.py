@@ -105,14 +105,14 @@ class SqlitePipeline(object):
         self.create_companies_table()
 
     def drop_tables(self):
-        self.curr.execute("""drop table if exists jobs""")
+        self.curr.execute("""drop table if exists job""")
         self.connection.commit()
         self.curr.execute("""drop table if exists companies""")
         self.connection.commit()
 
 
     def create_jobs_table(self):
-        self.curr.execute("""create table IF NOT EXISTS jobs( 
+        self.curr.execute("""create table IF NOT EXISTS job( 
         id integer,
         name text,
         link text,
@@ -150,11 +150,11 @@ class SqlitePipeline(object):
         print('INSERT JOB')
         print(tuple)
         print([type(e) for e in tuple])
-        self.curr.execute("""insert into jobs values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", tuple)
+        self.curr.execute("""insert into job values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", tuple)
         self.connection.commit()
 
     def insert_company(self, tuple):
-        self.curr.execute("""insert into jobs values(?, ?, ?, ?, ?, ? ,?)""", tuple)
+        self.curr.execute("""insert into job values(?, ?, ?, ?, ?, ? ,?)""", tuple)
         self.connection.commit()
 
     def process_item(self, item, spider):

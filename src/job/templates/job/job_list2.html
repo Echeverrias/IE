@@ -1,0 +1,12 @@
+{% extends 'job/base.html' %}
+{% block job %}
+<ul>
+    {% for job in job_list %}
+    <li>
+        <div>
+            <p>{{job.name}}</p>
+        </div>
+    </li>
+ {% endfor %}
+</ul>
+{% endblock %}

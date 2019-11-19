@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/chart/chart.css' %}">
+    <div class="ie-chart">
+        <h2 class="title">Gráficos</h2>
+        {% block chart %}
+        {% endblock %}
+    </div>
+{% endblock %}

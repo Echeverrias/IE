@@ -1,0 +1,130 @@
+{% extends 'job/base.html' %}
+{% block subtitle %}<h2 class="title">{{job.name}}</h2>{% endblock %}
+{% block job %}
+{% load job_extras %}
+<div class="detail">
+    <div class="main">
+        <p>{{job.name}}</p>
+        <div class="row">
+             <div class="inline">
+                <span class="important">Estado de la oferta: </span>{{job.state}}
+            </div>
+            <div class="inline">
+                <span class="important">Creación de la oferta: </span>{{job.first_publication_date}}
+            </div>
+            <div class="inline">
+                <span class='important'>Última actualización de la oferta: </span>{{job.last_update_date}}
+            </div>
+            {% if job.expiration.date %}
+                <div class="inline">
+                    <span class='important'>Expiración de la oferta: </span>{{job.expiration.date}}
+                </div>
+            {% endif %}
+        </div>
+        <div id="location" class="row">
+            <div class="inline">
+                {% if job.cities.all|length > 1 %}
+                    <span class='important'>Ciudades: </span>{{ job.cities.all|get_attributes:'name'|join:', ' }}
+                {% else %}
+                    <span class='important'>Ciudad </span>{{ job.cities.all.first.name }}
+                {% endif %}
+            </div>
+            <div class="inline">
+                {% if job.cities.all.first.province  %}
+                    <span class='important'>Provincia: </span>{{ job.cities.all.first.province.name }}
+                {% endif %}
+            </div>
+            <div class="inline">
+                <span class='important'>País: </span>{{ job.cities.all.first.country.name }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="inline">
+                <span class='important'>Tipo de oferta: </span>{{ job.type }}
+            </div>
+            <div class="inline">
+                <span class='important'>Tipo de contrato: </span>{{ job.contract }}
+            </div>
+            <div class="inline">
+                <span class='important'>Jornada laboral: </span>{{ job.working_day }}
+            </div>
+            <div class="inline">
+                <span class='important'>Categoría: </span>{{ job.category_level }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="inline">
+                <span class='important'>Área: </span>{{ job.area }}
+            </div>
+            {% if job.company %}
+            <div class="inline">
+                <span class='important'>Compañia: </span><a href="company.company_link">{{ job.company.company_name }}</a>
+            </div>
+            {% endif %}
+        </div>
+        {% if job.minimum_salary or job.mimimum_years_of_experience %}
+        <div class="row">
+            {% if job.minimum_salary %}
+            <div>
+                <div class="inline">
+                <span class='important'>Salario minímo: </span>{{ job.minimum_salary }}€ brutos anuales
+                </div>
+                <div class="inline">
+                <span class='important'>Salario máximo: </span>{{ job.maximum_salary }}€ brutos anuales
+                </div>
+            </div>
+            {% endif %}
+            {% if job.minimum_years_of_experience %}
+            <div>
+                <div class="inline">
+                <span class='important'>Años mínimos de experiencia: </span>{{ job.minimum_years_of_experience }}
+                </div>
+                <div class="inline">
+                <span class='important'>Años recomendables de experiencia: </span>{{ job.recommendable_years_of_experience }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        <div id="summary" class="row">
+            {% if job.functions %}
+            <div id="functions">
+                <h5>Funciones</h5>
+                <p>{{ job.functions }}</p>
+            </div>
+            {% endif %}
+            {% if job.requirements %}
+            <div id="requirements">
+                <h5>Requisitos</h5>
+                <p>{{ job.requirements }}</p>
+            </div>
+            {% endif %}
+            {% if job.it_is_offered %}
+            <div id="offered">
+                <h5>Se ofrece</h5>
+                <p>{{ job.it_is_offered }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% if job.languages %}
+        <div id="language" class="row">
+            {% for language in job.languages.all %}
+                <div class="inline">
+                    <span class='important'>Idioma: </span>{{ language.name }} - {{ language.level }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="row">
+            <div class="inline">
+                <span class='important'>Vacantes: </span>{{ job.vacancies  }}
+            </div>
+            <div class="inline">
+                <span class='important'>Gente registrada: </span>{{ job.registered_people  }}
+            </div>
+        </div>
+    </div>
+    <a href="{{job.link}}" target="_blank">Ir a página de la oferta</a>
+</div>
+
+{% endblock %}

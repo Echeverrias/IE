@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+{% load static %}
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="IE Scraper">
+    <meta name="author" content="JAEA">
+    <meta name="generator" content="Jekyll v3.8.5">
+    <title>IE Scraper</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+     {% include 'js.html' %}
+  </head>
+  <body>
+
+  {% include 'nav.html' %}
+
+<main role="main" class="">
+
+  <div class="">
+    <h1>IE Scraper</h1>
+
+  </div>
+
+{% block content %}
+
+{% endblock %}
+</main><!-- /.container -->
+{% block js %}
+{% endblock %}
+  </body>
+</html>
+

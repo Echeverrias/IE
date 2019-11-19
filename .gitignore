@@ -3,10 +3,23 @@ etc/
 include
 lib/
 share/
+zzz/
+xxx/
+yyy/
+*(copia)/
+*copia*/
+src/**/*.txt
 *.sqlite3
 *.db
 *.csv
+*.pdf
 *.json
-src/**/*.txt
-
+*.png
+*.jpeg
+*.jpg
+*.txt
+*_.py
+*prueba*.py
+p.py
+*copia*.*
 

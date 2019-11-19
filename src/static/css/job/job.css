@@ -1,0 +1,70 @@
+li.nav-item.job a.nav-link{
+    color:white;
+}
+
+div.ie-job .card{
+    padding: 1em;
+}
+
+div.ie-job .highlight {
+    background: yellow;
+ }
+
+div.ie-job .lowlight {
+    background: #FFFFAD;
+ }
+
+div.jie-ob div.card-body{
+    display:none;
+}
+
+
+div.ie-job div.job div.card{
+    border:none
+}
+
+div.ie-job div.job.details div.card div.card-body{
+    display:block;
+}
+
+div.ie-job div.job.details div.card{
+    border: 1px solid rgba(0,0,0,.125)
+}
+
+div.ie-job .ie-btn{
+    background: #dee2e6;
+    cursor: pointer;
+}
+
+
+#btn-filters.ie-btn.highlight{
+    background: #6c757d;
+}
+
+div.ie-job ul.list li.active{
+    background: #dee2e6;
+}
+
+
+
+#filters{
+    margin:1em;
+}
+
+div.inline{
+    margin:0em 2em;
+}
+
+div.row{
+    margin:3em 0em;
+}
+
+.important{
+    font-weight:bold;
+}
+
+
+
+
+
+

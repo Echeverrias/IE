@@ -1,12 +1,28 @@
 # -*- coding: utf-8 -*-
 from scrapy.spiders import Spider,CrawlSpider, Rule
+from scrapy import signals
 from scrapy.linkextractors import LinkExtractor
 from scrapy import Request
 from ..items import JobItem, CompanyItem
+from ..state_ import UrlsState
 import math
 import re
 import random
 import time
+from collections import namedtuple
+
+
+class BaseException(Exception):
+    pass
+
+class PageNotFoundError(BaseException):
+    pass
+
+class NonExistentPageError(BaseException):
+    pass
+
+class NonElementFoundError(BaseException):
+    pass
 
 
 
@@ -15,18 +31,32 @@ class InfoempleoSpider(Spider):
     name = 'ie'
     allowed_domains = ['infoempleo.com']
 
+    start_urlsz = [
+         "https://www.infoempleo.com/trabajo/area-de-empresa_legal/",
+    ]
+
     start_urls = [
+        "https://www.infoempleo.com/ofertas-internacionales/",
         "https://www.infoempleo.com/primer-empleo/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_ingenieria-y-produccion/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_profesionales-artes-y-oficios/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_compras-logistica-y-transporte/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_hosteleria-turismo/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_administracion-de-empresas/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_administrativos-y-secretariado/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_atencion-al-cliente/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_banca-y-seguros/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_calidad-id-prl-y-medio-ambiente/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_construccion-e-inmobiliaria/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_internet/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_legal/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_marketing-y-comunicacion/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_recursos-humanos/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_telecomunicaciones/",
     ]
 
     start_urls3 = [
-        "https://www.infoempleo.com/primer-empleo/",
-        "https://www.infoempleo.com/ofertas-internacionales/",
-    ]
-
-    start_urls2 = [
-                "https://www.infoempleo.com/primer-empleo/",
-                "https://www.infoempleo.com/ofertas-internacionales/",
                 "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/",
                 "https://www.infoempleo.com/trabajo/area-de-empresa_ingenieria-y-produccion/",
                 "https://www.infoempleo.com/trabajo/area-de-empresa_profesionales-artes-y-oficios/",
@@ -58,15 +88,22 @@ class InfoempleoSpider(Spider):
 
 
     def parse(self, response):
-        print(f'parse {response.url}')
+        print(f'#InfoempleoSpider.parse {response.url}')
         print(response.url)
+        start_url = self._clean_url(response.url)
+        print('### extracting job')
         job_urls = response.xpath("//*[@id='main-content']/div[2]/ul/li/h2/a/@href").extract()
-
+        try:
+            total_results =  self._get_the_total_number_of_results(response)
+        except Exception as e:
+            print(f'Error_: {e}')
+        print('### ')
         for job_url in job_urls:
             print('# Go to job_url: %s', job_url)
-            yield response.follow(job_url, self.parse_item, meta={"results_url": response.url})
-            break
-
+            yield response.follow(job_url, self.parse_item, meta={
+                UrlsState.KEY_START_URL: start_url,
+                UrlsState.KEY_TOTAL_RESULTS: total_results,
+            })
         try:
             if self._is_there_next_page(response):
                 next_url = self._get_next_page_url(response.url)
@@ -74,29 +111,57 @@ class InfoempleoSpider(Spider):
                 yield response.follow(next_url, self.parse)
             else:
                 print('# All the pages have been parsed')
+        except NonExistentPageError as e:
+            print(f'The url {response.url} has not job: {e}')
+
+
+    def do_nothing(self, response):
+        print(f'do_nothing{response.url}')
+        return None
+
+
+    def _get_info_of_number_of_results(self, response):
+        print("#_get_info_of_number_of_results")
+        try:
+            # results_showed == 'Mostrando 1-20 de 1028 ofertas'
+            results_showed = response.xpath("//p[contains(text(),'Mostrando')]/text()").extract_first()
+            text = results_showed.replace('-', ' ')  # Mostrando 1 20 de 1028 ofertas
+            numbers = [int(s) for s in text.split() if s.isdigit()]
+            InfoResults = namedtuple('ResultsNumberInfo',['first_result_showed', 'last_result_showed', UrlsState.KEY_TOTAL_RESULTS])
+            return InfoResults(numbers[0], numbers[1], numbers[2])
         except Exception as e:
-            print(f'Exception {e}')
+            print('Error in _get_info_of_number_of_results: {}'.format(e))
+            raise NonElementFoundError()
+
+
+    def _get_the_total_number_of_results(self, response):
+        print('#_get_the_total_number_of_results')
+        try:
+            info_results =  self._get_info_of_number_of_results(response)
+            return info_results.total_results
+        except NonElementFoundError as e:
+            print('Error in _get_the_total_number_of_results: {}'.format(e))
+            raise NonElementFoundError()
 
 
     def _is_there_next_page(self, response):
-        print('#__is_there_next_page')
+        print('#_is_there_next_page')
         try:
-            # results_shower == 'Mostrando 1-20 de 1028 ofertas'
-            results_showed = response.xpath("//p[contains(text(),'Mostrando')]/text()").extract_first()
-            text = results_showed.replace('-', ' ')  # Mostrando 1-20 de 1028 ofertas
-            numbers = [int(s) for s in text.split() if s.isdigit()]
-            return numbers[1] < 20 #numbers[2]
-        except:
-            try:
-                # page_not_found == 'Lo sentimos, hemos rastreado nuestra web y no hemos encontrado la página que buscas.'
-                page_not_found = response.xpath("//*[@class='error404']//div[3]/div/text()").extract_first().strip()
-                raise Exception(page_not_found )
-            except Exception as e:
-                print(f'Error trying to find error 404: {e}')
-                raise Exception('The page has not loaded correctly')
+            info_results = self._get_info_of_number_of_results(response)
+            print(info_results)
+            return info_results.last_result_showed < info_results.total_results
+        except NonElementFoundError as e:
+            print('Error in _is_there_next_page: {}'.format(e))
+            raise NonExistentPageError()
 
 
     def _clean_url(self, url):
+        """
+        Return the url without queries
+
+        :param url: url
+        :return: url
+        """
         clean_url = url
         try:
             clean_url = re.findall('(.*/)\?pagina=\d+', url)[0]
@@ -104,28 +169,25 @@ class InfoempleoSpider(Spider):
             pass
         return clean_url
 
-    def _get_next_page_url(self, url):
+
+    def _get_next_page_url(self, url, next_page=None):
         print('* get_next_page_url: %s'%url)
-        try:
-            href = self._clean_url(url)
-            print('href: %s'%href)
+        href = self._clean_url(url)
+        print('href: %s' % href)
+        if not next_page:
             try:
                 next_page = int(re.findall(r'\d+', url)[0]) + 1
                 print(next_page)
-            except:
+            except: # The current page is the page 1
                 next_page = 2
-            return f'{href}?pagina={str(next_page)}'
-        except Exception as e:
-            print('Error getting next page url: %s' % e)
-            return url
+        next_page_url = f'{href}?pagina={str(next_page)}'
+        return next_page_url
 
-        
+
+
     def parse_item(self, response):
         print('PARSE_ITEM')
         print (response.url)
-
-
-
         company_dict = {
             'company_link': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li/a/@href"),
             'company_name': self._get_company_name(response),
@@ -135,19 +197,24 @@ class InfoempleoSpider(Spider):
             'company_offers': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[child::a]/a/text()")
         }
 
+        # doesn't support ManyToManyFields
         job_dict = {
             'link': response.url,
             'registered_people': self._extract_info(response, "//div[@class='main-title']//ul[@class='meta']/li/span/text()"),
             'id': self._extract_info(response, "(//div[@class='main-title']//ul[@class='details inline']/li/text())[1]"),
-            'job_date': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][2]//li[2]/text()"),
+            'state': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][2]//li[2]/span/text()"),
+            'first_publication_date': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][2]//li[2]/text()"),
+            'last_update_date': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][2]//li[2]/text()"),
             'summary': self._extract_info(response, "//div[@class='main-title']//p/text()"),
-            'type': response.meta['results_url'],
+            'type': response.meta[UrlsState.KEY_START_URL],
             'nationality': self._extract_info(response, "//nav[@class='breadcrumbs']//li[2]/a/text()"),
-            'city_name': self._extract_info(response, "//div[@class='main-title']//ul[contains(@class,'details')][2]/li[1]/text()"),
-            'province_name': self._extract_info(response, "//div[@class='main-title']//ul[contains(@class,'details')][2]/li[1]/text()"),
-            'country_name': self._extract_info(response, "//nav[@class='breadcrumbs']//li[3]/a/text()"),
+            'cityname': self._extract_info(response, "//div[@class='main-title']//ul[contains(@class,'details')][2]/li[1]/text()"),
+            'provincename': self._extract_info(response, "//div[@class='main-title']//ul[contains(@class,'details')][2]/li[1]/text()"),
+            'countryname': self._extract_info(response, "//nav[@class='breadcrumbs']//li[3]/a/text()"),
             'name': self._extract_info(response, "//nav[@class='breadcrumbs']//li[5]/text()"),
             'expiration_date': self._extract_info(response, "//div[@class='offer']//div[@class='dtable']//p/text()"),
+            # description: ['Proceso de selección continuo', Oferta válida hasta el xx/xx/xxx]
+            'description': self._extract_info(response, "//div[@class='offer']//h2//following-sibling::p[1]/text()"),
             'functions': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Funciones')]//following-sibling::pre[1]/text()"),
             'requirements': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Requisitos')]//following-sibling::pre[1]/text()"),
             'it_is_offered': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Se ofrece')]//following-sibling::pre[1]/text()"),
@@ -164,6 +231,7 @@ class InfoempleoSpider(Spider):
 
         yield job_item
 
+
     def _extract_info(self, response, xpath):
         try:
             info = response.xpath(xpath).extract_first()
@@ -173,13 +241,12 @@ class InfoempleoSpider(Spider):
         return info
 
     def _get_company_name(self, response):
-        company_name = self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li[child::a]/a/text()")
-        if not company_name:
-            company_name = self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li[2]/text()")
-            if not company_name:
-                company_name = self._extract_info(response, "//div[@class='company']//*[@class='title']/text()")
-                if not company_name:
-                    company_name = '?'
+        company_name = (
+            self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li[child::a]/a/text()") or
+            self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li[2]/text()") or
+            self._extract_info(response, "//div[@class='company']//*[@class='title']/text()") or
+            '?'
+        )
         company_name = company_name.strip()
         if 'importante empresa' in company_name.lower():
             description = self._extract_info(response, "//div[@class='company']//pre/text()")
@@ -214,7 +281,7 @@ class InfoempleoSpider(Spider):
             'registered_people': 0,
             'id': 324 ,
             'company': 323,
-            'job_date': None,
+            'first_publication_date': None,
             'requisites': 'leer',
             'nationality': 'nacional',
             'area': 'rrhh',

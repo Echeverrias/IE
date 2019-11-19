@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/job/job.css' %}">
+    <div class="ie-job">
+        {% block subtitle %}{% endblock %}
+        {% block job %}
+        {% endblock %}
+    </div>
+{% endblock %}
+{% block js %}
+      {% include 'job/js.html' %}
+{% endblock %}

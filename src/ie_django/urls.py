@@ -14,19 +14,22 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from dataset.views import get_jobs_view
-from jobs.views import JobAPIView, CompanyAPIView, JobView, CompanyView, welcome_view, set_spain_locations_view, delete_companies_and_jobs_view, query_view, run_crawler
+from django.urls import  include, path, re_path #url, re_url
+from .views import init_view
+from job.views import  run_crawler
+#from job.views import JobAPIView, CompanyAPIView, JobView, CompanyView,
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('crawl/', run_crawler, name='crawl'),
-    path('dataset/', get_jobs_view, name='dataset'),
-    path(r'jobs/', JobView.as_view(), name='jobs2'),
-    path(r'companies/', CompanyView.as_view(), name='companies2'),
-    path(r'api/jobs/', JobAPIView.as_view(), name='jobs'),
-    path(r'api/companies/', CompanyAPIView.as_view(), name='companies'),
-    path(r'insert_locations', set_spain_locations_view, name='locations'),
-    path(r'reset', delete_companies_and_jobs_view, name='delete'),
-    path(r'query', query_view, name='query'),
-    path('', welcome_view, name='welcome'),
+    path('chart/', include('chart.urls')),
+    path('job/', include('job.urls')),
+    path('task/', include('task.urls')),
+    path('', init_view, name='init'),
 ]
+
+"""
+  re_path(r'job/', JobView.as_view(), name='jobs2'),
+    re_path(r'companies/', CompanyView.as_view(), name='companies2'),
+    re_path(r'api/job/', JobAPIView.as_view(), name='job'),
+    re_path(r'api/companies/', CompanyAPIView.as_view(), name='companies'),
+"""
