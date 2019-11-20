@@ -95,7 +95,7 @@ class JobListView(ListView):
 
     def get_queryset(self):
         qs = self.model.objects.all().prefetch_related('cities')
-        self.job_filtered_list = JobFilter(self.request.GET, queryset=qs) #JobFilter(self.request.GET, queryset=qs)
+        self.job_filtered_list = JobFilter(self.request.GET, queryset=qs)
         return self.job_filtered_list.qs
 
     def get_context_data(self, **kwargs):

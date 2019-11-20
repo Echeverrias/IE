@@ -3,6 +3,7 @@ import math
 from .models import Job, City, Province, Community, Country, Language
 import sqlite3
 import time
+from datetime import date
 
 COUNTRIES_CSV = 'static/data/countries.csv'
 COMMUNITIES_CSV = 'static/data/communities.csv'
@@ -107,4 +108,18 @@ def sql():
     #data = curr.execute("""CREATE TABLE  IF NOT EXISTS job_sub (name text)""")
     connection.commit()
     connection.close()
+
+
+def fix_jobs_state():
+    exp_qs = Job.objects.filter(expiration_date__lte=date.today())
+    for job in exp_qs:
+        job.state = Job.STATE_CLOSED
+        job.save()
+
+def fix_state_update_date():
+    qs = Job.objects.filter(last_update_date=None)
+    qs = qs.exclude(first_publication_date=None)
+    for job in qs:
+        job.last_update_date = job.first_publication_date
+        job.save()
 

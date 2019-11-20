@@ -20,3 +20,8 @@ body{
 .hidden {
     display: none;
 }
+
+.block{
+    margin:1em 0.5em;
+
+}

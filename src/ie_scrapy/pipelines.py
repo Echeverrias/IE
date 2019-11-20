@@ -20,7 +20,6 @@ from utilities import (
     save_error,
 )
 from .items import JobItem, CompanyItem
-import time
 from django.db import transaction
 
 STATE_CREATED = Job.STATE_CREATED
@@ -583,13 +582,13 @@ class StorePipeline(object):
         print('StorePipeline._set_location')
         cities, province, country = self.__get_location(item['cityname'], item['provincename'], item['countryname'])
         print(cities, province, country)
-        time.sleep(20)
+
         #job.country = country
         #job.province = province
         job.cities.clear()
         job.cities.set(cities)
         print(job);print();print()
-        time.sleep(20)
+
         return job
 
     def _set_languages(self, job, item):

@@ -1,6 +1,7 @@
 {% extends 'job/base.html' %}
 {% block subtitle %}<h2 class="title">Búsquedas</h2>{% endblock %}
 {% block job %}
+
 <div>
     <div id='btn-filters' class="btn dropdown-toggle ie-btn">
         Filtros
@@ -8,7 +9,7 @@
     <div id="filters" class="hidden">
     <form method="GET" action="." enctype="multipart/form-data">{% csrf_token %}
          {{ form.as_p }}
-        <button type="submit">Send</button>
+        <button type="submit">Aplicar filtros</button>
     </form>
     </div>
 </div><br>
@@ -17,7 +18,7 @@
         <span>
             Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} resultados
         </span>
-        <div class="card-list">
+        <div class="card-list block">
         {% include 'job/job_list.html' with job_list=job_list %}
         </div>
     {% else  %}

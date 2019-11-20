@@ -304,7 +304,6 @@ class Job(models.Model):
     provincename = models.CharField(null=True, max_length=100, blank=True)  # Model
     countryname = models.CharField(null=True, max_length=30) #Model
     nationality = models.CharField(max_length=30)
-    registered_people = models.PositiveIntegerField(default=0)
     first_publication_date = models.DateField(null=True, blank=True, default=None)
     last_update_date = models.DateField(null=True, blank=True, default=None)
     expiration_date = models.DateField(null=True, blank=True)  # models.DateTimeField(auto_now_add=True)
@@ -324,6 +323,7 @@ class Job(models.Model):
         choices=CATEGORY_CHOICES,
     )
     vacancies = models.PositiveIntegerField()
+    registered_people = models.PositiveIntegerField(default=0)
     vacancies_update = models.PositiveIntegerField(null=True, blank=True)
 
     company = models.ForeignKey(
@@ -349,9 +349,6 @@ class Job(models.Model):
 
 
     def save(self, *args, **kwargs):
-        print('Job.save()');print()
-        print(args);print()
-        print(kwargs);print()
         super(Job, self).save(*args, **kwargs)
 
 
