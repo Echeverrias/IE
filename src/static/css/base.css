@@ -25,3 +25,7 @@ body{
     margin:1em 0.5em;
 
 }
+
+form input.form-control.datetimepicker-input.date{
+    width:auto;
+}

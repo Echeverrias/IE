@@ -20,8 +20,6 @@ class JobManager(models.Manager):
             hints=self._hints
         )
 
-
-
     def nationals(self):
         return self.get_queryset().nationals()
 
@@ -42,4 +40,16 @@ class JobManager(models.Manager):
 
     def annotate_mean_salary(self):
         return self.get_queryset().annotate_mean_salary()
+
+    def closed_offers(self):
+        return self.get_queryset().closed_offers()
+
+    def available_offers(self):
+        return self.get_queryset().available_offers()
+
+    def free_vacancies(self):
+        return self.get_queryset().free_vacancies()
+
+    def not_free_vacancies(self):
+        return self.get_queryset().not_free_vacancies()
 

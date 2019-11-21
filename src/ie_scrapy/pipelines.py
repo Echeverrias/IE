@@ -382,7 +382,7 @@ class CleanPipeline(CleanupPipeline_):
         print('CleanUpPipeline._job_dates_cleanup')
         if item['state'] == STATE_CREATED:
             item['first_publication_date'] = self._job_date_cleanup(item['first_publication_date'])
-            item['last_update_date'] = None
+            item['last_update_date'] = item['first_publication_date']
         elif item['state'] == STATE_UPDATED:
             item['last_update_date'] = self._job_date_cleanup(item['last_update_date'])
             item['first_publication_date'] = None
@@ -644,7 +644,6 @@ class StorePipeline(object):
             self._set_location(job, item)
             self._set_languages(job, item)
         elif job.registered_people != item['registered_people']:
-            print('2')
             job.registered_people = item['registered_people']
             job.state = item['state'] #ñapa
             job.save()

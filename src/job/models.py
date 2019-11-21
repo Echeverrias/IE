@@ -3,7 +3,6 @@ from django.urls import reverse
 from django_mysql.models import ListCharField
 import language_utilities
 from simple_history.models import HistoricalRecords
-from .queries import JobQuerySet
 from .managers import JobManager
 
 

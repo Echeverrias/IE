@@ -9,9 +9,15 @@
     <div id="filters" class="hidden">
     <form method="GET" action="." enctype="multipart/form-data">{% csrf_token %}
          {{ form.as_p }}
-        <button type="submit">Aplicar filtros</button>
+        <button type="submit" class="btn btn-primary">Aplicar filtros</button>
     </form>
     </div>
+    <script type="text/javascript">
+        $( function() {
+            $("#id_datepicker").datepicker({format:'dd/mm/yyyy'});
+            $("#id_datepicker").addClass('date');
+        } );
+     </script>
 </div><br>
     {% if job_list %}
         <h4 class="title">Resultados encontrados</h4><br>

@@ -1,10 +1,11 @@
 import pandas as pd
 import math
-from .models import Job, City, Province, Community, Country, Language
+from .models import Job, City, Province, Community, Country, Language, Company
 import sqlite3
 import time
 from datetime import date
 
+CSV_PATH = 'static/data/csv/'
 COUNTRIES_CSV = 'static/data/countries.csv'
 COMMUNITIES_CSV = 'static/data/communities.csv'
 PROVINCES_CSV = 'static/data/provinces.csv'
@@ -122,4 +123,25 @@ def fix_state_update_date():
     for job in qs:
         job.last_update_date = job.first_publication_date
         job.save()
+
+def save_model_csv(model):
+    today = date.today()
+    qs = model.objects.all()
+    df = pd.DataFrame.from_records(qs.values())
+    name = CSV_PATH + model.__name__.lower() + '_' + today.strftime('%Y%m%d') + '.csv'
+    df.to_csv(name, index=False)
+
+def save_models_to_csv():
+    models = [
+        Job,
+        City,
+        Company,
+        Country,
+        Province,
+        Community,
+        Language
+    ]
+    for model in models:
+        save_model_csv(model)
+
 
