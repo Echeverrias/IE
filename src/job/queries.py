@@ -35,8 +35,10 @@ class JobQuerySet(models.QuerySet):
 
     def available_offers(self):
         print('qs.available_offers')
-        states = [STATE_CREATED_JOB, STATE_UPDATED_JOB,]
-        return self.filter(state__in=states).exclude(expiration_date__lt=date.today())
+        return self.exclude(state=STATE_CLOSED_JOB).exclude(expiration_date__lt=date.today())
+
+    def new_offers(self):
+        return self.filter(state=STATE_CREATED_JOB)
 
     def free_vacancies(self):
         return self.filter(vacancies__gt=F('registered_people'))

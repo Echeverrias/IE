@@ -100,18 +100,11 @@ def get_surrounding_text(text, sub_start, sub_end=None, distance=25):
 
 def get_coincidences(text, coincidences, unique_values = False):
     try:
-        expected_coincidences = ""
-        for i, coincidence in enumerate(coincidences):
-            expected_coincidences += coincidence
-            if i < len(coincidences) - 1:
-                expected_coincidences += '|'
+        expected_coincidences = '|'.join(coincidences)
         coincidences_list = re.findall(expected_coincidences, text)
         if unique_values:
-            temp = []
-            for i in coincidences_list:
-                if not i in temp:
-                    temp.append(i)
-            coincidences_list = temp
+            coincidences_list = set(coincidences_list)
+            coincidences_list = list(coincidences_list)
         return coincidences_list
     except Exception as e:
         print(f'Error: {e}')

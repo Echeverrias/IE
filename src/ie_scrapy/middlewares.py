@@ -278,11 +278,7 @@ class IeDownloaderMiddleware(object):
 
     def get_clean_job_url_path(self, url):
         try:
-            expected_urls = ""
-            for i, url in enumerate(IeDownloaderMiddleware.JOB_RESULTS_URL_PATHS):
-                expected_urls += url
-                if i < len(IeDownloaderMiddleware.JOB_RESULTS_URL_PATHS) - 1:
-                    expected_urls += '|'
+            expected_urls = '|'.join(IeDownloaderMiddleware.JOB_RESULTS_URL_PATHS)
             href_list = re.findall(expected_urls, url)
             return href_list[0]
         except:

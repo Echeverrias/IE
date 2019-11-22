@@ -25,7 +25,7 @@ class JobAdmin(ImportExportModelAdmin):
     list_display = ['name', 'type', 'contract', 'working_day', 'category_level', 'area', 'company', '_cities']
     list_filter =  ['type','contract','working_day', 'nationality', 'area']
     #search_fields = ['name', 'id', 'functions', 'requirements', 'it_is_offered']
-    search_fields = ['name']
+    search_fields = ['name', 'id', 'functions', 'requirements', 'it_is_offered']
 
     # Para mostrar campos no editables
     readonly_fields = ['created_at', 'updated_at']

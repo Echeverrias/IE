@@ -151,11 +151,10 @@ class Job(models.Model):
     STATE_CLOSED = 'Inscripción cerrada'
     STATE_CHOICES = (
         (STATE_CREATED, 'Nueva'),
-        (STATE_UPDATED, 'Actualizada'),
         (STATE_WITHOUT_CHANGES, 'Sin cambios'),
+        (STATE_UPDATED, 'Actualizada'),
         (STATE_CLOSED, 'Inscripción cerrada')
     )
-
     TYPE_INTERNATIONAL = 'ofertas-internacionales'
     TYPE_NATIONAL = 'trabajo'
     TYPE_FIRST_JOB = 'primer-empleo'
@@ -262,7 +261,6 @@ class Job(models.Model):
     state = models.CharField(
         max_length=20,
         choices=STATE_CHOICES,
-        default='',
         null=True,
         blank=True,
     )

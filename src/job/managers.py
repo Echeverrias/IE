@@ -47,6 +47,9 @@ class JobManager(models.Manager):
     def available_offers(self):
         return self.get_queryset().available_offers()
 
+    def new_offers(self):
+        return self.get_queryset().new_offers()
+
     def free_vacancies(self):
         return self.get_queryset().free_vacancies()
 

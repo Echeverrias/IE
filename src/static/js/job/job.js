@@ -4,6 +4,7 @@ $(document).ready(function() {
         console.log('JS loaded from static')
 
         $("div.card-body").addClass('hidden')
+
         $(".job").click(function(event) {
             console.log(this);
             try{
@@ -15,8 +16,8 @@ $(document).ready(function() {
             catch(e){
             }
             //$( this ).toggleClass( "highlight" );
-
         });
+
         $("div.card").hover(function(event) {
             console.log('hover');
             //$('#' +this.id).toggleClass('highlight');
@@ -24,18 +25,8 @@ $(document).ready(function() {
             //$('#' +this.id).css('color', 'blue');
             //$('#' +this.id).addClass('highlight');
             //$( this ).toggleClass( "highlight" );
-
         });
-        /*
-         $(".card.job").mouseleave(function(event) {
-            $('#' + this.id).removeClass('highlight');
-            $('#' + this.id).removeClass('lowlight');
-            //$('#' +this.id).css('color', 'blue');
-            //$('#' +this.id).addClass('highlight');
-            //$( this ).toggleClass( "highlight" );
 
-        });
-        */
         $('#btn-filters').hover(function(event){
             console.log("('#btn-filters').hover")
             $(this).toggleClass('highlight');
@@ -52,9 +43,5 @@ $(document).ready(function() {
         });
 
 
-        });
-
-
-//.rgba-lime-strong
 
 });

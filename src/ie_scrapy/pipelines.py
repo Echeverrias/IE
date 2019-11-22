@@ -19,16 +19,13 @@ from utilities import (
     replace_multiple,
     save_error,
     raise_function_exception,
+    get_coincidences,
 )
 
 import time
 from .items import JobItem, CompanyItem
 from django.db import transaction
 
-STATE_CREATED = Job.STATE_CREATED
-STATE_UPDATED = Job.STATE_UPDATED
-STATE_CLOSED = Job.STATE_CLOSED
-STATE_WITHOUT_CHANGES = Job.STATE_WITHOUT_CHANGES
 
 def trace(func):
     def wrapper(*args, **kwargs):
@@ -259,12 +256,12 @@ class CleanPipeline(CleanupPipeline_):
 
     def _state_cleanup(self, string):
         print(f'_state_clean_up{string}')
-        try:
-            return replace_multiple(string, ['¡','!','\(', '\)'], "")
-        except ValueError as e:
-            print(f'Error in _state_clean_up{string}: {e}')
-            save_error(e, {'arg':string})
-            return ''
+        if string:
+            states = [Job.STATE_CREATED, Job.STATE_UPDATED, Job.STATE_CLOSED]
+            states_coincidences = get_coincidences(string, states)
+            if states_coincidences:
+                return states_coincidences[0]
+        return Job.STATE_WITHOUT_CHANGES
 
     def _nationality_cleanup(self, string):
         if 'extranjero' in string:
@@ -401,14 +398,11 @@ class CleanPipeline(CleanupPipeline_):
 
     def _job_dates_cleanup(self, item):
         print('CleanUpPipeline._job_dates_cleanup')
-        if item['state'] == STATE_CREATED:
+        if item['state'] in [Job.STATE_CREATED, Job.STATE_WITHOUT_CHANGES]:
             item['first_publication_date'] = self._job_date_cleanup(item['first_publication_date'])
-            item['last_update_date'] = item['first_publication_date']
-        elif item['state'] == STATE_UPDATED:
-            item['last_update_date'] = self._job_date_cleanup(item['last_update_date'])
-            item['first_publication_date'] = None
-        else:
             item['last_update_date'] = None
+        elif item['state'] ==  Job.STATE_UPDATED:
+            item['last_update_date'] = self._job_date_cleanup(item['last_update_date'])
             item['first_publication_date'] = None
         return item
 
@@ -633,11 +627,11 @@ class StorePipeline(object):
     # Checks for any change in the offer
     def _has_been_updated(self, job, item):
         update = (
-            (item['state'] == STATE_UPDATED) and (item['last_update_date'] != job.last_update_date) or
-            (item['state'] == STATE_CREATED) and (item['firs_publication_date'] != job.first_publication_date) or
-            (item['state'] == STATE_CLOSED) and (item['expiration_date'] != job.expiration_date)
+            (item['state'] == Job.STATE_UPDATED) and (item['last_update_date'] != job.last_update_date) or
+            (item['state'] in [Job.STATE_CREATED, Job.STATE_WITHOUT_CHANGES]) and (item['firs_publication_date'] != job.first_publication_date) or
+            (item['state'] == Job.STATE_CLOSED) and (item['expiration_date'] != job.expiration_date)
         )
-        if (not update) and (item['state'] == STATE_CLOSED) and (job.state != STATE_CLOSED):
+        if (not update) and (item['state'] == Job.STATE_CLOSED) and (job.state != Job.STATE_CLOSED):
             update = (
                 job['vacancies'] != item['vacancies'] or
                 job['type'] != item['type'] or
@@ -664,12 +658,11 @@ class StorePipeline(object):
             print('1')
             job_dict = copy.deepcopy(item.get_dict_deepcopy())
             job_dict.pop('id', None)
-            if item['state'] != STATE_CREATED:
+            if item['state'] == Job.STATE_CLOSED:
                 job_dict.pop('first_publication_date', None)
-                if item['state'] == STATE_WITHOUT_CHANGES:
-                    job_dict.pop('last_update_date', None)
-                if item['state'] == STATE_CLOSED and not item['expiration_date']:
-                    job_dict.pop('expiration_date', None)
+                job_dict.pop('last_update_date', None)
+            elif item['state'] == Job.STATE_UPDATED:
+                job_dict.pop('first_publication_date', None)
             id = job.id
             qs = Job.objects.filter(id=id)
             qs.update(**job_dict)
