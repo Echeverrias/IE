@@ -18,13 +18,17 @@ from utilities import (
     get_text_before_sub,
     replace_multiple,
     save_error,
+    raise_function_exception,
 )
+
+import time
 from .items import JobItem, CompanyItem
 from django.db import transaction
 
 STATE_CREATED = Job.STATE_CREATED
 STATE_UPDATED = Job.STATE_UPDATED
 STATE_CLOSED = Job.STATE_CLOSED
+STATE_WITHOUT_CHANGES = Job.STATE_WITHOUT_CHANGES
 
 def trace(func):
     def wrapper(*args, **kwargs):
@@ -43,22 +47,29 @@ class CleanupPipeline_(object):
         try:
             clean_string = string.strip()
         except Exception as e:
-            print('#Error in str_cleanup in %s: %s'%(string, e))
+
+            raise_function_exception(e)
         return clean_string
 
     def list_cleanup(self, some_list):
         return list(map(lambda e: e.strip(), some_list))
 
     def str_int_cleanup(self, string):
+        print('#str_int_cleanup: %s' % string)
         try:
             return re.findall(r'\d+', string)[0]
-        except:
+        except Exception as e:
+            print(f'Error str_int_cleanup({string}): {e}')
+            raise_function_exception(e)
             return None
 
     def int_cleanup(self, string):
+        print('#int_cleanup: %s' % string)
         try:
             return int(self.str_int_cleanup(string))
-        except:
+        except ValueError as e:
+            print(f'Error int_cleanup({string}): {e}')
+            raise_function_exception(e)
             return None
 
 
@@ -218,6 +229,7 @@ class CleanPipeline(CleanupPipeline_):
 
 
     def __city_cleanup(self, string):
+        print(f'$$__city_cleanup({string})')
         city = self.get_text_before_parenthesis(string)
         parenthesis = self.get_text_between_parenthesis(string)
         if parenthesis and len(parenthesis[0]) < 4:
@@ -227,6 +239,9 @@ class CleanPipeline(CleanupPipeline_):
             city = city.title()
         alrededores = re.compile(r'(a|A)ldedores|(a|A)lredores|(a|A)lredor|(a|A)lrededores')
         city = alrededores.sub("Alrededores", city)
+        print(city)
+        city = city.replace('.', "")
+        print(city)
         return city
 
     def _cities_cleanup(self, string):
@@ -243,7 +258,13 @@ class CleanPipeline(CleanupPipeline_):
             return "trabajo" #Trabajo
 
     def _state_cleanup(self, string):
-        return replace_multiple(string, ['¡','!','\(', '\)'], "")
+        print(f'_state_clean_up{string}')
+        try:
+            return replace_multiple(string, ['¡','!','\(', '\)'], "")
+        except ValueError as e:
+            print(f'Error in _state_clean_up{string}: {e}')
+            save_error(e, {'arg':string})
+            return ''
 
     def _nationality_cleanup(self, string):
         if 'extranjero' in string:
@@ -386,6 +407,9 @@ class CleanPipeline(CleanupPipeline_):
         elif item['state'] == STATE_UPDATED:
             item['last_update_date'] = self._job_date_cleanup(item['last_update_date'])
             item['first_publication_date'] = None
+        else:
+            item['last_update_date'] = None
+            item['first_publication_date'] = None
         return item
 
 
@@ -393,30 +417,32 @@ class CleanPipeline(CleanupPipeline_):
         item['company_name'] = self.str_cleanup(item['company_name'])
         item['company_link'] = self.url_cleanup(item['company_link'])
         item['company_offers'] = self.int_cleanup(item['company_offers'])
+        item['company_city_name'] = self.__city_cleanup(item['company_city_name'])
         return item
 
     def _job_cleanup(self, item):
         print('CleanPipeline._job_cleanup')
-        item['name'] = self.str_cleanup(item['name'])
-        item['state']= self._state_cleanup(item['state'])
-        item['type'] = self._type_jobs_results_cleanup(item['type'])
-        item['summary'] = self._summary_cleanup(item)
-        item['id'] = self.int_cleanup(item['id'])
-        item['registered_people'] = self.int_cleanup(item['registered_people'])
-        item['provincename'] = self._province_cleanup(item['provincename'])
-        item['cityname'] = self._cities_cleanup(item['cityname'])
-        item['nationality'] = self._nationality_cleanup(item['nationality'])
-        item = self._job_dates_cleanup(item)
+        item['name'] = self.str_cleanup(item['name']);print(1);
+        item['state']= self._state_cleanup(item['state']);print(2);
+        item['type'] = self._type_jobs_results_cleanup(item['type']);print(3);
+        item['summary'] = self._summary_cleanup(item);print(4);
+        item['id'] = self.int_cleanup(item['id']);print(5);
+        item['registered_people'] = self.int_cleanup(item['registered_people']);print(6);
+        item['provincename'] = self._province_cleanup(item['provincename']);print(7);
+        item['cityname'] = self._cities_cleanup(item['cityname']);print(8);
+        item['nationality'] = self._nationality_cleanup(item['nationality']);print(9);
+        item = self._job_dates_cleanup(item);print(10);
         if item['nationality'] == "nacional":
             item['countryname'] = 'España'
         else:
-            item['countryname'] = self._country_cleanup(item['countryname'])
-        item['expiration_date'] = self.get_date_as_date(item['expiration_date'])
+            item['countryname'] = self._country_cleanup(item['countryname']);print(11);
+        item['expiration_date'] = self.get_date_as_date(item['expiration_date']);print(12);
         try:
             company = item['company']
-            item['company'] = self.cleanup[company.get_model_name()](company)
+            item['company'] = self.cleanup[company.get_model_name()](company);print(13);
         except Exception as e:
             print(e)
+            save_error(e, {'pipeline': 'CleanPipeline', 'id': item['id'], 'link': item['link'], 'item': item})
         return item
 
 
@@ -429,6 +455,7 @@ class CleanPipeline(CleanupPipeline_):
             return clean_item
         except Exception as e:
             print('Error CleanPipeline.process_item: {}'.format(e))
+            save_error(e, {'pipeline':'CleanPipeline', 'id':item['id'], 'link':item['link'], 'item':item })
             return item
         #return self.ie_item_cleanup(item)
 
@@ -559,21 +586,24 @@ class StorePipeline(object):
 
 
     def _store_company(self, item):
-        print('*store_company')
+        print('$$store_company')
         company_dict = item.get_dict_deepcopy()
         company_id = company_dict.pop('company_name', None)
         city = self.__get_city(company_dict['company_city_name'])
         company_dict.setdefault('created_at', timezone.now())
         company_dict.setdefault('company_city', city)
         company = None
+        print('$$1')
         try:
             company, is_a_new_company_created = Company.objects.get_or_create(company_name=company_id, defaults=company_dict)
             if not is_a_new_company_created:
-                company.company_offers = company_dict['company_offers']
-                company.updated_at = timezone.now()
-                company.save()
+                if company.company_offers != company_dict['company_offers']:
+                    company.company_offers = company_dict['company_offers']
+                    company.updated_at = timezone.now()
+                    company.save()
         except Exception as e:
-            print('Company.objects.get_or_create')
+            print('!!Company.objects.get_or_create')
+            save_error(e, {'pipeline':'StorePipeline','company_id': item['company_name'], 'company_link': item['company_link'], 'item': item})
             print(e)
 
         return company
@@ -636,6 +666,8 @@ class StorePipeline(object):
             job_dict.pop('id', None)
             if item['state'] != STATE_CREATED:
                 job_dict.pop('first_publication_date', None)
+                if item['state'] == STATE_WITHOUT_CHANGES:
+                    job_dict.pop('last_update_date', None)
                 if item['state'] == STATE_CLOSED and not item['expiration_date']:
                     job_dict.pop('expiration_date', None)
             id = job.id
@@ -659,8 +691,11 @@ class StorePipeline(object):
             company = item['company']
             print(company)
             item['company'] = self.store[company.get_model_name()](company)
+            print('$$Company stored!!')
         except Exception as e:
-            print(f'Error StorePipeline._store_job (storing company){e}')
+            print(f'!!Error StorePipeline._store_job (storing company){e}')
+            save_error(e, {'pipeline':'StorePipeline', 'company_id': item['company_name'], 'company_link': item['company_link'], 'item': item})
+
         job_dict = copy.deepcopy(item.get_dict_deepcopy())
         job_id = job_dict.pop('id', None)
         job, is_new_item_created = Job.objects.get_or_create(id=job_id, defaults=job_dict)
@@ -690,7 +725,7 @@ class StorePipeline(object):
             return self.store[item.get_model_name()](item)
         except Exception as e:
             print(f'Error StorePipeline.process_item: {e}')
-            save_error({'error': e, 'description':'Error StorePipeline.process_item','id':item['id'], 'link':item['link']})
+            save_error(e, {'pipeline':'StorePipeline', 'line':723, 'id':item['id'], 'link':item['link'], 'item': item})
             return item
         """
         print()

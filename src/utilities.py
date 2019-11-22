@@ -4,6 +4,7 @@ import re
 import threading
 from time import time as time_
 import datetime
+import os, sys, traceback
 
 def get_random_color():
     Color = namedtuple('Color', 'red green blue transparency')
@@ -132,7 +133,12 @@ class Lock(object):
 
 
 def replace_multiple(string, olds, new):
-    return re.compile(r"|".join(olds)).sub(new, string)
+    try:
+        return re.compile(r"|".join(olds)).sub(new, string)
+    except Exception as e:
+        if not string:
+            string = ''
+        return str(string)
 
 
 def trace(func):
@@ -147,11 +153,23 @@ def trace(func):
 
     return wrapper
 
-def save_error(dictionary, path='errors.txt'):
+def raise_function_exception(description, exception=Exception):
+    tb = sys.exc_info()[-1]
+    stk = traceback.extract_tb(tb, 1)
+    fname = stk[0][2]
+    raise exception(f'Error in {fname}: {description}')
+
+def save_error(e, dictionary={}, path='errors.txt'):
+    tb = sys.exc_info()[-1]
+    stk = traceback.extract_tb(tb, 1)
+    fname = stk[0][2]
     with open(path, 'a') as f:
-        f.write(f'{datetime}: \n')
+        f.write(f'{datetime.datetime.now().strftime("%c")}: \n')
+        f.write(f'function: {fname}\n')
+        f.write(f'error: {e}\n')
         for k,v in dictionary.items():
-            f.write(f'{k:} {v}: \n')
+            f.write(f'{k}: {v} \n')
+        f.write(f'\n')
         f.write(f'\n')
         f.write(f'\n')
 

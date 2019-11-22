@@ -31,11 +31,11 @@ class InfoempleoSpider(Spider):
     name = 'ie'
     allowed_domains = ['infoempleo.com']
 
-    start_urlsz = [
+    start_urls = [
          "https://www.infoempleo.com/trabajo/area-de-empresa_legal/",
     ]
 
-    start_urls = [
+    start_urlsz = [
         "https://www.infoempleo.com/ofertas-internacionales/",
         "https://www.infoempleo.com/primer-empleo/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/",
@@ -98,6 +98,10 @@ class InfoempleoSpider(Spider):
         except Exception as e:
             print(f'Error_: {e}')
         print('### ')
+        job_urls = [
+            'https://www.infoempleo.com/ofertasdetrabajo/gpv-canal-impuslo-hm-muy-valorable-idioma-chino/madrid/2563304/',
+            'https://www.infoempleo.com/ofertasdetrabajo/consultora-seguridad-mobile-para-campo-de-gibraltar-41307410/cadiz/2563351',
+        ]
         for job_url in job_urls:
             print('# Go to job_url: %s', job_url)
             yield response.follow(job_url, self.parse_item, meta={

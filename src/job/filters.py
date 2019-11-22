@@ -40,7 +40,7 @@ class JobFilter(django_filters.FilterSet):
 
     class Meta:
         model = Job
-        fields = ['type', 'working_day', 'contract', 'area']
+        fields = ['id', 'type', 'working_day', 'contract', 'area']
 
 
     @property

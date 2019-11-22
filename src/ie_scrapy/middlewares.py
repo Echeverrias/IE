@@ -121,7 +121,7 @@ class IeSpiderMiddleware(object):
             start_url = r.url
             r._set_url(UrlsState.get_pending_page_url(r.url))
             print(r.url)
-            print(UrlsState.get_url_data(start_url, UrlsState.KEY_RESULTS_PARSED))
+            #print(UrlsState.get_url_data(start_url, UrlsState.KEY_RESULTS_PARSED))
             print(r)
             print('###end process_start_requests')
             yield r
@@ -129,7 +129,7 @@ class IeSpiderMiddleware(object):
     def spider_opened(self, spider):
         spider.logger.info('Spider.Middleware opened: %s' % spider.name)
         UrlsState.init()
-        print(UrlsState.parsed_urls)
+        #print(UrlsState.parsed_urls)
         print('##########################################################################################')
 
     def spider_closed(self, spider):

@@ -146,11 +146,13 @@ class Language(models.Model):
 class Job(models.Model):
 
     STATE_CREATED = 'Nueva'
+    STATE_WITHOUT_CHANGES = ''
     STATE_UPDATED = 'Actualizada'
     STATE_CLOSED = 'Inscripción cerrada'
     STATE_CHOICES = (
         (STATE_CREATED, 'Nueva'),
         (STATE_UPDATED, 'Actualizada'),
+        (STATE_WITHOUT_CHANGES, 'Sin cambios'),
         (STATE_CLOSED, 'Inscripción cerrada')
     )
 
