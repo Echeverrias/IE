@@ -301,14 +301,14 @@ class Job(models.Model):
     link = models.URLField(null=True)
 
     state = models.CharField(
-        max_length=20,
+        max_length=30,
         choices=STATE_CHOICES,
         null=True,
         blank=True,
     )
 
     type = models.CharField(
-        max_length=23,
+        max_length=30,
         choices=TYPE_CHOICES,
         default=TYPE_NATIONAL,
     )
@@ -325,13 +325,13 @@ class Job(models.Model):
     maximum_salary = models.PositiveIntegerField(null=True, blank=True)
     #working_day = models.CharField(max_length=30, null=True, blank=True)
     working_day = models.CharField(
-        max_length=23,
+        max_length=30,
         choices=WORKING_DAY_CHOICES,
         default=CATEGORY_UNSPECIFIED
     )
     #contract = models.CharField(max_length=30, null=True, blank=True)
     contract = models.CharField(
-        max_length=32,
+        max_length=40,
         choices=CONTRACT_CHOICES,
         default=CONTRACT_UNSPECIFIED,
     )
@@ -365,12 +365,12 @@ class Job(models.Model):
     tags = models.TextField(null=True, blank=True) #Model
     #area = models.CharField(null=True,max_length=100, blank=True) #Model
     area = models.CharField(
-        max_length=34,
+        max_length=40,
         choices=AREA_CHOICES,
     )
     #category_level = models.CharField(null=True,max_length=100, blank=True)
     category_level = models.CharField(
-        max_length=15,
+        max_length=20,
         choices=CATEGORY_CHOICES,
         default=CATEGORY_UNSPECIFIED,
         null=True
