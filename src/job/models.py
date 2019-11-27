@@ -15,6 +15,13 @@ class Country(models.Model):
         verbose_name_plural = "Countries"
         ordering = ['name']
 
+    def save(self, *args, **kwargs):
+        try:
+            self.slug = self.name.lower().replace(' ','-')
+        except:
+            pass
+        super(Country, self).save(*args, **kwargs)
+
     def __str__(self):
         return "%s" % (self.name)
 
@@ -33,6 +40,13 @@ class Community(models.Model):
         verbose_name = "Community"
         verbose_name_plural = "Communities"
         ordering = ['name']
+
+    def save(self, *args, **kwargs):
+        try:
+            self.slug = self.name.lower().replace(' ','-')
+        except:
+            pass
+        super(Community, self).save(*args, **kwargs)
 
     def __str__(self):
         return "%s" % (self.name)
@@ -57,6 +71,13 @@ class Province(models.Model):
         verbose_name = "Province"
         ordering = ['name']
 
+    def save(self, *args, **kwargs):
+        try:
+            self.slug = self.name.lower().replace(' ','-')
+        except:
+            pass
+        super(Province, self).save(*args, **kwargs)
+
 
     def __str__(self):
         return "%s" % (self.name)
@@ -66,15 +87,15 @@ class Province(models.Model):
 class City (models.Model):
     id = models.AutoField(primary_key=True)
     province = models.ForeignKey(Province,
-                                  on_delete=models.CASCADE,
-                                    related_name='cities',
+                                 on_delete=models.CASCADE,
+                                 related_name='cities',
                                  null = True, blank = True)
     country = models.ForeignKey(Country,
                                 on_delete=models.CASCADE,
                                 related_name='cities',
                                 null = True, blank = True)
     name = models.CharField(max_length=100)
-    slug = models.CharField(max_length=30, null=True, default='',blank = True)
+    slug = models.CharField(max_length=100, null=True, blank = True)
 
     latitude = models.FloatField(null=True, blank = True)
     longitude = models.FloatField(null=True, blank = True)
@@ -83,6 +104,17 @@ class City (models.Model):
         verbose_name = "City"
         verbose_name_plural = "Cities"
         ordering = ['name']
+
+    def save(self, *args, **kwargs):
+        print('save')
+        try:
+            self.slug = self.name.lower().replace(' ','-')
+        except:
+            pass
+        super(City, self).save(*args, **kwargs)
+
+    def default_slug(self):
+        return self.name.lower().replace(' ','-')
 
     def __str__(self):
         if self.province:
@@ -93,8 +125,8 @@ class City (models.Model):
 
 
 class Company(models.Model):
+    company_name = models.CharField(unique = True, primary_key=True, max_length=100)
     company_link = models.URLField(null=True)
-    company_name = models.CharField(primary_key=True, max_length=100)
     company_description = models.TextField(null=True)
     company_city_name = models.CharField(max_length=50, null=True)
     company_city = models.ForeignKey(City,
@@ -103,6 +135,7 @@ class Company(models.Model):
                             null = True, blank = True)
     company_category = models.CharField(null=True, max_length=100)
     company_offers = models.IntegerField(null=True, blank=True)
+    company_slug= models.CharField(max_length=100, null=True, blank = True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)  # models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)  # models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
@@ -111,6 +144,13 @@ class Company(models.Model):
         verbose_name = "Company"
         verbose_name_plural = "Companies"
         ordering = ['company_name']
+
+    def save(self, *args, **kwargs):
+        try:
+            self.company_slug = self.company_name.lower().replace(' ','-')
+        except:
+            pass
+        super(Company, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.company_name
@@ -138,6 +178,8 @@ class Language(models.Model):
         verbose_name = "Language"
         verbose_name_plural = "Languages"
         ordering = ['name', 'level']
+
+
 
     def __str__(self):
         return f'{self.name} - {self.level}'
@@ -285,18 +327,28 @@ class Job(models.Model):
     working_day = models.CharField(
         max_length=23,
         choices=WORKING_DAY_CHOICES,
+        default=CATEGORY_UNSPECIFIED
     )
     #contract = models.CharField(max_length=30, null=True, blank=True)
     contract = models.CharField(
         max_length=32,
         choices=CONTRACT_CHOICES,
+        default=CONTRACT_UNSPECIFIED,
     )
     cityname = ListCharField(base_field=models.CharField(max_length=100),
         size=6,
-        max_length=(6 * 101), null=True)
+        max_length=(6 * 101), null=True, blank=True)
     cities = models.ManyToManyField(City,
                             related_name='jobs',
                             null = True, blank = True)
+    province = models.ForeignKey(Province,
+                                 on_delete=models.CASCADE,
+                                 related_name='jobs',
+                                 null=True, blank=True)
+    country = models.ForeignKey(Country,
+                                on_delete=models.CASCADE,
+                                related_name='jobs',
+                                null=True, blank=True)
     languages = models.ManyToManyField(Language,
                             related_name='jobs',
                             null = True, blank = True)
@@ -305,7 +357,7 @@ class Job(models.Model):
     nationality = models.CharField(max_length=30)
     first_publication_date = models.DateField(null=True, blank=True, default=None)
     last_update_date = models.DateField(null=True, blank=True, default=None)
-    expiration_date = models.DateField(null=True, blank=True)  # models.DateTimeField(auto_now_add=True)
+    expiration_date = models.DateField(null=True, blank=True, default=None)  # models.DateTimeField(auto_now_add=True)
     description = models.TextField(null=True, blank=True)
     functions = models.TextField(null=True, blank=True)
     requirements = models.TextField(null=True, blank=True)
@@ -320,15 +372,17 @@ class Job(models.Model):
     category_level = models.CharField(
         max_length=15,
         choices=CATEGORY_CHOICES,
+        default=CATEGORY_UNSPECIFIED,
+        null=True
     )
-    vacancies = models.PositiveIntegerField()
+    vacancies = models.PositiveIntegerField(null=True, blank=True)
     registered_people = models.PositiveIntegerField(default=0)
     vacancies_update = models.PositiveIntegerField(null=True, blank=True)
 
     company = models.ForeignKey(
         Company,
         on_delete=models.CASCADE,
-        related_name='job', null=True)
+        related_name='jobs', null=True)
    
     
 
@@ -363,6 +417,22 @@ class Job(models.Model):
 
     def fields(self):
         return [field['name'] for field in self._meta.fields]
+
+    def display_cities(self):
+        """
+        For display the cities and the country of an offer in the admin section
+        :return: The cities and the country
+        """
+        cities = self.cities.all()[0:3]
+        if cities:
+            names = [city.name for city in cities]
+            return f'{", ".join(names)} ({cities[0].country.name})'
+        else:
+            return None
+
+    display_cities.short_description = 'Cities (Country)'
+
+
 
     @classmethod
     def add_city(cls, job, city):
