@@ -1,4 +1,4 @@
-,id,province,country,name,slug,latitude,longitude
+,id,province_id,country_id,name,slug,latitude,longitude
 0,8828,,12,  Renania-Palatinado,,,
 1,8624,,1, Alredores Southampton ,,,
 2,8815,,1, Alredores de Londres ,,,
@@ -467,7 +467,7 @@
 465,1813,12.0,6,Alfondeguilla,alfondeguilla,39.8372449,-0.26879
 466,6356,43.0,6,Alforja,alforja,41.2113272,0.9762403
 467,7840,50.0,6,Alforque,alforque,41.3314265,-0.3856694
-468,4212,27.0,6,Alfoz,alfoz,43.528,-7.414
+468,4212,27.0,6,Alfoz,alfoz,43528,-7414
 469,1178,9.0,6,Alfoz de Bricia,alfoz-de-bricia,42.8966667,-3.8791667
 470,5748,39.0,6,Alfoz de Lloredo,alfoz-de-lloredo,43.3791667,-4.1755556
 471,1179,9.0,6,Alfoz de Quintanadueñas,alfoz-de-quintanadueas,42.3850307,-3.7349418
@@ -730,7 +730,7 @@
 728,5053,34.0,6,Antigüedad,antigedad,41.9458733,-4.1183282
 729,3322,22.0,6,Antillón,antilln,42.0358988,-0.1623112
 730,3141,20.0,6,Antzuola,antzuola,43.0994407,-2.3817472
-731,4619,31.0,6,Anue,anue,42.979,-1.589
+731,4619,31.0,6,Anue,anue,42979,-1589
 732,8316,31.0,6,Aoiz-Agoitz,,,
 733,4621,31.0,6,Aoiz/Agoitz,aoizagoitz,42.7979859,-1.3838404
 734,5362,37.0,6,Arabayona de Mógica,arabayona-de-mgica,41.0470963,-5.3862158
@@ -741,9 +741,9 @@
 739,5867,40.0,6,Arahuetes,arahuetes,41.1376743,-3.8564745
 740,4622,31.0,6,Araitz,araitz,43.065584,-2.006245
 741,7468,48.0,6,Arakaldo,arakaldo,43.1495502,-2.9250864
-742,4623,31.0,6,Arakil,arakil,42.917,-1.861
+742,4623,31.0,6,Arakil,arakil,42917,-1861
 743,3142,20.0,6,Arama,arama,43.0636373,-2.1655576
-744,4,1.0,6,Aramaio,aramaio,43.054,-2.566
+744,4,1.0,6,Aramaio,aramaio,43054,-2566
 745,4624,31.0,6,Aranarache,aranarache,42.7794203,-2.2287811
 746,6185,42.0,6,Arancón,arancn,41.8007905,-2.2821424
 747,1185,9.0,6,Aranda de Duero,aranda-de-duero,41.6717131,-3.6865695
@@ -918,7 +918,7 @@
 916,6367,43.0,6,Ascó,asc,41.183719,0.5671799
 917,3836,25.0,6,Aspa,aspa,41.4957325,0.6723415
 918,7588,49.0,6,Aspariegos,aspariegos,41.6737361,-5.5984756
-919,9,1.0,6,Asparrena,asparrena,42.8956667,-2.321
+919,9,1.0,6,Asparrena,asparrena,42.8956667,-2321
 920,157,3.0,6,Aspe,aspe,38.3485684,-0.7694142
 921,3145,20.0,6,Asteasu,asteasu,43.1951981,-2.0975478
 922,3146,20.0,6,Astigarraga,astigarraga,43.2806524,-1.9475599
@@ -1098,7 +1098,7 @@
 1096,1205,9.0,6,Barrio de Muñó,barrio-de-mu,42.1750227,-4.0072085
 1097,2882,19.0,6,Barriopedro,barriopedro,40.7892184,-2.7537559
 1098,1207,9.0,6,Barrios de Colina,barrios-de-colina,42.3961112,-3.4597878
-1099,5273,36.0,6,Barro,barro,42.525,-8.64722
+1099,5273,36.0,6,Barro,barro,42525,-8.64722
 1100,398,5.0,6,Barromán,barromn,41.0650893,-4.9313915
 1101,5373,37.0,6,Barruecopardo,barruecopardo,41.0725268,-6.6629353
 1102,5062,34.0,6,Barruelo de Santullán,barruelo-de-santulln,42.9076748,-4.2872296
@@ -1431,7 +1431,7 @@
 1429,68,2.0,6,Bogarra,bogarra,38.5813761,-2.2142213
 1430,1573,10.0,6,Bohonal de Ibor,bohonal-de-ibor,39.7843195,-5.4841801
 1431,409,5.0,6,Bohoyo,bohoyo,40.3149588,-5.4411855
-1432,2129,15.0,6,Boimorto,boimorto,43.008,-8.127
+1432,2129,15.0,6,Boimorto,boimorto,43008,-8127
 1433,2130,15.0,6,Boiro,boiro,42.65,-8.9
 1434,1966,13.0,6,Bolaños de Calatrava,bolaos-de-calatrava,38.9056484,-3.6663543
 1435,7260,47.0,6,Bolaños de Campos,bolaos-de-campos,42.0065794,-5.2844524
@@ -1448,7 +1448,7 @@
 1446,2247,16.0,6,Boniches,boniches,39.9852679,-1.6241867
 1447,410,5.0,6,Bonilla de la Sierra,bonilla-de-la-sierra,40.530886,-5.264956
 1448,7045,46.0,6,Bonrepòs i Mirambell,bonreps-i-mirambell,39.5184653,-0.3648613
-1449,2131,15.0,6,Boqueixón,boqueixn,42.817,-8.417
+1449,2131,15.0,6,Boqueixón,boqueixn,42817,-8417
 1450,7874,50.0,6,Boquiñeni,boquieni,41.8487392,-1.2497337
 1451,3354,22.0,6,Borau,borau,42.6587359,-0.5881645
 1452,7875,50.0,6,Bordalba,bordalba,41.4172392,-2.07819
@@ -1508,7 +1508,7 @@
 1506,8478,,1,Bristol ,,,
 1507,1217,9.0,6,Briviesca,briviesca,42.5502929,-3.3233687
 1508,4069,26.0,6,Briñas,brias,42.6018489,-2.8303345
-1509,2132,15.0,6,Brión,brin,42.867,-8.678
+1509,2132,15.0,6,Brión,brin,42867,-8678
 1510,6573,44.0,6,Bronchales,bronchales,40.5090921,-1.5890833
 1511,3355,22.0,6,Broto,broto,42.6048128,-0.1235453
 1512,1575,10.0,6,Brozas,brozas,39.6120781,-6.7779352
@@ -1571,7 +1571,7 @@
 1569,3619,24.0,6,Bustillo del Páramo,bustillo-del-pramo,42.4413392,-5.7917985
 1570,5073,34.0,6,Bustillo del Páramo de Carrión,bustillo-del-pramo-de-carrin,42.3558863,-4.7382321
 1571,1221,9.0,6,Busto de Bureba,busto-de-bureba,42.6594071,-3.2647149
-1572,7490,48.0,6,Busturia,busturia,43.383,-2.697
+1572,7490,48.0,6,Busturia,busturia,43383,-2697
 1573,7048,46.0,6,Buñol,buol,39.4182498,-0.7907688
 1574,4667,31.0,6,Buñuel,buuel,41.9804623,-1.4432527
 1575,2464,17.0,6,Bàscara,bscara,42.1571523,2.9106383
@@ -2642,7 +2642,7 @@
 2640,2730,18.0,6,Deifontes,deifontes,37.3252398,-3.5944841
 2641,1613,10.0,6,Deleitosa,deleitosa,39.6431018,-5.6457434
 2642,6401,43.0,6,Deltebre,deltebre,40.7194412,0.7083474
-2643,7491,48.0,6,Derio,derio,43.302,-2.8818333
+2643,7491,48.0,6,Derio,derio,43302,-2.8818333
 2644,1614,10.0,6,Descargamaría,descargamara,40.3039771,-6.4870169
 2645,4688,31.0,6,Desojo,desojo,42.5870822,-2.2735361
 2646,3656,24.0,6,Destriana,destriana,42.3277515,-6.0968722
@@ -3063,7 +3063,7 @@
 3061,4708,31.0,6,Eulate,eulate,42.7765437,-2.2080375
 3062,8252,,1,Exeter,,,
 3063,8483,,1,Exeter ,,,
-3064,4709,31.0,6,Ezcabarte,ezcabarte,42.851,-1.621
+3064,4709,31.0,6,Ezcabarte,ezcabarte,42851,-1621
 3065,4097,26.0,6,Ezcaray,ezcaray,42.3267239,-3.0133947
 3066,4710,31.0,6,Ezcároz/Ezkaroze,ezcrozezkaroze,42.8876478,-1.097649
 3067,3167,20.0,6,Ezkio-Itsaso,ezkio-itsaso,43.0819444,-2.2741667
@@ -3341,7 +3341,7 @@
 3339,4101,26.0,6,Galbárruli,galbrruli,42.6225374,-2.9611426
 3340,7505,48.0,6,Galdakao,galdakao,43.2305556,-2.8458333
 3341,8328,48.0,6,Galdakao/Galdácano,,,
-3342,7506,48.0,6,Galdames,galdames,43.255,-3.0963889
+3342,7506,48.0,6,Galdames,galdames,43255,-3.0963889
 3343,8339,35.0,6,Galdar,,,
 3344,7649,49.0,6,Galende,galende,42.10423,-6.6626402
 3345,2742,18.0,6,Galera,galera,37.7428844,-2.5511932
@@ -3824,7 +3824,7 @@
 3822,2760,18.0,6,Illora,illora,37.2884253,-3.8797818
 3823,7944,50.0,6,Illueca,illueca,41.5363208,-1.6234421
 3824,6845,45.0,6,Illán de Vacas,illn-de-vacas,39.9704783,-4.5564592
-3825,4736,31.0,6,Imotz,imotz,42.967,-1.783
+3825,4736,31.0,6,Imotz,imotz,42967,-1783
 3826,822,7.0,6,Inca,inca,39.7222978,2.9132192
 3827,5247,35.0,6,Ingenio,ingenio,27.920473,-15.4424616
 3828,2317,16.0,6,Iniesta,iniesta,39.4408518,-1.7493846
@@ -3862,7 +3862,7 @@
 3860,7519,48.0,6,Ispaster,ispaster,43.362954,-2.544635
 3861,4517,29.0,6,Istán,istn,36.5821576,-4.9494014
 3862,7945,50.0,6,Isuerre,isuerre,42.4881632,-1.0551577
-3863,3400,22.0,6,Isábena,isbena,42.31,0.527
+3863,3400,22.0,6,Isábena,isbena,42.31,527
 3864,2531,17.0,6,Isòvol,isvol,42.3778943,1.8185772
 3865,5114,34.0,6,Itero de la Vega,itero-de-la-vega,42.2872548,-4.2598597
 3866,1315,9.0,6,Itero del Castillo,itero-del-castillo,42.2894043,-4.2444138
@@ -3878,7 +3878,7 @@
 3876,3906,25.0,6,Ivars de Noguera,ivars-de-noguera,41.8505005,0.5869282
 3877,3908,25.0,6,Ivorra,ivorra,41.7716195,1.3945488
 3878,4742,31.0,6,Iza/Itza,izaitza,42.822578,-1.7243294
-3879,4743,31.0,6,Izagaondoa,izagaondoa,42.753,-1.421
+3879,4743,31.0,6,Izagaondoa,izagaondoa,42753,-1421
 3880,3672,24.0,6,Izagre,izagre,42.2242364,-5.2572926
 3881,4744,31.0,6,Izalzu/Itzaltzu,izalzuitzaltzu,42.9135311,-1.0536612
 3882,2762,18.0,6,Iznalloz,iznalloz,37.3927023,-3.5275488
@@ -4260,7 +4260,7 @@
 4258,3405,22.0,6,Lalueza,lalueza,41.8418351,-0.255536
 4259,5294,36.0,6,Lalín,laln,42.6613704,-8.1109567
 4260,5781,39.0,6,Lamasón,lamasn,43.2536111,-4.4819444
-4261,4749,31.0,6,Lana,lana,42.706,-2.247
+4261,4749,31.0,6,Lana,lana,42706,-2247
 4262,3406,22.0,6,Lanaja,lanaja,41.7721415,-0.32952
 4263,28,1.0,6,Lanciego/Lantziego,lanciegolantziego,42.5626187,-2.5132036
 4264,2320,16.0,6,Landete,landete,39.9076791,-1.3645337
@@ -4301,7 +4301,7 @@
 4299,7914,50.0,6,Las Cuerlas,cuerlas-las,40.9591832,-1.548931
 4300,2741,18.0,6,Las Gabias,gabias-las,37.1364238,-3.669147
 4301,6837,45.0,6,Las Herencias,herencias-las,39.8694911,-4.9202375
-4302,1300,9.0,6,Las Hormazas,hormazas-las,42.515,-3.8961111
+4302,1300,9.0,6,Las Hormazas,hormazas-las,42515,-3.8961111
 4303,2965,19.0,6,Las Inviernas,inviernas-las,40.8720738,-2.6688905
 4304,1993,13.0,6,Las Labores,labores-las,39.2745837,-3.5186036
 4305,2323,16.0,6,Las Majadas,majadas-las,40.3103836,-2.0000661
@@ -4906,7 +4906,7 @@
 4904,1337,9.0,6,Merindad de Río Ubierna,merindad-de-ro-ubierna,42.6166667,-3.65
 4905,1338,9.0,6,Merindad de Sotoscueva,merindad-de-sotoscueva,43.0587747,-3.642048
 4906,1339,9.0,6,Merindad de Valdeporres,merindad-de-valdeporres,43.0205556,-3.7686111
-4907,1340,9.0,6,Merindad de Valdivielso,merindad-de-valdivielso,42.82,-3.536
+4907,1340,9.0,6,Merindad de Valdivielso,merindad-de-valdivielso,42.82,-3536
 4908,5790,39.0,6,Meruelo,meruelo,43.45,-3.5833333
 4909,1662,10.0,6,Mesas de Ibor,mesas-de-ibor,39.756251,-5.5438906
 4910,493,5.0,6,Mesegar de Corneja,mesegar-de-corneja,40.502713,-5.3014999
@@ -4927,7 +4927,7 @@
 4925,2989,19.0,6,Miedes de Atienza,miedes-de-atienza,41.2667021,-2.9642457
 4926,5791,39.0,6,Miengo,miengo,43.4271143,-3.9952598
 4927,5792,39.0,6,Miera,miera,43.2833333,-3.7083333
-4928,2551,17.0,6,Mieres,mieres,42.127,2.6392444
+4928,2551,17.0,6,Mieres,mieres,42127,2.6392444
 4929,5002,33.0,6,Mieres,5002-mieres,43.25,-5.766667
 4930,5506,37.0,6,Mieza,mieza,41.1622537,-6.6876075
 4931,6866,45.0,6,Miguel Esteban,miguel-esteban,39.5259496,-3.0757092
@@ -5475,7 +5475,7 @@
 5473,4141,26.0,6,Ochánduri,ochnduri,42.5246508,-3.0036307
 5474,4798,31.0,6,Oco,oco,42.6382657,-2.1645853
 5475,4142,26.0,6,Ocón,ocn,42.297954,-2.2446629
-5476,4799,31.0,6,Odieta,odieta,42.94,-1.638
+5476,4799,31.0,6,Odieta,odieta,42.94,-1638
 5477,3939,25.0,6,Odèn,odn,42.1326391,1.4546931
 5478,6678,44.0,6,Odón,6678-odn,40.8844348,-1.5678129
 5479,3690,24.0,6,Oencia,oencia,42.5464373,-6.9706502
@@ -5493,7 +5493,7 @@
 5491,36,1.0,6,Okondo,okondo,43.1544,-3.02861
 5492,8180,1.0,6,Okondo-oquendo,,,
 5493,3194,20.0,6,Olaberria,olaberria,43.0270754,-2.2030894
-5494,4801,31.0,6,Olaibar,olaibar,42.886,-1.603
+5494,4801,31.0,6,Olaibar,olaibar,42886,-1603
 5495,8198,31.0,6,Olave,,,
 5496,8340,31.0,6,Olazti-Olazagutía,,,
 5497,4802,31.0,6,Olazti/Olazagutía,olaztiolazaguta,42.8763269,-2.1970675
@@ -5577,7 +5577,7 @@
 5575,3196,20.0,6,Ordizia,ordizia,43.0541983,-2.1781155
 5576,8196,20.0,6,Ordizia-Ordicia,,,
 5577,3012,19.0,6,Orea,orea,40.5575005,-1.7270382
-5578,5983,40.0,6,Orejana,orejana,41.163,-3.778
+5578,5983,40.0,6,Orejana,orejana,41163,-3778
 5579,725,6.0,6,Orellana de la Sierra,orellana-de-la-sierra,39.0304845,-5.4975433
 5580,726,6.0,6,Orellana la Vieja,orellana-la-vieja,39.0050506,-5.5342736
 5581,3197,20.0,6,Orendain,orendain,43.079721,-2.1142902
@@ -6387,7 +6387,7 @@
 6385,39,1.0,6,Ribera Baja/Erribera Beitia,ribera-bajaerribera-beitia,42.7120124,-2.9183001
 6386,3970,25.0,6,Ribera dOndara,ribera-dondara,41.629444,1.343056
 6387,3971,25.0,6,Ribera dUrgellet,ribera-durgellet,42.3266667,1.3972222
-6388,5022,33.0,6,Ribera de Arriba,ribera-de-arriba,43.3083333,-5.875
+6388,5022,33.0,6,Ribera de Arriba,ribera-de-arriba,43.3083333,-5875
 6389,743,6.0,6,Ribera del Fresno,ribera-del-fresno,38.5523599,-6.2415873
 6390,5166,34.0,6,Riberos de la Cueza,riberos-de-la-cueza,42.2784362,-4.7253726
 6391,2587,17.0,6,Ribes de Freser,ribes-de-freser,42.3063699,2.1691016
@@ -7087,7 +7087,7 @@
 7085,1446,9.0,6,Santo Domingo de Silos,santo-domingo-de-silos,41.9623798,-3.4197335
 7086,4170,26.0,6,Santo Domingo de la Calzada,santo-domingo-de-la-calzada,42.4419919,-2.9525895
 7087,594,5.0,6,Santo Domingo de las Posadas,santo-domingo-de-las-posadas,40.8121818,-4.6334214
-7088,6924,45.0,6,Santo Domingo-Caudilla,santo-domingo-caudilla,40.012,-4.326
+7088,6924,45.0,6,Santo Domingo-Caudilla,santo-domingo-caudilla,40012,-4326
 7089,3575,23.0,6,Santo Tomé,santo-tom,38.0281848,-3.1018444
 7090,595,5.0,6,Santo Tomé de Zabarcos,santo-tom-de-zabarcos,40.7866372,-4.9102153
 7091,6021,40.0,6,Santo Tomé del Puerto,santo-tom-del-puerto,41.1805376,-3.5637626
@@ -7321,7 +7321,7 @@
 7319,8601,,1,Southamopton ,,,
 7320,8298,,1,Southampton,,,
 7321,8611,,1,Southampton ,,,
-7322,5323,36.0,6,Soutomaior,soutomaior,42.333,-8.567
+7322,5323,36.0,6,Soutomaior,soutomaior,42333,-8567
 7323,8593,,1,St Albans,,,
 7324,8608,,1,St Albans ,,,
 7325,8893,,1,St. Albans,,,
@@ -7509,7 +7509,7 @@
 7507,7396,47.0,6,Tordesillas,tordesillas,41.5016522,-4.9991272
 7508,3076,19.0,6,Tordesilos,tordesilos,40.670501,-1.5931016
 7509,5636,37.0,6,Tordillos,tordillos,40.8542135,-5.3524303
-7510,2204,15.0,6,Tordoia,tordoia,43.088,-8.56
+7510,2204,15.0,6,Tordoia,tordoia,43088,-8.56
 7511,1463,9.0,6,Tordómar,tordmar,42.0458703,-3.8647273
 7512,1145,8.0,6,Torelló,torell,42.0482431,2.2627203
 7513,3750,24.0,6,Toreno,toreno,42.7005553,-6.509904
@@ -7800,13 +7800,13 @@
 7798,4851,31.0,6,Urdazubi/Urdax,urdazubiurdax,43.2688303,-1.504145
 7799,4852,31.0,6,Urdiain,urdiain,42.8871132,-2.136436
 7800,3755,24.0,6,Urdiales del Páramo,urdiales-del-pramo,42.3704325,-5.7731177
-7801,7563,48.0,6,Urduliz,urduliz,43.3796667,-2.962
+7801,7563,48.0,6,Urduliz,urduliz,43.3796667,-2962
 7802,7564,48.0,6,Urduña/Orduña,urduaordua,42.9944489,-3.0096225
 7803,43,1.0,6,Urkabustaiz,urkabustaiz,42.9719444,-2.9222222
 7804,3205,20.0,6,Urnieta,urnieta,43.2481997,-1.9905166
 7805,7408,47.0,6,Urones de Castroponce,urones-de-castroponce,42.0986199,-5.28183
 7806,4853,31.0,6,Urraul Alto,urraul-alto,42.775688,-1.247821
-7807,4854,31.0,6,Urraul Bajo,urraul-bajo,42.714,-1.323
+7807,4854,31.0,6,Urraul Bajo,urraul-bajo,42714,-1323
 7808,6741,44.0,6,Urrea de Gaén,urrea-de-gan,41.1600932,-0.4705417
 7809,8084,50.0,6,Urrea de Jalón,urrea-de-jaln,41.6676014,-1.234124
 7810,3206,20.0,6,Urretxu,urretxu,43.0922818,-2.3143826
@@ -7990,7 +7990,7 @@
 7988,5194,34.0,6,Valle de Cerrato,valle-de-cerrato,41.8799555,-4.3621462
 7989,3485,22.0,6,Valle de Hecho,valle-de-hecho,42.7394964,-0.7503078
 7990,8174,35.0,6,Valle de Jinamar,,,
-7991,3486,22.0,6,Valle de Lierp,valle-de-lierp,42.38,0.489
+7991,3486,22.0,6,Valle de Lierp,valle-de-lierp,42.38,489
 7992,1481,9.0,6,Valle de Losa,valle-de-losa,42.9866667,-3.2191667
 7993,1482,9.0,6,Valle de Manzanedo,valle-de-manzanedo,42.8989494,-3.6906771
 7994,774,6.0,6,Valle de Matamoros,valle-de-matamoros,38.3795991,-6.8028886
@@ -8000,7 +8000,7 @@
 7998,1485,9.0,6,Valle de Santibáñez,valle-de-santibez,42.4827222,-3.8224722
 7999,1486,9.0,6,Valle de Sedano,valle-de-sedano,42.7154406,-3.7496111
 8000,6042,40.0,6,Valle de Tabladillo,valle-de-tabladillo,41.3628246,-3.839471
-8001,1487,9.0,6,Valle de Tobalina,valle-de-tobalina,42.792,-3.271
+8001,1487,9.0,6,Valle de Tobalina,valle-de-tobalina,42792,-3271
 8002,7565,48.0,6,Valle de Trápaga-Trapagaran,valle-de-trpaga-trapagaran,43.3031076,-3.0355479
 8003,1488,9.0,6,Valle de Valdebezana,valle-de-valdebezana,42.97,-3.81657
 8004,1489,9.0,6,Valle de Valdelaguna,valle-de-valdelaguna,42.0925972,-3.1325417
@@ -8280,7 +8280,7 @@
 8278,1499,9.0,6,Villadiego,villadiego,42.5157478,-4.0100963
 8279,8097,50.0,6,Villadoz,villadoz,41.1625412,-1.2873417
 8280,5204,34.0,6,Villaeles de Valdavia,villaeles-de-valdavia,42.5654357,-4.5844887
-8281,5847,39.0,6,Villaescusa,villaescusa,43.3708333,-3.855
+8281,5847,39.0,6,Villaescusa,villaescusa,43.3708333,-3855
 8282,7790,49.0,6,Villaescusa,7790-villaescusa,41.206335,-5.4648196
 8283,2421,16.0,6,Villaescusa de Haro,villaescusa-de-haro,39.5974055,-2.6740598
 8284,1500,9.0,6,Villaescusa de Roa,villaescusa-de-roa,41.7277577,-4.0169853
@@ -8842,7 +8842,7 @@
 8840,3295,21.0,6,Zufre,zufre,37.8338385,-6.3386126
 8841,4873,31.0,6,Zugarramurdi,zugarramurdi,43.2693567,-1.5412445
 8842,2119,14.0,6,Zuheros,zuheros,37.5431369,-4.3164148
-8843,51,1.0,6,Zuia,zuia,42.9816667,-2.844
+8843,51,1.0,6,Zuia,zuia,42.9816667,-2844
 8844,3215,20.0,6,Zumaia,zumaia,43.2972583,-2.2568485
 8845,3216,20.0,6,Zumarraga,zumarraga,43.0904761,-2.3132201
 8846,381,4.0,6,Zurgena,zurgena,37.3426519,-2.0396074

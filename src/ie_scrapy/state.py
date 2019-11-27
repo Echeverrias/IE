@@ -19,12 +19,12 @@ class UrlsState():
 
 
     def _save_parsed_urls_state(self, data_dict):
-        print('#UrlsState.__save_parsed_urls_state({})'.format(data_dict))
+        #print('#UrlsState.__save_parsed_urls_state({})'.format(data_dict))
         with self._lock:
             print('#UrlsState.__save_parsed_urls_state({})'.format(data_dict))
             with open('parsed urls state.json', 'w') as fw:
                 print('#saving_parsed_urls_state')
-                print(data_dict)
+                #print(data_dict)
                 fw.write(json.dumps(data_dict))
 
     
@@ -53,7 +53,7 @@ class UrlsState():
         try:
             with open('parsed urls state.json', 'r') as fr:
                 parsed_urls_state = json.loads(fr.read())
-            print(f'load parsed_urls_state: {parsed_urls_state}')
+            #print(f'load parsed_urls_state: {parsed_urls_state}')
                # print(f'parsed_urls_state.keys: {parsed_urls_state.keys()}'
             return parsed_urls_state
         except:
@@ -90,7 +90,7 @@ class UrlsState():
         :param total_results: total_results
 
         """
-        print('#UrlState.update_url_state({}, {})'.format(url, total_results))
+        #print('#UrlState.update_url_state({}, {})'.format(url, total_results))
         state = self.parsed_urls.get(url, self._create_parsed_url_state(url))
         state['total_results'] = total_results
         if state['results_parsed'] >= (total_results - 1):

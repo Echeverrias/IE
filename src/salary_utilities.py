@@ -1,4 +1,7 @@
-from utilities import get_int_list, get_text_before_sub
+from utilities import (
+    get_int_list_from_string,
+    get_text_before_sub,
+)
 from jobs.models import Job
 from django.db.models import Q
 
@@ -24,31 +27,7 @@ def get_annual_salary(text):
                 text_ = get_text_before_sub(text, salary_type_tl[0][0], distance=25, separators=['\n', '\r'])
             else:
                 text_ = text[i_salary:salary_type_tl[0][1]]
-            salary = get_int_list(text_)
+            salary = get_int_list_from_string(text_)
             if salary and is_monthly_salary:
                 salary = [i*12 for i in salary]
-    return salary
-
-def yyy():
-    qs = Job.objects.filter(Q(minimum_salary__gt=0)&Q(maximum_salary__gt=0)&~Q(it_is_offered=""))
-    for j in qs:
-
-        salary = get_annual_salary(j.it_is_offered)
-    return salary
-
-def yyy():
-    qs = Job.objects.filter(Q(minimum_salary__gte=1)&Q(minimum_salary__lte=9))
-    s = set()
-    for j in qs:
-
-        salary = get_annual_salary(j.it_is_offered)
-        if salary:
-            print((j.minimum_salary, j.maximum_salary))
-            print((j.minimum_years_of_experience, j.recommendable_years_of_experience))
-            print(j.link)
-            print(j.contract)
-            print();print();
-            s.add(j.contract)
-    print(s)
-    print(len(qs))
     return salary

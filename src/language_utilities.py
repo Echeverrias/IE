@@ -1,4 +1,9 @@
-from utilities import get_a_list, get_or_list, get_surrounding_text, get_coincidences
+from utilities import (
+    get_an_and_list_of_enumerates_from_string,
+    get_an_or_list_of_enumerates_from_string,
+    get_surrounding_text,
+    get_coincidences,
+)
 
 LANGUAGES = [
     'inglés','francés', 'alemán',
@@ -76,7 +81,7 @@ def get_languages_and_levels_pairs(text):
     if len(languages) > 0:
         text_ = get_surrounding_text(text, languages[0], languages[len(languages) - 1], 25)
         if len(languages) > 1:
-            languages_ = get_a_list(text_)
+            languages_ = get_an_and_list_of_enumerates_from_string(text_)
             print('getting list')
             print(languages_)
         else:
@@ -103,7 +108,7 @@ def get_languages_and_levels_pairs(text):
             for language_ in languages_:
                 print();
                 print(f'language_: {language_}')
-                lang_or_l = get_or_list(language_)
+                lang_or_l = get_an_or_list_of_enumerates_from_string(language_)
                 print(f'lang_or_l: {lang_or_l}')
                 if (len(lang_or_l) == 1):
                         print('len: 1')
@@ -172,7 +177,3 @@ def get_languages_and_levels_pairs(text):
         if len(pairs) > 0: ##
             print(pairs)
     return pairs
-
-def yyy():
-    requirements = zzz()
-    return [get_languages_and_levels_pairs(r) for r in requirements]

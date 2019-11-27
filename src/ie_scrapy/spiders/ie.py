@@ -31,13 +31,11 @@ class InfoempleoSpider(Spider):
     name = 'ie'
     allowed_domains = ['infoempleo.com']
 
-    start_urls = [
-        "https://www.infoempleo.com/ofertas-internacionales/",
+    start_urlz = [
         "https://www.infoempleo.com/trabajo/area-de-empresa_legal/",
-        "https://www.infoempleo.com/ppyhrimer-empleo/"
     ]
 
-    start_urlsz = [
+    start_urls = [
         "https://www.infoempleo.com/ofertas-internacionales/",
         "https://www.infoempleo.com/primer-empleo/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/",
@@ -100,7 +98,6 @@ class InfoempleoSpider(Spider):
         except Exception as e:
             print(f'Error_: {e}')
         print('### ')
-
         for job_url in job_urls:
             print('# Go to job_url: %s', job_url)
             yield response.follow(job_url, self.parse_item, meta={
@@ -194,7 +191,8 @@ class InfoempleoSpider(Spider):
         company_dict = {
             'company_link': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li/a/@href"),
             'company_name': self._get_company_name(response),
-            'company_description': self._extract_info(response, "//div[@class='company']//pre/text()"),
+            'company_description': self._extract_info(response, "//div[@class='company']//pre/text()") or
+                                   self._extract_info(response, "//div[@id='content']//pre[1]/text()"),
             'company_city_name': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[child::span]/text()"),
             'company_category': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[@class='category']/text()"),
             'company_offers': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[child::a]/a/text()")
@@ -213,20 +211,23 @@ class InfoempleoSpider(Spider):
             'nationality': self._extract_info(response, "//nav[@class='breadcrumbs']//li[2]/a/text()"),
             'cityname': self._extract_info(response, "//div[@class='main-title']//ul[contains(@class,'details')][2]/li[1]/text()"),
             'provincename': self._extract_info(response, "//div[@class='main-title']//ul[contains(@class,'details')][2]/li[1]/text()"),
-            'countryname': self._extract_info(response, "//nav[@class='breadcrumbs']//li[3]/a/text()"),
+            'countryname': self._extract_info(response, "//nav[@class='breadcrumbs']//a[contains(text(), 'Empleo')]/text()"),
             'name': self._extract_info(response, "//nav[@class='breadcrumbs']//li[5]/text()"),
             'expiration_date': self._extract_info(response, "//div[@class='offer']//div[@class='dtable']//p/text()"),
             # description: ['Proceso de selección continuo', Oferta válida hasta el xx/xx/xxx]
             'description': self._extract_info(response, "//div[@class='offer']//h2//following-sibling::p[1]/text()"),
-            'functions': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Funciones')]//following-sibling::pre[1]/text()"),
-            'requirements': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Requisitos')]//following-sibling::pre[1]/text()"),
-            'it_is_offered': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Se ofrece')]//following-sibling::pre[1]/text()"),
+            'functions': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Funciones')]//following-sibling::pre[1]/text()") or
+                self._extract_info(response, "//h3[contains(., 'responsabilities') or contains(., 'RESPONSABILITIES')]//following-sibling::pre[1]/pre[1]/text()"),
+            'requirements': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Requisitos')]//following-sibling::pre[1]/text()") or
+                            self._extract_info(response, "//h3[contains(., 'PROFILE') or contains(., 'profile')]//following-sibling::pre[1]/pre[1]/text()"),
+            'it_is_offered': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Se ofrece')]//following-sibling::pre[1]/text()") or
+                             self._extract_info(response, "//h3[contains(., 'OFFER') or contains(., 'offer')]//following-sibling::pre[1]/pre[1]/text()"),
             'tags': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Etiquetas')]//following-sibling::ul[@class='tags']/li/text()"),
-            'area': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Área')]//following-sibling::p[1]/text()"),
+            'area': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Área')]//following-sibling::p[1]/text()") or
+                    self._extract_info(response, "//nav[@class='breadcrumbs']//a[contains(text(), 'Area')]/text()"),
             'category_level': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'ategoría')or contains(text(), 'ivel')]//following-sibling::p[1]/text()"),
             'vacancies': self._extract_info(response, "//div[@class='offer']//h3[contains(text(), 'Vacantes')]//following-sibling::p[1]/text()"),
         }
-
 
         company_item = CompanyItem(company_dict)
         job_item = JobItem(job_dict)
@@ -237,10 +238,10 @@ class InfoempleoSpider(Spider):
 
     def _extract_info(self, response, xpath):
         try:
-            info = response.xpath(xpath).extract_first()
+            info = response.xpath(xpath).extract_first() or ''
         except Exception as e:
             print('__extract_info error: %s'%e)
-            info = None
+            info = ''#None
         return info
 
     def _get_company_name(self, response):

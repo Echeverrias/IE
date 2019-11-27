@@ -22,7 +22,7 @@ class JobQuerySet(models.QuerySet):
         return self.exclude(minimum_salary=0)
 
     def exclude_expirated_offers(self):
-        return self.exclude(expiration_date__lt=date.today())
+        return self.exclude(state=STATE_CLOSED_JOB).exclude(expiration_date__lt=date.today())
 
     def annotate_location(self):
         return self.annotate(city_name=F('cities__name'), province_name=F('cities__province__name'), country_name=F('cities__country__name'))

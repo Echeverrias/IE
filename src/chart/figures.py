@@ -21,6 +21,7 @@ def _get_color_areas_list(areas):
     return [COLOR_AREAS[area] for area in areas]
 
 def _get_colors(colors_column_name_and_column_tuple):
+    print();print();print(f'****************************figures._get_colors({colors_column_name_and_column_tuple})')
     colors = []
     if colors_column_name_and_column_tuple[0] == 'area':
         colors =  [COLOR_AREAS[area] for area in colors_column_name_and_column_tuple[1]]
@@ -29,7 +30,8 @@ def _get_colors(colors_column_name_and_column_tuple):
 
 @trace
 def get_bar_figure(x, y, x_label, y_label, title, legend=([], 'upper right'), bar_horizontal=False, colors_column_name_and_column_tuple=('x', None)):
-    fgr = plt.figure(figsize=(10,12))
+    print(f'********************figures.get_bar_figure')
+    fgr = plt.figure(figsize=(16,12))
     try:
         x = x.unique()  # !! unique
     except:
@@ -65,19 +67,20 @@ def get_bar_figure(x, y, x_label, y_label, title, legend=([], 'upper right'), ba
     if bar_horizontal:
         axes.set_yticks(ind + offset)
         axes.set_yticklabels(x)
-        axes.set_xlabel(y_label, fontsize=14)
-        axes.set_ylabel(x_label, fontsize=14)
+        axes.set_xlabel(y_label, fontsize=18)
+        axes.set_ylabel(x_label, fontsize=18)
         axes.invert_yaxis()
         #plt.xticks(rotation=45)
     else:
         axes.set_xticks(ind)
         axes.set_xticklabels(x)
-        axes.set_xlabel(x_label, fontsize=14)
-        axes.set_ylabel(y_label, fontsize=14)
+        axes.set_xlabel(x_label, fontsize=18)
+        axes.set_ylabel(y_label, fontsize=18)
+        plt.xticks(rotation=90)
 
-    axes.tick_params(axis="x", labelsize=14)
-    axes.tick_params(axis="y", labelsize=14)
-    axes.set_title(title, fontsize=14)
+    axes.tick_params(axis="x", labelsize=18)
+    axes.tick_params(axis="y", labelsize=18)
+    axes.set_title(title, fontsize=18)
     plt.tight_layout() # resize
     return fgr
 

@@ -2,7 +2,8 @@ import os
 import pandas as pd
 import geopandas as gpd
 from job.models import Job
-from django.db.models import Sum, Count, Avg, Q, F
+from django.db.models import Sum, Count, Avg, Q, F, Value
+from django.db.models.functions import Concat
 from utilities import trace, Lock
 
 from collections import namedtuple
@@ -78,7 +79,7 @@ def get_filtered_jobs_by_nationality(show_national_areas, show_international_are
 def get_annotations_job_in_groupby_df(national_filter, international_filter, groupby_list, aggregations):
     print('-----------------------------------------------------------------------')
     print('get_annotations_job_in_groupby_df')
-    qs = get_filtered_jobs_by_nationality(national_filter, international_filter).exclude_first_job()
+    qs = get_filtered_jobs_by_nationality(national_filter, international_filter)
     print('qs', qs[0:2])
     #operations = { a.new_column: a.operator(a.column) for a in annotations}
     print('operations', aggregations)
@@ -99,6 +100,18 @@ def get_salaries_per_area_df(national_filter=True, international_filter=True):
         groupby = ['area', 'nationality']
     else:
         groupby = ['area']
+    return get_annotations_job_in_groupby_df(national_filter, international_filter, groupby, aggregations)
+
+def get_companies_with_more_vacancies_df(national_filter=True, international_filter=True):
+    annotations = [Annotation('mean_salaries', Avg, 'mean_salary')]
+    aggregations = {
+        'vacancies': Sum('vacancies'),
+        'name': Concat(F('company'), Value(' ('), F('company__company_category'), Value(')')),
+    }
+    if (national_filter & international_filter):
+        groupby = ['company', 'nationality']
+    else:
+        groupby = ['company']
     return get_annotations_job_in_groupby_df(national_filter, international_filter, groupby, aggregations)
 
 def get_vacancies_and_registered_people_per_area_df(national_filter=True, international_filter=True):

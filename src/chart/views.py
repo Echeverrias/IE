@@ -9,6 +9,7 @@ from .dataframes import (
     get_vacancies_per_province_gdf,
     get_registered_people_per_province_gdf,
     get_salary_per_province_gdf,
+    get_companies_with_more_vacancies_df,
 
 )
 from .figures import (
@@ -148,6 +149,38 @@ def salaries_per_area_view(request, type_):
     elif type_ == 'international':
         show_international_vacancies = True
     buffer_value = _get_salaries_per_area_buffer(show_national_vacancies, show_international_vacancies)
+    return _get_response_from_buffer_value(buffer_value, 'image/png')
+
+
+def _get_companies_with_more_vacancies_buffer(show_national_areas=True, show_international_areas=True):
+    df = get_companies_with_more_vacancies_df(show_national_areas, show_international_areas)
+    df = df.sort_values('vacancies', ascending=False)[0:15]
+    print(df) #%
+    data = []
+    legend = None
+    if not show_international_areas:
+        title = "Compañías nacionales"
+        data.append(df['vacancies'])
+    elif not show_national_areas:
+        title = "Compañías internacional"
+        data.append(df['vacancies'])
+    else:
+        title = "Compañías que ofrecen más vacantes"
+        data.append(df.loc[df['nationality']=='nacional', 'vacancies'])
+        data.append(df.loc[df['nationality']=='internacional', 'vacancies'])
+        legend = (['nacional', 'internacional'], 'upper right')
+    buffer_value = get_buffer_of_plot(df['name'].unique(), data, 'Compañías', 'Vacantes', title, legend, True, ('name', df['name'].unique()))
+    return buffer_value
+
+
+def companies_with_more_vacancies_view(request, type_):
+    show_national_vacancies = False
+    show_international_vacancies = False
+    if type_ == 'national':
+        show_national_vacancies = True
+    elif type_ == 'international':
+        show_international_vacancies = True
+    buffer_value = _get_companies_with_more_vacancies_buffer(show_national_vacancies, show_international_vacancies)
     return _get_response_from_buffer_value(buffer_value, 'image/png')
 
 

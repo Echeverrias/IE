@@ -14,6 +14,9 @@
          <a href="/chart?charts_type=per_province">Vacantes e inscripciones por provincia</a>
       </li>
        <li>
+         <a href="/chart?charts_type=per_company">Compañías con mayor oferta</a>
+      </li>
+       <li>
          <a href="/chart?charts_type=salaries_per_area">Salarios por área</a>
       </li>
          <li>
@@ -33,7 +36,7 @@
                   width="700px" height="auto"/><br>
           </div>
     </div>
-{% if "z" == "z" %}
+
     <div class="section">
         <h3 class="title">Vacantes e inscripciones de ofertas</h3>
         <div class="row">
@@ -66,15 +69,26 @@
       </div>
     </div>
 
-{% endif %}
-{% elif  charts_type and charts_type == "per_province" %}
+
+    {% elif  charts_type and charts_type == "per_province" %}
     <div class="section">
       <h3 class="title">Vacantes e inscripciones de ofertas</h3>
       <div class="row">
-          <img src='/chart/vacancies-or-registered-people-per-province/vacancies'
+          <img src='/chart/vacancies-or-registered-people-per-province/national'
               width="900px" height="auto"/><br>
           <img src='/chart/vacancies-or-registered-people-per-province/registered_people'
               width="900px" height="auto"/><br>
+      </div>
+    </div>
+
+    {% elif  charts_type and charts_type == "per_company" %}
+    <div class="section">
+      <h3 class="title">Compañías que ofrecen más ofertas</h3>
+      <div class="row">
+          <img src='/chart/companies-with-more-vacancies/national'
+              width="700px" height="auto"/><br>
+          <img src='/chart/companies-with-more-vacancies/international'
+              width="700px" height="auto"/><br>
       </div>
     </div>
 
@@ -82,17 +96,24 @@
     <div class="section">
       <h3 class="title">Salarios brutos anuales</h3>
        <div class="row">
-          <img src='/chart/national-and-international-salaries-per-area'
-              width="700px" height="auto"/><br>
+
       </div>
       <div class="row">
           <img src='/chart/salaries-per-area/national'
               width="700px" height="auto"/><br>
-          <img src='/chart/salaries-per-area/international'
-              width="700px" height="auto"/><br>
+
       </div>
     </div>
+        {% if charts_type == "salasdsdsds_per_area" %}
+        <div class="row">
+          <img src='/chart/national-and-international-salaries-per-area'
+              width="700px" height="auto"/><br>
 
+
+             <img src='/chart/salaries-per-area/international'
+              width="700px" height="auto"/><br>
+      </div>
+        {% endif %}
      {% elif  charts_type and charts_type == "salaries_per_province" %}
     <div class="section">
       <h3 class="title">Salarios brutos anuales</h3>

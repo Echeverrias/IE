@@ -22,7 +22,7 @@ apply_upper_to_author.short_description = 'Apply upper to the author field'
 class JobAdmin(ImportExportModelAdmin):
     resource_class = JobResource
     # Si no se declara 'list_display' mostrará por defecto su conversión a string
-    list_display = ['name', 'type', 'contract', 'working_day', 'category_level', 'area', 'company', '_cities']
+    list_display = ['name', 'state', 'type', 'contract', 'working_day', 'category_level', 'area', 'company', 'display_cities']
     list_filter =  ['type','contract','working_day', 'nationality', 'area']
     #search_fields = ['name', 'id', 'functions', 'requirements', 'it_is_offered']
     search_fields = ['name', 'id', 'functions', 'requirements', 'it_is_offered']
@@ -46,10 +46,10 @@ class JobAdmin(ImportExportModelAdmin):
         ('Offer', {
             'fields': ['area','description', 'functions', 'requirements', 'it_is_offered', 'category_level', 'languages']
         }),
-        ('Company', {
+        ('Compañía', {
             'fields': ['company']
         }),
-        ('Vacancies', {
+        ('Vacantes', {
             'fields': [('vacancies', 'vacancies_update','registered_people')]
         }),
         ('Tags', {
@@ -60,13 +60,17 @@ class JobAdmin(ImportExportModelAdmin):
         })
     ]
 
+    #Job.display_cities
     def _cities(self, obj):
-        cities = obj.cities.all()
+        cities = obj.cities.all()[0:3]
         if cities:
             names = [city.name for city in cities]
             return f'{", ".join(names)} ({cities[0].country.name})'
         else:
             return None
+
+
+    _cities.short_description = 'Cities (Country)'
 
 
     #actions = [apply_upper_to_author]
@@ -79,7 +83,7 @@ class JobInLine(admin.TabularInline):
 class CompanyAdmin(ImportExportModelAdmin): #class CompanyAdmin(admin.ModelAdmin):
     list_display = ['company_name', '_jobs']
     list_filter = ['company_name', 'company_city']
-    search_fields = ['company_name', 'company_id']
+    search_fields = ['company_name']
     """
     fieldsets = [
         ('Company', {
@@ -94,7 +98,7 @@ class CompanyAdmin(ImportExportModelAdmin): #class CompanyAdmin(admin.ModelAdmin
         #return obj.quotes.all().count()
         return obj.jobs.all().count()
 
-    _jobs.short_description = 'job'
+    _jobs.short_description = 'Count of jobs'
     _jobs.admin_order_field = 'job'
 
 
