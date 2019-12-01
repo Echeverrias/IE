@@ -44,9 +44,10 @@ class JobFilter(django_filters.FilterSet):
 
 
     @property
-    def qs(self):
-        print('qs')
+    def qs(self, *args, **kwargs):
+        print('JobFilter.qs')
         parent_qs = super().qs
+        print(parent_qs.count())
         return parent_qs.available_offers()
 
     def search_text(self, queryset, field_name, *args, **kwargs):

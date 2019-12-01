@@ -1,7 +1,7 @@
 {% extends 'job/base.html' %}
 {% block subtitle %}<h2 class="title">Búsquedas</h2>{% endblock %}
 {% block job %}
-
+<p>{{ prueba }}</p>
 <div>
     <div id='btn-filters' class="btn dropdown-toggle ie-btn">
         Filtros
@@ -31,6 +31,6 @@
         <h4 class="title">No se han encontrado resultados {{ city_name }}</h4>
     {% endif %}
     {% include 'job/pagination.html' with is_paginated=is_paginated  page_obj=page_obj  paginate_by=paginate_by %}
-
 {% endblock %}
+
 

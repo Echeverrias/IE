@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
+{% include 'task/js.html' %}
 {% load task_extras %}
+<div id="info-crawler">
 {% if is_running %}
-    <h4 class="title">La araña está corriendo - Fecha inicio: {{ init_datetime|date:'d-m-Y' }}</h4>
-    <p class="title">Se están procesando {{ scraped_items_number }} ofertas de trabajo</p>
-    <p class="title">{{ percentage|percentage }} aprox. de ofertas procesadas</p>
+        {% include 'task/info_crawler_task.html' %}
 {% else %}
-    <form action="." metho="GET">
-        <input type="hidden" name="crawl" value="True">
-        <button type="submit">Correr araña</button>
-    </form>
+        {% include 'task/init.html' %}
 {% endif %}
+</div>
+
+<br><br><br><button class="btn btn-primary" id="AJAX">AJAX</button>
 {% endblock %}

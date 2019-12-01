@@ -89,14 +89,18 @@ class JobDetailView(DetailView):
 class JobListView(ListView):
     model = Job
     context_object_name = 'job_list'  # your own name for the list as a template variable
-     #queryset = Job.objects.all() # Get 5 books containing the title war
+    #queryset = Job.objects.all()[0:50] # Get 5 books containing the title war
     template_name = 'job/query_form.html' #'job/job_list.html'  # Specify your own template name/location
     paginate_by = 10
 
-    def get_queryset(self):
-        qs = self.model.objects.all().prefetch_related('cities')
+
+    def get_queryset(self, *args, **kwargs):
+        print(f'JobListView.get_queryset')
+        qs = super(JobListView, self).get_queryset()
+        qs = qs.prefetch_related('cities')
         self.job_filtered_list = JobFilter(self.request.GET, queryset=qs)
         return self.job_filtered_list.qs
+
 
     def get_context_data(self, **kwargs):
         print('CONTEXT')
@@ -105,5 +109,6 @@ class JobListView(ListView):
          # Create any data and add it to the context
         #context['form'] = CityNameForm()
         context['form'] = self.job_filtered_list.form
-        context['paginate_by'] = self.paginate_by
+        #context['paginate_by'] = self.paginate_by
+        context['prueba'] = 'prueba job'
         return context

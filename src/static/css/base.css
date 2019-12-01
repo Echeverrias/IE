@@ -29,3 +29,15 @@ body{
 form input.form-control.datetimepicker-input.date{
     width:auto;
 }
+
+#container{
+            padding-top: 3em;
+      }
+
+#ie-nav ul li{
+        list-style-type: none;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+}
+

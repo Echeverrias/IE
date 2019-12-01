@@ -1,0 +1,9 @@
+{% load task_extras %}
+<h4 class="title">La tarea {{task.type}}-{{ task.pid }} está ejecutandose - Fecha inicio: {{ task.created_at|date:'d-m-Y' }} {{ task.created_at|time:"H:i" }}</h4>
+<p id="count" class="title">Se están procesando <span>{{ scraped_items_number }}</span> ofertas de trabajo</p>
+<p id='percentage' class="title"><span>{{ percentage|percentage }}</span> aprox. de ofertas procesadas</p>
+<br><br>
+<form id="stop-crawler" action="." metho="GET">
+    <input type="hidden" name="stop" value="True">
+    <button class="btn btn-primary" type="submit">Parar araña</button>
+</form>

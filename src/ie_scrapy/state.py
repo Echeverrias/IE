@@ -21,7 +21,7 @@ class UrlsState():
     def _save_parsed_urls_state(self, data_dict):
         #print('#UrlsState.__save_parsed_urls_state({})'.format(data_dict))
         with self._lock:
-            print('#UrlsState.__save_parsed_urls_state({})'.format(data_dict))
+            #print('#UrlsState.__save_parsed_urls_state({})'.format(data_dict))
             with open('parsed urls state.json', 'w') as fw:
                 print('#saving_parsed_urls_state')
                 #print(data_dict)

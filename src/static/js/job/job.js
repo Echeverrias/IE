@@ -3,6 +3,7 @@ $(document).ready(function() {
         // JQuery code to be added in here.
         console.log('JS loaded from static')
 
+
         $("div.card-body").addClass('hidden')
 
         $(".job").click(function(event) {

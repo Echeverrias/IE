@@ -7,6 +7,10 @@ import datetime
 import os, sys, traceback
 
 class Lock(object):
+    """"
+        This is a decorator
+        Use: @Lock()
+    """
 
     def __init__(self):
         self.lock = threading.Lock()
@@ -327,6 +331,15 @@ def raise_function_exception(description, exception=Exception):
     raise exception(f'Error in {fname}: {description}')
 
 def save_error(e, dictionary={}, path='errors.txt'):
+    """
+    Write in a file the error raised in a function, the function which raises the error
+    and an optional dictionary
+    Write in a file the error of a funtion
+    :param e: error raised
+    :param dictionary: dictionary with data
+    :param path: path to the file where the error will be stored
+    :return:
+    """
     tb = sys.exc_info()[-1]
     stk = traceback.extract_tb(tb, 1)
     fname = stk[0][2]
