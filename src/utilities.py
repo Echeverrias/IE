@@ -5,6 +5,7 @@ import threading
 from time import time as time_
 import datetime
 import os, sys, traceback
+import multiprocessing
 
 class Lock(object):
     """"
@@ -87,11 +88,11 @@ def _get_int_or_float_list_from_string(string, float_flag):
     return numbers_
 
 def get_int_list_from_string(string):
-    _get_int_or_float_list_from_string(string, False)
+    return _get_int_or_float_list_from_string(string, False)
 
 
 def get_float_list_from_string(string):
-    _get_int_or_float_list_from_string(string, True)
+    return _get_int_or_float_list_from_string(string, True)
 
 
 def get_date_from_string(string):
@@ -134,7 +135,7 @@ def get_slice_from_sub_to_end_of_the_paragraph(isub, text):
         return ""
     else:
         start = start + len(isub)
-    end = self.get_end_index_of_a_paragraph_from_string(text, start)
+    end = get_end_index_of_a_paragraph_from_string(text, start)
     return text[start:end+1].strip()
 
 
@@ -330,6 +331,8 @@ def raise_function_exception(description, exception=Exception):
     fname = stk[0][2]
     raise exception(f'Error in {fname}: {description}')
 
+
+@Lock()
 def save_error(e, dictionary={}, path='errors.txt'):
     """
     Write in a file the error raised in a function, the function which raises the error
@@ -347,6 +350,35 @@ def save_error(e, dictionary={}, path='errors.txt'):
         f.write(f'{datetime.datetime.now().strftime("%c")}: \n')
         f.write(f'function: {fname}\n')
         f.write(f'error: {e}\n')
+        for k,v in dictionary.items():
+            f.write(f'{k}: {v} \n')
+        f.write(f'\n\n\n')
+
+@Lock()
+def write_in_a_file(desc, dictionary={}, path='log.txt'):
+    """
+    Write in a file something.
+    The caller function and the datetime are wtritten too in the file
+    :param desc: description
+    :param dictionary: dictionary with data
+    :param path: path to the file where the error will be stored
+    :return:
+    """
+    process_name = multiprocessing.current_process().name
+    process_pid = multiprocessing.current_process().pid
+    fname = '?'
+    try:
+        tb = sys.exc_info()[-1]
+        stk = traceback.extract_tb(tb, 1)
+        fname = stk[0][2]
+    except Exception as e:
+        fname = f'{fname} - Error: {e}'
+    with open(path, 'a') as f:
+        f.write(f'{datetime.datetime.now().strftime("%c")}: \n')
+        f.write(f'process name: {process_name}\n')
+        f.write(f'process pid: {process_pid}\n')
+        f.write(f'function: {fname}\n')
+        f.write(f'description: {desc}\n')
         for k,v in dictionary.items():
             f.write(f'{k}: {v} \n')
         f.write(f'\n\n\n')
