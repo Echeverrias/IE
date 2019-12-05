@@ -3,6 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from .tasks import CrawlProcess
 from .models import Task
 from django.contrib.auth.models import User
+from django.contrib.admin.views.decorators import staff_member_required
 
 
 # Create your views here.
@@ -10,30 +11,35 @@ from django.contrib.auth.models import User
 
 
 # python manage.py process_tasks
+@staff_member_required
 def run_crawler_view(request, *args):
     print('run_crawler_view');print();print()
-    print(f'AJAX request: {request.is_ajax()}');print();print()
     c = CrawlProcess.get_instance()
-    print(f'user: {request.user}')
+
     if request.GET.get('crawl', None) != None:
         user = User.objects.get(username=request.user)
         print(user)
         c.start(user)
+        print('CrawlProcess started !!!!')
     elif request.GET.get('stop', None) != None:
         print('run_crawler_view: stop request')
         c.stop()
+
     is_running = c.is_scrapping()
     print(f'run_crawler_view: c.is_scrapping: {is_running}')
-    last_task = c.get_last_task() or Task.objects.get_latest_crawler_task()
+    last_task = c.get_actual_task() or c.get_latest_task()
     context = {
        'task': last_task,
         'is_running': is_running,
+        'cp': c.crawler_process,
+        'running_state': Task.STATE_RUNNING
     }
     if is_running:
         context = { **context, **{
             'scraped_items_number': c.get_scraped_items_number(),
             'percentage': c.get_scraped_items_percentage(),
             }
+
         }
 
     if request.is_ajax():

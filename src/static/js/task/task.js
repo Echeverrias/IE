@@ -4,9 +4,12 @@ $(document).ready(function(){
     function show_info_running_crawler(data) {
         console.log('show_info_running_crawler')
         console.log(data)
-        if (data !== 'not running'){
+        if(data !== 'not running'){
             $('#info-crawler').html(data)
-          //  setTimeout(get_info_running_crawler, 10000);
+            state = $('#state', '<div>' + data + '<div>').attr('data-state')
+            if(state === running_state){
+                setTimeout(get_info_running_crawler, 10000);
+            }
         }
     }
 
@@ -21,18 +24,12 @@ $(document).ready(function(){
         })
         return false
     }
-/*
-    $('#run-crawler').submit(function(){
-        console.log('Run Crawler');
-        setTimeout(get_info_running_crawler, 5000);
-        e.preventDefault;
-    })
-*/
+
     try{
 
-        if (is_running){
+        if (is_running === 'True'){
             console.log('The crawler is running');
-           // setTimeout(get_info_running_crawler, 5000);
+            setTimeout(get_info_running_crawler, 5000);
         }
         else{
              console.log('The crawler is not running');
@@ -41,6 +38,8 @@ $(document).ready(function(){
     catch(e){
         console.error(e)
     }
+
+    $()
 
     $("#AJAX").click(get_info_running_crawler)
 
