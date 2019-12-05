@@ -1,7 +1,9 @@
 ##from .models import Job
 from django.db import models
 from django.db.models import Q, F
-from datetime import date
+from django.utils import timezone
+from datetime import date, datetime, timedelta
+
 
 STATE_CREATED_JOB = 'Nueva'
 STATE_UPDATED_JOB = 'Actualizada'
@@ -46,4 +48,57 @@ class JobQuerySet(models.QuerySet):
     def not_free_vacancies(self):
         return self.filter(vacancies__lte=F('registered_people'))
 
+    def registered_timedelta_ago(self, timedeltadict):
+        try:
+            today = timezone.now()
+            td = timedelta(**timedeltadict)
+            dt = today - td
+            return self.filter(created_at__gte=dt)
+        except:
+            return self.none()
+
+    def modified_timedelta_ago(self, timedeltadict):
+        try:
+            today = timezone.now()
+            td = timedelta(**timedeltadict)
+            dt = today - td
+            return self.filter(updated_at__gte=dt)
+        except:
+            return self.none()
+
+    def registered_or_modified_timedelta_ago(self, timedeltadict):
+        try:
+            today = timezone.now()
+            td = timedelta(**timedeltadict)
+            dt = today - td
+            return self.filter(Q(created_at__gte=dt) | Q(updated_at__gte=dt))
+        except:
+            return self.none()
+
+    def first_publication_date_timedelta_ago(self, timedeltadict):
+        try:
+            today = datetime.today()
+            td = timedelta(**timedeltadict)
+            dt = today - td
+            return self.filter(first_publication_date__gte=dt)
+        except:
+            return self.none()
+
+    def last_updated_date_timedelta_ago(self, timedeltadict):
+        try:
+            today = datetime.today()
+            td = timedelta(**timedeltadict)
+            dt = today - td
+            return self.filter(last_updated_date__gte=dt)
+        except:
+            return self.none()
+
+    def available_timedelta_ago(self, timedeltadict):
+        try:
+            today = datetime.today()
+            td = timedelta(**timedeltadict)
+            dt = today - td
+            return self.available_offers().filter(Q(first_publication_date__gte=dt) | Q(last_updated_date__gte=dt))
+        except:
+            return self.none()
 
