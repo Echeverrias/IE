@@ -64,6 +64,7 @@ class CrawlProcess():
             t = Task.objects.get_latest_crawler_task()
             d = datetime.today()
             t.description = f'spider closed with count: {CrawlProcess.count} at {str(d)}'
+            t.result = CrawlProcess.count
             t.save()
 
         def open(spider):
@@ -104,20 +105,35 @@ class CrawlProcess():
         def error(*args, **kwargs):
             write_in_a_file('CrawlerProcess.signal.error', {'args': args, 'kwargs': kwargs}, 'task.txt')
 
+        def send_by_pipe(item):
+            try:
+                conn.send(item)
+                #conn.close()
+            except Exception as e:
+                write_in_a_file('CrawlProcess._crawl: error conn.send', {'conn error': e}, 'debug.txt')
+
         process = CrawlerProcess(get_project_settings())
+        write_in_a_file('CrawlProcess.crawl: first', {'crawler_process': str(process), 'dir process': dir(process)},
+                        'debug.txt')
+        send_by_pipe(process)
+        write_in_a_file('CrawlProcess.crawl: second', {'crawler_process': str(process), 'dir process': dir(process)},'debug.txt')
         process.crawl(InfoempleoSpider())
+        write_in_a_file('CrawlProcess.crawl: third', {'crawler_process': str(process), 'dir process': dir(process)},'debug.txt')
         crawler = Crawler(InfoempleoSpider())
         crawler.signals.connect(open, signal=signals.spider_opened)
         crawler.signals.connect(scraped, signal=signals.item_scraped)
         crawler.signals.connect(close, signal=signals.spider_closed)
         crawler.signals.connect(stopped, signal=signals.engine_stopped)
         crawler.signals.connect(error, signal=signals.spider_error)
-        time.sleep(20)
+
+        write_in_a_file('CrawlProcess.crawl: before', {'crawler_process': str(process),'dir process': dir(process)},'debug.txt')
+
         process.crawl(crawler)
-        time.sleep(20)
+        write_in_a_file('CrawlProcess.crawl: after', {'crawler_process': str(process), 'dir process': dir(process)}, 'debug.txt')
+
         process.start()
-        conn.send(process)
-        conn.close()
+        write_in_a_file('CrawlProcess._crawl: process started', {'crawler_process': str(process), 'dir process': dir(process)}, 'debug.txt')
+
         print('***************************************************************************************')
         print(f'CrawlerProcess: {process}')
         print(dir(process))
@@ -125,7 +141,7 @@ class CrawlProcess():
         print()
         print()
         write_in_a_file('CrawlProcess.crawl', {'CrawlerProcess': str(process), 'dir(CrawlerProcess)': dir(process)}, 'task.txt')
-        #process.join()
+        process.join()
         write_in_a_file('CrawlProcess.crawl: process.join', {}, 'task.txt')
         write_in_a_file('CrawlProcess.crawl: process.join', {}, 'spider.txt')
 
@@ -168,9 +184,11 @@ class CrawlProcess():
         self.init_datetime = timezone.now()  # Before create the task
         self.process.start()
         self.task.pid = self.process.pid
+        write_in_a_file('CrawlProcess._start_process: process started', {'pid': self.process.pid}, 'debug.txt')
         self.task.state = Task.STATE_RUNNING
         self.task.save()
         self.crawler_process = self.parent_conn.recv()
+        write_in_a_file('CrawlProcess._start_process: conn.recv', {'crawler_process':str(self.crawler_process), 'dir crawler_process':dir(self.crawler_process)}, 'debug.txt')
         write_in_a_file('CrawlProcess._start_process', {'CrawlerProcess': str(self.crawler_process), 'dir(CrawlerProcess)': dir(self.crawler_process)},'task.txt')
 
 
@@ -178,7 +196,12 @@ class CrawlProcess():
         print(f'CrawlerProcess._reset_process({state})')
         try:
             self.process.terminate()
+            write_in_a_file('_reset_process terminated (from stop)', {'is_running': self.process.is_alive()}, 'debug.txt')
+            self.task.result = CrawlProcess.count
+            self.task.state = state
+            self.task.save()
             self.process.join()  # ! IMPORTANT after .terminate -> .join
+            write_in_a_file('_reset_process joinned (from stop)', {'is_running': self.process.is_alive()}, 'debug.txt')
         except:
             pass
         try:
@@ -186,8 +209,7 @@ class CrawlProcess():
         except Exception as e:
             pass
         self._clear_queue()
-        self.task.state = state
-        self.task.save()
+
 
     def _update_process(self):
         print('CrawlerProcess._update_process')
@@ -217,8 +239,10 @@ class CrawlProcess():
 
     def stop(self):
         print(f'CrawleProcess.stop')
-        self.crawler_process.stop()
         self._reset_process(Task.STATE_INCOMPLETE)
+       # self.crawler_process.stop()
+        #self.crawler_process.join()
+
 
     def join(self):
         self.process.join()
@@ -272,11 +296,8 @@ class CrawlProcess():
     def get_scraped_items_percentage(self):
         # Calcula el total con los items scrapeados de la tarea enterior
         count = self.get_scraped_items_number()
-        tasks = Task.objects.all().order_by('-created_at')
-        if tasks and tasks.count() > 1:
-            old_result = tasks[1].result
-        else:
-            old_result = 20000
+        task = Task.objects.get_latest_finished_crawler_task()
+        old_result = task.result or 20000
 
         if count < old_result:
             total = old_result

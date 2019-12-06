@@ -1,6 +1,9 @@
 {% if task %}
+<div id="msg">
     <h4 class="title">Última tarea ejecutada: {{ task.type }}-{{ task.pid }} iniciada el {{ task.created_at|date:'d/m/Y' }} {{ task.created_at|time:"H:i" }}</h4>
-<div id="state" data-state="{{task.state}}"></div>
+    <div id="state" data-state="{{task.state}}">{{task.state}}</div>
+</div>
 {% endif %}
+ajax: {{ajax}}
+req: {{req}}
 <br><br>
-{% include 'task/run_crawler_btn.html' %}
