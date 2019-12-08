@@ -48,6 +48,7 @@ $(document).ready(function(){
 
 
     function show_loader(velocity=''){
+        console.log('show loader')
         $('#main-loader').removeClass();
         $('#main-loader').addClass("loader " + velocity);
         $('#main-loader').removeAttr('hidden');
@@ -56,7 +57,7 @@ $(document).ready(function(){
 
     function change_loader_velocity(velocity){
         classes = $('#main-loader').attr('class');
-        classes = classes.replace('loader', '').trim()
+        classes = classes.replace('loader', '').trim();
         $('#main-loader').removeClass(classes);
         $('#main-loader').addClass(velocity);
 
@@ -69,7 +70,7 @@ $(document).ready(function(){
 
 
     function waiting_for_stop(msg){
-        console.log('waiting_for_stop')
+        console.log('waiting_for_stop');
         stop_ajax_request();
     }
 
@@ -79,18 +80,18 @@ $(document).ready(function(){
         console.log("stop...")
         $("#stop-crawler").hide();
         msg = 'Parando la araña...';
-        display_msg(msg)
+        display_msg(msg);
         $('#main-loader').show();
         waiting_for_stop(msg);
-        change_loader_velocity('slow')
+        change_loader_velocity('slow');
     })
 
     $('#start').click((e) => {
         console.log("start...")
         $("#run-crawler").hide();
         msg = 'Iniciando la araña...';
-        display_msg(msg)
-        show_loader('fast')
+        display_msg(msg);
+        show_loader('fast');
     })
 
 
@@ -108,5 +109,7 @@ $(document).ready(function(){
     catch(e){
         console.error(e)
     }
+
+    $('#AJAX').click(show_loader)
 
 })

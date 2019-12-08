@@ -2,8 +2,10 @@ import threading
 import json
 import math
 
+
 class UrlsState():
     """"
+    # DEPRECATED
     To save the count of parsed results from each url of wanted results.
     """
 
@@ -12,6 +14,7 @@ class UrlsState():
 
     
     def __init__(self):
+        print('UrlsState.__init__')
         # parsed_urls: {'key': {'total_results': int, 'results_parsed':int }}
         self.parsed_urls = self._load_parsed_urls_state()
         for url in self.parsed_urls.keys():
@@ -49,7 +52,7 @@ class UrlsState():
     
     def _load_parsed_urls_state(self):
 
-        print('load')
+        print('UrlsState._load_parsed_urls_state')
         try:
             with open('parsed urls state.json', 'r') as fr:
                 parsed_urls_state = json.loads(fr.read())

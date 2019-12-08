@@ -364,15 +364,18 @@ def write_in_a_file(desc, dictionary={}, path='log.txt'):
     :param path: path to the file where the error will be stored
     :return:
     """
-    process_name = multiprocessing.current_process().name
-    process_pid = multiprocessing.current_process().pid
-    fname = '?'
+    try:
+        process_name = multiprocessing.current_process().name
+        process_pid = multiprocessing.current_process().pid
+    except Exception as e:
+        process_name = f'Error: {e}'
+        process_pid = f'Error: {e}'
     try:
         tb = sys.exc_info()[-1]
         stk = traceback.extract_tb(tb, 1)
         fname = stk[0][2]
     except Exception as e:
-        fname = f'{fname} - Error: {e}'
+        fname = f'Error: {e}'
     with open(path, 'a') as f:
         f.write(f'{datetime.datetime.now().strftime("%c")}: \n')
         f.write(f'process name: {process_name}\n')

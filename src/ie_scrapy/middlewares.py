@@ -23,6 +23,7 @@ from .state_ import UrlsState
 from .chrome_browser import ChromeBrowser
 from .items import JobItem
 from selenium.webdriver import ActionChains
+from utilities import write_in_a_file
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print('SCRAPY.MIDDLEWARES: %s'%BASE_DIR)
@@ -36,22 +37,32 @@ class IeSpiderMiddleware(object):
 
     JOB_URL_PATH = 'https://www.infoempleo.com/ofertasdetrabajo/'
     job_requests_count = 0
+    job_requests_count2 = 0
     START = now()
 
-    # https://docs.scrapy.org/en/latest/topics/signals.html
     @classmethod
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.
+        # Signals: https://docs.scrapy.org/en/latest/topics/signals.html
         s = cls()
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         crawler.signals.connect(s.spider_closed, signal=signals.spider_closed)
+        crawler.signals.connect(s.item_scraped, signal=signals.item_scraped)
         return s
 
+
+    def item_scraped(self, response, item, spider, signal, sender) :
+
+        print('-------------------------------------------------------------------------------------------')
+        self.job_requests_count2 += 1
+        write_in_a_file('IeSpiderMiddleware.item_scraped', {'response': response, 'count': self.job_requests_count, 'count2': self.job_requests_count2}, 'spider.txt')
+        print('IeSpiderMiddleware.item_scraped')
+        print('-------------------------------------------------------------------------------------------')
 
     def process_spider_input(self, response, spider):
         # Called for each response that goes through the spider
         # middleware and into the spider.
-
+        write_in_a_file('IeSpiderMiddleware.process_spider_input', {'response': response}, 'spider.txt')
 
         url = response.url
 
@@ -62,7 +73,7 @@ class IeSpiderMiddleware(object):
             print("######################################################################")
 
             #print(f'job_requests_count: {self.job_requests_count}')
-            #UrlsState.update_url_state(response.meta[UrlsState.KEY_START_URL], response.meta[UrlsState.KEY_TOTAL_RESULTS])
+            UrlsState.update_url_state(response.meta[UrlsState.KEY_START_URL], response.meta[UrlsState.KEY_TOTAL_RESULTS])
 
         # Should return None or raise an exception.
         print("#######IeSpiderMiddleware.process_spider_input############################################");
@@ -73,6 +84,7 @@ class IeSpiderMiddleware(object):
     def process_spider_output(self, response, result, spider):
         # Called with the results returned from the Spider, after
         # it has processed the response.
+
         print();print()
         print("######################################################################")
         print("#@ IeSpiderMiddleware.process_spider_output: {}".format(response.url))
@@ -96,7 +108,7 @@ class IeSpiderMiddleware(object):
             print(f'job_requests_count: {self.job_requests_count}')
 
             yield i
-
+        write_in_a_file('IeSpiderMiddleware.process_spider_output', {'response': response, 'result': result, 'count': self.job_requests_count, 'count2': self.job_requests_count2}, 'spider.txt')
         print("#######IeSpiderMiddleware.process_spider_output############################################");print();print()
 
     def process_spider_exception(self, response, exception, spider):
@@ -113,6 +125,7 @@ class IeSpiderMiddleware(object):
         # that it doesn’t have a response associated.
 
         # Must return only requests (not items).
+        write_in_a_file('IeSpiderMiddleware.process_start_requests', {} ,'spider.txt')
         print('# ###process_start_requests')
 
 
@@ -122,20 +135,26 @@ class IeSpiderMiddleware(object):
             r._set_url(UrlsState.get_pending_page_url(r.url))
             print(r.url)
             #print(UrlsState.get_url_data(start_url, UrlsState.KEY_RESULTS_PARSED))
-            print(r)
+            write_in_a_file('IeSpiderMiddleware.process_start_requests', {'req': r} ,'spider.txt')
             print('###end process_start_requests')
             yield r
 
     def spider_opened(self, spider):
         spider.logger.info('Spider.Middleware opened: %s' % spider.name)
+        write_in_a_file('IeSpiderMiddleware.spider_opened', {},'spider.txt')
         UrlsState.init()
         #print(UrlsState.parsed_urls)
         print('##########################################################################################')
 
+
+        spider.logger.info('Spider.Middleware opened: %s' % 'end')
+
     def spider_closed(self, spider):
         spider.logger.info('Spider.Middleware closed: %s', spider.name)
+        write_in_a_file('IeSpiderMiddleware.spider_closed', {}, 'spider.txt')
         UrlsState.close()
         print(f'job_requests_count: {self.job_requests_count}')
+        print(f'job_requests_count2: {self.job_requests_count2}')
         print(f'time: {IeSpiderMiddleware.START - now()}')
 
 
@@ -178,7 +197,19 @@ class IeDownloaderMiddleware(object):
         # This method is used by Scrapy to create your spiders.
         s = cls()
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
+        crawler.signals.connect(s.spider_closed, signal=signals.spider_closed)
+        crawler.signals.connect(s.item_scraped, signal=signals.item_scraped)
         return s
+
+    def item_scraped(self, *args, **kwargs):
+        write_in_a_file('IeSpiderDownloaderMiddleware.item_scraped', {}, 'spider.txt')
+
+        print('-------------------------------------------------------------------------------------------')
+        print('IeSpiderDownloaderMiddleware.item_scraped')
+        print(f'args: {args}')
+        print(f'kwargs: {kwargs}')
+
+        print('-------------------------------------------------------------------------------------------')
 
     def process_request(self, request, spider):
         # Called for each request that goes through the downloader
@@ -187,10 +218,10 @@ class IeDownloaderMiddleware(object):
         # Must either:
         # - return None: continue processing this request
         # - or return a Response object
-        # - or return a Request object
-        # - or raise IgnoreRequest: process_exception() methods of
+        # - or return a Request object        # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
 
+        write_in_a_file('IeSpiderDownloaderMiddleware.process_request', {'request': request}, 'spider.txt')
         print(f'IeSpiderDownloaderMiddleware.process_request: {request.url}')
         try:
             print(request.meta[UrlsState.KEY_START_URL])
@@ -291,6 +322,7 @@ class IeDownloaderMiddleware(object):
         return url
 
     def process_response(self, request, response, spider):
+        write_in_a_file('IeSpiderDownloaderMiddleware.process_response', {'request': request, 'response': response}, 'spider.txt')
         # Called with the response returned from the downloader.
 
         # Must either;
@@ -310,5 +342,6 @@ class IeDownloaderMiddleware(object):
         pass
 
     def spider_opened(self, spider):
+        write_in_a_file('IeSpiderDownloaderMiddleware.spider_openes', {}, 'spider.txt')
         spider.logger.info('Spider opened: %s' % spider.name)
 

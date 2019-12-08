@@ -289,7 +289,7 @@ class CrawlProcess():
             print(f'q.count: {count}')
         except Exception as e:
             print(f'get_scraped_items_number')
-            save_error(e, {'count': count})
+           # save_error(e, {'count': count})
         return count
 
 
@@ -297,7 +297,10 @@ class CrawlProcess():
         # Calcula el total con los items scrapeados de la tarea enterior
         count = self.get_scraped_items_number()
         task = Task.objects.get_latest_finished_crawler_task()
-        old_result = task.result or 20000
+        if task:
+            old_result = task.result or 20000
+        else:
+            old_result = 20000
 
         if count < old_result:
             total = old_result
