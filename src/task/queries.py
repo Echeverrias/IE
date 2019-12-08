@@ -16,8 +16,16 @@ class TaskQuerySet(models.QuerySet):
         return self.filter(type__iexact=TYPE_CRAWLER).filter(state__iexact=STATE_FINISHED)
 
     def get_latest_crawler_task(self):
-        return self.crawler_tasks().latest('created_at')
+        try:
+            return self.crawler_tasks().latest('created_at')
+        except Exception as e:
+            print(e)
+            return None
 
     def get_latest_finished_crawler_task(self):
-        return self.finished_crawler_tasks().latest('created_at')
+        try:
+            return self.finished_crawler_tasks().latest('created_at')
+        except Exception as e:
+            print(e)
+            return None
 

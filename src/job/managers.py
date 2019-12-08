@@ -57,7 +57,7 @@ class JobManager(models.Manager):
         return self.get_queryset().not_free_vacancies()
 
     def registered_timedelta_ago(self, timedeltadict):
-        return self.get_queryset.registered_timedelta_ago(timedeltadict)
+        return self.get_queryset().registered_timedelta_ago(timedeltadict)
 
     def modified_timedelta_ago(self, timedeltadict):
         return self.get_queryset().modified_timedelta_ago(timedeltadict)
