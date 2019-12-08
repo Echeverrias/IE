@@ -1,5 +1,5 @@
 from background_task import background
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Pipe
 import multiprocessing
 from datetime import datetime
 from scrapy.crawler import Crawler, CrawlerProcess
@@ -12,13 +12,18 @@ from django.utils import timezone
 from django.db.models import Q
 from .models import Task
 from job.models import Job
+from utilities import save_error, Lock, write_in_a_file
+import time
+from task.models import Task
 
 # https://medium.com/@robinttt333/running-background-tasks-in-django-f4c1d3f6f06e
 
+
 class CrawlProcess():
 
-    q = Queue()
+    _model = Task
     __instance = None
+    count = 0
 
     @staticmethod
     def get_instance():
@@ -33,71 +38,185 @@ class CrawlProcess():
             raise Exception("This class is a singleton!")
         else:
             CrawlProcess.__instance = self
-            self.init_datetime = timezone.now()
-            self.process = Process(target=CrawlProcess.crawl)
+            #self.process = Process(target=CrawlProcess.crawl)
+            self.process = None
+            self.crawler_process = None
             self.task = None
+            self.q = Queue()
+            self.parent_conn, self.child_conn = Pipe()
 
 
-    def get_scraped_items_number(self):
-        try:
-            count = CrawlProcess.q.get_nowait()
-            CrawlProcess.q.put_nowait(count)
-        except:
-            if count:
-                count = count
-            else:
-                count = 0
-        return count
 
+    #@classmethod
+    #def crawl(cls, q):
+    #@classmethod
+    #def crawl(cls, process, q):
     @classmethod
-    def crawl(cls):
+    def crawl(cls, q, conn):
+        print()
+        print()
+        print('***************************************************************************************')
+        print('crawl')
 
-        def close(*args, **kwargs):
+        def close(spider, reason):
             print(f'{multiprocessing.current_process().name}: *!!CLOSE')
-            print(f'args: {args}')
-            print(f'kwargs: {kwargs}');
+            write_in_a_file('CrawlerProcess.signal.close', {'reason': reason}, 'task.txt')
+            t = Task.objects.get_latest_crawler_task()
+            d = datetime.today()
+            t.description = f'spider closed with count: {CrawlProcess.count} at {str(d)}'
+            t.result = CrawlProcess.count
+            t.save()
 
-
-        def open(*args, **kwargs):
+        def open(spider):
             print(f'{multiprocessing.current_process().name}: *!!OPEN')
-            print(f'args: {args}')
-            print(f'kwargs: {kwargs}')
-            cls.q.put_nowait()
-            print()
-
-        def idle(*args, **kwargs):
-            print(f'{multiprocessing.current_process().name}: *!!IDLE')
-            print(f'args: {args}')
-            print(f'kwargs: {kwargs}')
-            print()
-
-        def scraped(*args, **kwargs):
-            print(f'{multiprocessing.current_process().name}: *!!SCRAPED')
-            print(f'args: {args}')
-            print(f'kwargs: {kwargs}')
-            print()
             try:
-                count = cls.q.get_nowait()
-                cls.q.put_nowait(count + 1)
+                name = spider.name
             except:
-                cls.q.put_nowait(1)
+                name = str(spider)
+            write_in_a_file('CrawlerProcess.signal.open', {'spider': name}, 'task.txt')
+            CrawlProcess.count = 0
+            try:
+                t = Task.objects.get_latest_crawler_task()
+                t.name = str(process.pid)
+                t.save()
+            except Exception as e:
+                t.name = e
+                t.save()
+            #q.put_nowait()
+            print()
+
+
+        def scraped(item, response, spider):
+            print(f'{multiprocessing.current_process().name}: *!!SCRAPED')
+
+            print()
+            CrawlProcess.count = CrawlProcess.count + 1
+            n = CrawlProcess.count
+            write_in_a_file('CrawlerProcess.signal.scraped_item', {'response': response, 'count': n}, 'task.txt')
+            try:
+                q.get_nowait()
+                q.put_nowait(n)
+            except:
+                q.put_nowait(n)
+
+        def stopped(*args, **kwargs):
+            write_in_a_file('CrawlerProcess.signal.stopped', {'args': args, 'kwargs': kwargs}, 'task.txt')
+
+        def error(*args, **kwargs):
+            write_in_a_file('CrawlerProcess.signal.error', {'args': args, 'kwargs': kwargs}, 'task.txt')
+
+        def send_by_pipe(item):
+            try:
+                conn.send(item)
+                #conn.close()
+            except Exception as e:
+                write_in_a_file('CrawlProcess._crawl: error conn.send', {'conn error': e}, 'debug.txt')
 
         process = CrawlerProcess(get_project_settings())
+        write_in_a_file('CrawlProcess.crawl: first', {'crawler_process': str(process), 'dir process': dir(process)},
+                        'debug.txt')
+        send_by_pipe(process)
+        write_in_a_file('CrawlProcess.crawl: second', {'crawler_process': str(process), 'dir process': dir(process)},'debug.txt')
         process.crawl(InfoempleoSpider())
+        write_in_a_file('CrawlProcess.crawl: third', {'crawler_process': str(process), 'dir process': dir(process)},'debug.txt')
         crawler = Crawler(InfoempleoSpider())
         crawler.signals.connect(open, signal=signals.spider_opened)
         crawler.signals.connect(scraped, signal=signals.item_scraped)
         crawler.signals.connect(close, signal=signals.spider_closed)
-        crawler.signals.connect(idle, signal=signals.spider_idle)
+        crawler.signals.connect(stopped, signal=signals.engine_stopped)
+        crawler.signals.connect(error, signal=signals.spider_error)
+
+        write_in_a_file('CrawlProcess.crawl: before', {'crawler_process': str(process),'dir process': dir(process)},'debug.txt')
+
         process.crawl(crawler)
+        write_in_a_file('CrawlProcess.crawl: after', {'crawler_process': str(process), 'dir process': dir(process)}, 'debug.txt')
+
         process.start()
+        write_in_a_file('CrawlProcess._crawl: process started', {'crawler_process': str(process), 'dir process': dir(process)}, 'debug.txt')
+
+        print('***************************************************************************************')
+        print(f'CrawlerProcess: {process}')
+        print(dir(process))
+        print('***************************************************************************************')
+        print()
+        print()
+        write_in_a_file('CrawlProcess.crawl', {'CrawlerProcess': str(process), 'dir(CrawlerProcess)': dir(process)}, 'task.txt')
+        process.join()
+        write_in_a_file('CrawlProcess.crawl: process.join', {}, 'task.txt')
+        write_in_a_file('CrawlProcess.crawl: process.join', {}, 'spider.txt')
+
+        print('Crawler Process has Finished!!!!!')
+
+
+
+    @classmethod
+    def crawl2(cls, q):
+        while CrawlProcess.count < 15:
+           # print(f'doing something: {CrawlProcess.count}')
+            CrawlProcess.count = CrawlProcess.count + 1
+            n = CrawlProcess.count
+            try:
+                q.get_nowait()
+            except:
+                pass
+            q.put(n)
+            if CrawlProcess.count % 5 == 0:
+               # print(f'qsize: {q.qsize()}')
+                time.sleep(5)
+
 
     def _clear_queue(self):
-        while not CrawlProcess.q.empty():
-            CrawlProcess.q.get_nowait()
+        while not self.q.empty():
+            self.q.get_nowait()
 
-    def is_scrapping(self):
-        return self.process.is_alive()
+
+
+    def _init_process(self, user):
+        print(f'CrawlerProcess.init_process')
+        self.q.put_nowait(0)
+        self.process = Process(target=CrawlProcess.crawl, args=(self.q, self.child_conn,))
+        self.task = Task(user=user, state=Task.STATE_PENDING, type=Task.TYPE_CRAWLER)
+
+
+
+    def _start_process(self):
+        print(f'CrawlerProcess._start_process')
+        self.init_datetime = timezone.now()  # Before create the task
+        self.process.start()
+        self.task.pid = self.process.pid
+        write_in_a_file('CrawlProcess._start_process: process started', {'pid': self.process.pid}, 'debug.txt')
+        self.task.state = Task.STATE_RUNNING
+        self.task.save()
+        self.crawler_process = self.parent_conn.recv()
+        write_in_a_file('CrawlProcess._start_process: conn.recv', {'crawler_process':str(self.crawler_process), 'dir crawler_process':dir(self.crawler_process)}, 'debug.txt')
+        write_in_a_file('CrawlProcess._start_process', {'CrawlerProcess': str(self.crawler_process), 'dir(CrawlerProcess)': dir(self.crawler_process)},'task.txt')
+
+
+    def _reset_process(self, state=Task.STATE_FINISHED):
+        print(f'CrawlerProcess._reset_process({state})')
+        try:
+            self.process.terminate()
+            write_in_a_file('_reset_process terminated (from stop)', {'is_running': self.process.is_alive()}, 'debug.txt')
+            self.task.result = CrawlProcess.count
+            self.task.state = state
+            self.task.save()
+            self.process.join()  # ! IMPORTANT after .terminate -> .join
+            write_in_a_file('_reset_process joinned (from stop)', {'is_running': self.process.is_alive()}, 'debug.txt')
+        except:
+            pass
+        try:
+            self.result = self.q.get_nowait()
+        except Exception as e:
+            pass
+        self._clear_queue()
+
+
+    def _update_process(self):
+        print('CrawlerProcess._update_process')
+        print(f'process is alive: {self.process and self.process.is_alive()}')
+        if self.process and not self.process.is_alive():
+            self._reset_process()
+
 
     def start(self, user, **kwargs):
         """
@@ -109,38 +228,77 @@ class CrawlProcess():
         :param kwargs:
         :return:
         """
-        print(f'CrawlProcess.q.empty(): {CrawlProcess.q.empty()}')
-        print(f'CrawlProcess.q.qsize(): {CrawlProcess.q.qsize()}')
+        print(f'self.q.empty(): {self.q.empty()}')
+        print(f'self.q.qsize(): {self.q.qsize()}')
 
         if not self.is_scrapping():
-            if self.task & (self.task.state == Task.STATE_RUNNING):
-                self.result = CrawlProcess.q.get_nowait()
-                self.task.state = Task.STATE_FINISHED
-                self.task.state.save()
-            self.process.close()
-            self.process = Process(target=CrawlProcess.crawl)
-            self.initdatetime = timezone.now() # Before create the task
-            self._clear_queue()
-            CrawlProcess.q.put_nowait(0)
-            self.task = Task(user=user, type=Task.TYPE_CRAWLER)
-            self.task.save()
-            self.process.start()
+            if self.task and (self.task.state == Task.STATE_RUNNING):
+                self._reset_process()
+            self._init_process(user)
+            self._start_process()
 
-    def get_init_datetime(self):
-        return self.init_datetime
+    def stop(self):
+        print(f'CrawleProcess.stop')
+        self._reset_process(Task.STATE_INCOMPLETE)
+       # self.crawler_process.stop()
+        #self.crawler_process.join()
+
 
     def join(self):
         self.process.join()
 
+    def get_actual_task(self):
+        self._update_process()
+        return self.task
+
+    def get_latest_task(self):
+        last_task = Task.objects.get_latest_crawler_task()
+        # If the latest task from de db has state equal STATE_RUNNING and not is the actual task will be an incomplete task...
+        #... and would have to update its state
+        is_an_incomplete_task = (
+                last_task and
+                last_task.state == Task.STATE_RUNNING and
+                (not self.task or self.task.pk != last_task.pk)
+        )
+        if is_an_incomplete_task:
+            last_task.state = Task.STATE_INCOMPLETE
+            last_task.save()
+        return last_task
+
+    def is_scrapping(self):
+        print(CrawlProcess.is_scrapping)
+        if self.process:
+            return self.process.is_alive()
+        else:
+            return False
+
     def _get_scraped_jobs(self):
-        return Job.objects.filter(Q(created_at__gte=self.init_datetime) or Q(updated_at__gte=self.init_datetime) )
+        latest_task = Task.objects.get_latest_crawler_task()
+        return Job.objects.filter(Q(created_at__gte=latest_task.created_at) | Q(updated_at__gte=latest_task.created_at))
+
+    def get_scraped_items_number(self):
+        print()
+        print('!!!! CrawlProcess.get_scraped_items_number');print();
+        count = CrawlProcess.count
+        try:
+            print(self.q)
+            #print(f'CrawlProcess.count: {CrawlProcess.count}')
+            #print(f'qsize: {self.q.qsize()}')
+            count = self.q.get(block=True, timeout=5)
+            CrawlProcess.count = count
+            print(f'q.count: {count}')
+        except Exception as e:
+            print(f'get_scraped_items_number')
+           # save_error(e, {'count': count})
+        return count
+
 
     def get_scraped_items_percentage(self):
         # Calcula el total con los items scrapeados de la tarea enterior
         count = self.get_scraped_items_number()
-        tasks = Task.objects.all().order_by('-created_at')
-        if tasks and tasks.count() > 1:
-            old_result = tasks[1].result
+        task = Task.objects.get_latest_finished_crawler_task()
+        if task:
+            old_result = task.result or 20000
         else:
             old_result = 20000
 

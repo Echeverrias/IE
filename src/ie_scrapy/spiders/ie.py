@@ -31,11 +31,11 @@ class InfoempleoSpider(Spider):
     name = 'ie'
     allowed_domains = ['infoempleo.com']
 
-    start_urlz = [
+    start_urls = [
         "https://www.infoempleo.com/trabajo/area-de-empresa_legal/",
     ]
 
-    start_urls = [
+    start_urlsz = [
         "https://www.infoempleo.com/ofertas-internacionales/",
         "https://www.infoempleo.com/primer-empleo/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/",
@@ -100,6 +100,8 @@ class InfoempleoSpider(Spider):
         print('### ')
         for job_url in job_urls:
             print('# Go to job_url: %s', job_url)
+            #job_url = "https://www.infoempleo.com/ofertasdetrabajo/convocatorias-de-trece-plazas-para-diferentes-departamentos-de-la-cnmv/palencia/2576093/"
+            #job_url = "https://www.infoempleo.com/ofertasdetrabajo/tecnicoa-back-office-reclamaciones-sustitucion-it/las-rozas/2577780/"
             yield response.follow(job_url, self.parse_item, meta={
                 UrlsState.KEY_START_URL: start_url,
                 UrlsState.KEY_TOTAL_RESULTS: total_results,

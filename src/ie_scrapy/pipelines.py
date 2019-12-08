@@ -33,6 +33,7 @@ from utilities import (
     get_slice_from_sub_to_end_of_the_paragraph,
     get_a_list_of_enumerates_from_string,
     trace,
+    write_in_a_file,
 
 )
 
@@ -119,6 +120,9 @@ class CleanPipeline(CleanupPipeline_):
 
     def _clean_city(self, string):
         try:
+            print(f'$$$$$$$  _clean_city: {string}');
+            write_in_a_file(f'CleanPipeline._clean_city({string})', {}, 'pipeline.txt')
+            print();
             debug['_city_cleanup - init'] = f'arg: {string}'
             print(f'$$_clean_city({string})')
             debug['_citiy_cleanup'] = f'get_text_before_parenthesis({string})'
@@ -150,7 +154,11 @@ class CleanPipeline(CleanupPipeline_):
             return ''
 
     def _clean_cities(self, string):
+        print(f'$$$$$$$  _clean_cities: {string}')
         cities = get_a_list_of_enumerates_from_string(string)
+        print(f'$$$$$$$  _clean_cities - cities: {cities}');
+
+        print();
         debug['_clean_cities'] = f'{len(cities)} cities: {cities}'
         return [self._clean_city(city) for city in cities]
 
@@ -358,7 +366,7 @@ class CleanPipeline(CleanupPipeline_):
         item['expiration_date'] = get_date_from_string(item['expiration_date'])
         try:
             company = item['company']
-            item['company'] = self._cleanup[company.get_model_name()](company);print(13);
+            item['company'] = self._cleanup[company.get_model_name()](company)
         except Exception as e:
             print(e)
             save_error(e, {**debug, 'pipeline': 'CleanPipeline', 'id': item['id'], 'link': item['link'], 'item': item})
@@ -367,6 +375,13 @@ class CleanPipeline(CleanupPipeline_):
 
     def process_item(self, item, spider):
         print('CleanPipeline.process_item')
+        write_in_a_file('CleanPipeline.process_item', {}, 'pipeline.txt')
+        j = Job.objects.all().count()
+        write_in_a_file('CleanPipeline.process_item', {'j': j}, 'pipeline.txt')
+        c = Company.objects.all().count()
+        write_in_a_file('CleanPipeline.process_item', {'c': c}, 'pipeline.txt')
+        ci = City.objects.all().count()
+        write_in_a_file('CleanPipeline.process_item', {'ci': ci}, 'pipeline.txt')
         debug = {}
         try:
             debug.setdefault('raw item',item)
@@ -419,6 +434,7 @@ class StorePipeline(object):
         return languages
 
     def _get_city(self, city_name, province=None, country=None):
+        write_in_a_file('StorePipeline._get_city', {'city_name': city_name + '.', 'province':province, 'country': country}, 'pipeline.txt')
         debug['location'] = f'CleanPipeline._get_city'
         debug['value'] = f'city_name {city_name}'
         print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
@@ -463,18 +479,29 @@ class StorePipeline(object):
                 elif province and (city_name != province.name):
                     city = City.objects.create(name=city_name, province=province, country=country)
 
-        elif country and (city_name.lower() == country.name.lower() or city_name.lower() == CleanupPipeline_.get_acronym(country.name).lower()):
+        elif country and (city_name.lower() == country.name.lower() or city_name.lower() == get_acronym(country.name).lower()):
             return None
         # a foreign city:
         elif country :
+            print('a foreign city')
             cities_qs = City.objects.filter(name__iexact=city_name,  country=country)
             if cities_qs:
                 city = cities_qs[0]
             else:
                 city, is_a_new_city = City.objects.get_or_create(name=city_name, country=country)
         else:
-            cities_qs = City.objects.filter(name__iexact=city_name)
+            write_in_a_file('StorePipeline._get_city',
+                            {'if':'not country'}, 'pipeline.txt')
+            try:
+                cities_qs = City.objects.filter(name__iexact=city_name)
+            except Exception as e:
+                write_in_a_file('StorePipeline._get_city',
+                                {'city_name': city_name + '.', 'error': e}, 'pipeline.txt')
+            write_in_a_file('StorePipeline._get_city',
+                            {'cities_qs': str(cities_qs)}, 'pipeline.txt')
             if not cities_qs:
+                write_in_a_file('StorePipeline._get_city',
+                                {'if': 'not cities_qs'}, 'pipeline.txt')
                 cities_qs = City.objects.filter(name__contains=city_name) # contains to avoid coincidence in the middle of the string
                 if cities_qs and cities_qs.count() > 1:
                     cities_qs = cities_qs.filter(name__icontains='/')
@@ -484,6 +511,13 @@ class StorePipeline(object):
                     cities_qs = cities
                 if cities_qs:
                     city = cities_qs[0]
+            elif  cities_qs.count() == 1:
+                write_in_a_file('StorePipeline._get_city',
+                                {'if': 'cities_qs.count() == 1'}, 'pipeline.txt')
+                city = cities_qs[0]
+
+        write_in_a_file('StorePipeline._get_city',
+                        {'city': city}, 'pipeline.txt')
         return city
 
     def _get_location(self, city_names, province_name, country_name):
@@ -511,17 +545,24 @@ class StorePipeline(object):
 
     def _store_company(self, item):
         print('$$store_company')
+        write_in_a_file(f'StorePipeline._store_company({item})', {}, 'pipeline.txt')
         debug['location'] = f'CleanPipeline._store_company'
         debug['company'] = item
         company_dict = item.get_dict_deepcopy()
+        write_in_a_file(f'StorePipeline._store_company: 1', {'company_dict': company_dict}, 'pipeline.txt')
         company_id = company_dict.pop('company_name', None)
-        city = self._get_city(company_dict['company_city_name'])
+        write_in_a_file(f'StorePipeline._store_company: 2', {'company_id': company_id}, 'pipeline.txt')
+        write_in_a_file(f'StorePipeline._store_company: 3', {'company_city_name': company_dict['company_city_name']}, 'pipeline.txt')
+        #city = self._get_city(company_dict['company_city_name'])
+        city = City.objects.filter(name__iexact='Madrid')[0]
+        write_in_a_file(f'StorePipeline._store_company: 4', {'city': city}, 'pipeline.txt')
         company_dict.setdefault('created_at', timezone.now())
         company_dict.setdefault('company_city', city)
         company = None
         print('$$1')
         try:
             company, is_a_new_company_created = Company.objects.get_or_create(company_name=company_id, defaults=company_dict)
+            write_in_a_file(f'StorePipeline._store_company: 5', {'company': company, 'is_new':is_a_new_company_created}, 'pipeline.txt')
             if not is_a_new_company_created:
                 if company.company_offers != company_dict['company_offers']:
                     company.company_offers = company_dict['company_offers']
@@ -539,8 +580,8 @@ class StorePipeline(object):
         cities, province, country = self._get_location(item['cityname'], item['provincename'], item['countryname'])
         print(cities, province, country)
 
-        #job.country = country
-        #job.province = province
+        job.country = country
+        job.province = province
         job.cities.clear()
         job.cities.set(cities)
         print(job);print();print()

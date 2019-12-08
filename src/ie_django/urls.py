@@ -16,15 +16,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import  include, path, re_path #url, re_url
 from .views import init_view
-from job.views import  run_crawler
-#from job.views import JobAPIView, CompanyAPIView, JobView, CompanyView,
+
+from task.views import  run_crawler_view
+
+
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
-    path('crawl/', run_crawler, name='crawl'),
     path('chart/', include('chart.urls')),
     path('job/', include('job.urls')),
     path('task/', include('task.urls')),
-    path('', init_view, name='init'),
+    path('?', init_view, name='init'),
+    path('', run_crawler_view, name='init'),
 ]
 
 """

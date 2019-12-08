@@ -20,6 +20,7 @@ src/**/*.txt
 *.jpg
 *.txt
 *_.py
+!*__.py
 *prueba*.py
 p.py
 *copia*.*
