@@ -44,22 +44,30 @@ class CrawlProcess():
             raise Exception("This class is a singleton!")
         else:
             CrawlProcess.__instance = self
+            self._id_task = None
             self.process = None
-            self._crawler_process = None
             self.task = None
             self.q = None
-            self.qresult = None
             self.qitems = None
             self._count = 0
             self._items = []
+            self._init_signals()
 
-    def _open(self, *args, **kwargs):
+
+    def _init_signals(self):
+        dispatcher.connect(self._spider_opened, signals.spider_opened)
+        dispatcher.connect(self._item_scraped, signals.item_scraped)
+        dispatcher.connect(self._spider_closed, signals.spider_closed)
+        dispatcher.connect(self._engine_stopped, signals.engine_stopped)
+        dispatcher.connect(self._spider_error, signals.spider_error)
+
+    def _spider_opened(self, *args, **kwargs):
         print(f'{multiprocessing.current_process().name}: *!!OPEN')
 
         write_in_a_file('CrawlerProcess.signal.open', {'args': args, 'kwargs': kwargs, 'process': self.process}, 'task.txt')
         self.count = 0
         try:
-            t = Task.objects.get_latest_crawler_task()
+            t = Task.objects.get_id(self._id_task)
             t.name = str(self.process.pid)
             t.save()
         except Exception as e:
@@ -69,18 +77,17 @@ class CrawlProcess():
         print()
 
 
-    def _close(self, spider, reason):
+    def _spider_closed(self, spider, reason):
         print(f'{multiprocessing.current_process().name}: *!!CLOSE')
         write_in_a_file('CrawlerProcess.signal.close', {'reason': reason}, 'task.txt')
-        t = Task.objects.get_latest_crawler_task()
+        t = Task.objects.get_id(self._id_task)
         d = datetime.today()
         t.description = f'spider closed with count: {CrawlProcess.count} at {str(d)}'
         t.result = self._count
         t.save()
 
 
-
-    def _scraped(self, item, response, spider):
+    def _item_scraped(self, item, response, spider):
         print(f'{multiprocessing.current_process().name}: *!!SCRAPED')
 
         print()
@@ -95,41 +102,24 @@ class CrawlProcess():
         except:
             self.q.put_nowait(n)
 
-    def _stopped(self, *args, **kwargs):
+    def _engine_stopped(self, *args, **kwargs):
         write_in_a_file('CrawlerProcess.signal.stopped', {'args': args, 'kwargs': kwargs}, 'task.txt')
 
-    def _error(self, *args, **kwargs):
+    def _spider_error(self, *args, **kwargs):
         write_in_a_file('CrawlerProcess.signal.error', {'args': args, 'kwargs': kwargs}, 'task.txt')
 
-    def _crawl(self, q):
+    def _crawl(self):
         write_in_a_file('CrawlerProcess.signal.error', {'signals': dir(signals)}, 't.txt')
-        self._crawler_process = CrawlerProcess(get_project_settings())
-        self._crawler_process.crawl(InfoempleoSpider)
-        dispatcher.connect(self._open, signals.spider_opened)
-        dispatcher.connect(self._scraped, signals.item_scraped)
-        dispatcher.connect(self._close, signals.spider_closed)
-        dispatcher.connect(self._stopped, signals.engine_stopped)
-        dispatcher.connect(self._error, signals.spider_error)
-        """
-        crawler = Crawler(InfoempleoSpider())
-        self._crawler_process.crawl(crawler)
-        crawler.signals.connect(self._open, signal=signals.spider_opened)
-        crawler.signals.connect(self._scraped, signal=signals.item_scraped)
-        crawler.signals.connect(self._close, signal=signals.spider_closed)
-        crawler.signals.connect(self._stopped, signal=signals.engine_stopped)
-        crawler.signals.connect(self._error, signal=signals.spider_error)
-        """
-        write_in_a_file('CrawlProcess.crawl: before', {'crawler_process': str(self._crawler_process)},'debug.txt')
-        write_in_a_file('CrawlProcess.crawl: after', {'crawler_process': str(self._crawler_process)}, 'debug.txt')
+        crawler = CrawlerProcess(get_project_settings())
+        crawler.crawl(InfoempleoSpider)
         # To prevent the infamous error: django.db.utils.InterfaceError: (0, '')
         db.connection.close()
-        self._crawler_process.start()
-        write_in_a_file('CrawlProcess.start: process started', {'crawler_process': str(self._crawler_process)}, 'debug.txt')
-        self._crawler_process.join()
+        crawler.start()
+        write_in_a_file('CrawlProcess.start: process started', {}, 'debug.txt')
+        crawler.join()
         write_in_a_file('CrawlProcess.crawl: process.join', {}, 'task.txt')
         write_in_a_file('CrawlProcess.crawl: process.join', {}, 'spider.txt')
         print('Crawler Process has Finished!!!!!')
-        q.put_nowait(self._items)
 
 
     def _clear_queue(self):
@@ -140,7 +130,7 @@ class CrawlProcess():
                 pass
         while not self.qitems.empty():
             try:
-                self.q.get_nowait()
+                self.qitems.get_nowait()
             except:
                 pass
 
@@ -151,8 +141,9 @@ class CrawlProcess():
         self.qitems = Queue()
         self.q.put_nowait(0)
         self.qresult = Queue()
-        self.process = Process(target=self._crawl, args=(self.qresult,))
-        self.task = Task(user=user, state=Task.STATE_PENDING, type=Task.TYPE_CRAWLER)
+        self.process = Process(target=self._crawl, args=())
+        self.task = Task.objects.create(user=user, state=Task.STATE_PENDING, type=Task.TYPE_CRAWLER)
+        self._id_task = self.task.pk
 
 
     def _start_process(self):
@@ -160,7 +151,7 @@ class CrawlProcess():
         self.init_datetime = timezone.now()  # Before create the task
         self.process.start()
         self.task.pid = self.process.pid
-        write_in_a_file('CrawlProcess._start_process: process started', {'pid': self.process.pid, 'crawler_process':str(self._crawler_process)}, 'debug.txt')
+        write_in_a_file('CrawlProcess._start_process: process started', {'pid': self.process.pid}, 'debug.txt')
         self.task.state = Task.STATE_RUNNING
         self.task.save()
 
@@ -174,8 +165,7 @@ class CrawlProcess():
             self.task.save()
             self.process.join()  # ! IMPORTANT after .terminate -> .join
             try:
-                items = self.qresult.get_nowait()
-                self.task.result = len(items)
+                self.task.result = self.qitems().qsize()
                 self.task.save()
             except Exception as  e:
                 print(e)
@@ -215,8 +205,6 @@ class CrawlProcess():
     def stop(self):
         print(f'CrawleProcess.stop')
         self._reset_process(Task.STATE_INCOMPLETE)
-       # self._crawler_process.stop()
-        #self._crawler_process.join()
 
 
     def get_actual_task(self):
@@ -246,6 +234,7 @@ class CrawlProcess():
         else:
             return False
 
+
     def _get_scraped_jobs(self):
         latest_task = Task.objects.get_latest_crawler_task()
         if latest_task:
@@ -253,6 +242,7 @@ class CrawlProcess():
             return Job.objects.registered_or_modified_after(tz)
         else:
             return Job.objects.none()
+
 
     def get_scraped_items_number(self):
         print()
@@ -304,58 +294,66 @@ class CrawlProcess():
 class CrawlerScript():
 
     def __init__(self):
-        self.crawler = None
+
         self.process = None
         self.items = []
-
         self._count = 0
+        self.queue = None
+        self.x = 2
+        self.y = 3
+        self._init_signals()
+
+
+    def _init_signals(self):
+        dispatcher.connect(self._so, signals.spider_opened)
+        dispatcher.connect(self._item_scraped, signals.item_scraped)
+        dispatcher.connect(self._sc, signals.spider_closed)
 
 
     def _so(self):
-        write_in_a_file('spider_opened 1', {'open': 'open!'}, "t.txt")
+        write_in_a_file('spider_opened 1', {'open': 'open!', 'x': self.x, 'process': self.process, 'process-pid': self.process and self.process.pid}, "t.txt")
+
 
     def _sc(self):
         write_in_a_file('spider_closed', {'scraped items': len(self.items)}, "t.txt")
 
-    def _so2(self):
-        write_in_a_file('spider_opened 2', {}, "t.txt")
-
     def _item_scraped(self, item, **kwargs):
         self._count = self._count + 1
-        write_in_a_file('item scraped', {'count':self._count, 'item': item, 'kwargs':kwargs}, "t.txt")
+        write_in_a_file('item scraped', {'x':self.x, 'y': self.y, 'count':self._count, 'item': item, 'kwargs':kwargs, 'process': self.process, 'process-pid': self.process and self.process.pid}, "t.txt")
         self.items.append(item)
+        self.queue.put_nowait(item)
 
     def _crawl(self, queue, spider):
-        self.crawler = CrawlerProcess(get_project_settings())
-        self.crawler.crawl(spider)
-        write_in_a_file('CrawlerProcess.signals', {'signals': dir(signals)}, 'task.txt')
-        dispatcher.connect(self._item_scraped, signals.item_scraped)
-        dispatcher.connect(self._sc, signals.spider_closed)
-        dispatcher.connect(self._so, signals.spider_opened)
-
-        write_in_a_file('crawler start', {'db': dir(db), 'db.connection': dir(db.connection)}, "t.txt")
+        crawler = CrawlerProcess(get_project_settings())
+        crawler.crawl(spider)
+        write_in_a_file('signals', {'signals': dir(signals)}, 'task.txt')
+        write_in_a_file('._crawl start', {'process': self.process, 'process-pid': self.process and self.process.pid, 'db': dir(db), 'db.connection': dir(db.connection)}, "t.txt")
         print(dir(db.connection))
         db.connection.close()
-        self.crawler.start()
-        self.crawler.stop()
-        write_in_a_file('crawler ended', {'qsize': queue.qsize() }, "t.txt")
+        crawler.start()
+        crawler.stop()
+        write_in_a_file('._crawl ended 1', {'qsize': self.queue.qsize() }, "t.txt")
         queue.put_nowait(self.items)
-        write_in_a_file('crawler ended after q', {'qsize': queue.qsize()}, "t.txt")
+        write_in_a_file('._crawlended after q 2', {'qsize': queue.qsize()}, "t.txt")
 
     def crawl(self, spider):
         queue = Queue()
-        self.process = Process(target=self._crawl, args=(queue, spider,))
+        self.queue = Queue()
+        self.process = Process(target=self._crawl, args=(queue, spider))
         self.process.start()
-        write_in_a_file('crawler started', {'crawler': dir(self.crawler)}, "t.txt")
+        self.y = self.y + 100
+        write_in_a_file('.crawl 1', {'process': self.process, 'process-pid': self.process and self.process.pid, 'queue': self.queue.qsize()}, "t.txt")
         self.process.join()
-        return self.process, queue
+        write_in_a_file('.crawl 2', {'process': self.process,
+                                   'process-pid': self.process and self.process.pid, 'queue': self.queue.qsize()}, "t.txt")
+        #return self.process, queue
         #return queue.get(True)
 
 
 def run_crawler_script():
     crawler = CrawlerScript()
-    spider = InfoempleoSpider()
-    p, q = crawler.crawl(spider)
+    spider = InfoempleoSpider
+    crawler.crawl(spider)
 
 
 def run_crawler_async():

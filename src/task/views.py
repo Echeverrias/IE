@@ -39,7 +39,6 @@ def run_crawler_view(request, *args):
     context = {
         'task': last_task,
         'is_running': is_running,
-        'cp': c._crawler_process,
         'p': c.process and c.process.pid,
         'running_state': Task.STATE_RUNNING,
         'ajax': False,
@@ -49,7 +48,6 @@ def run_crawler_view(request, *args):
     if is_running:
         context = { **context, **{
             'scraped_items_number': c.get_scraped_items_number(),
-            'percentage': c.get_scraped_items_percentage(),
             }
 
         }

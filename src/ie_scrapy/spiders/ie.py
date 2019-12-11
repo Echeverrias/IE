@@ -87,6 +87,16 @@ class InfoempleoSpider(Spider):
                     ]
 
 
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(InfoempleoSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
+        return spider
+
+
+    def spider_closed(self, spider):
+        spider.logger.info('Spider closed: %s', spider.name)
+
     def parse(self, response):
         print(f'#InfoempleoSpider.parse {response.url}')
         print(response.url)
