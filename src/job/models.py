@@ -1,3 +1,5 @@
+from django.db.utils import InterfaceError
+from django import db
 from django.db import models
 from django.urls import reverse
 from django_mysql.models import ListCharField
@@ -125,7 +127,7 @@ class City (models.Model):
 
 
 class Company(models.Model):
-    company_name = models.CharField(unique = True, primary_key=True, max_length=100)
+    company_name = models.CharField(unique = True, primary_key=True, max_length=250)
     company_link = models.URLField(null=True)
     company_description = models.TextField(null=True)
     company_city_name = models.CharField(max_length=50, null=True)
@@ -402,7 +404,11 @@ class Job(models.Model):
 
 
     def save(self, *args, **kwargs):
-        super(Job, self).save(*args, **kwargs)
+        try:
+            super(Job, self).save(*args, **kwargs)
+        except InterfaceError as ie:
+            db.connection.close()
+            super(Job, self).save(*args, **kwargs)
 
 
     def get_absolute_url(self):

@@ -32,7 +32,7 @@ class InfoempleoSpider(Spider):
     allowed_domains = ['infoempleo.com']
 
     start_urls = [
-        "https://www.infoempleo.com/trabajo/area-de-empresa_legal/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_banca-y-seguros/",
     ]
 
     start_urlsz = [

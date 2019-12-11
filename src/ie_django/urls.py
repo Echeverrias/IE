@@ -25,8 +25,8 @@ urlpatterns = [
     path('chart/', include('chart.urls')),
     path('job/', include('job.urls')),
     path('task/', include('task.urls')),
-    path('?', init_view, name='init'),
-    path('', run_crawler_view, name='init'),
+    path('', init_view, name='init'),
+    path('crawl', run_crawler_view, name='crawl'),
 ]
 
 """

@@ -15,9 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import  include, path, re_path #url, re_url
-from .views import run_crawler_view
+from .views import run_crawler_view, test_view
 
 urlpatterns = [
     path('crawl/', run_crawler_view, name='run_crawler'),
+    path('test/', test_view, name='test'),
 ]
 

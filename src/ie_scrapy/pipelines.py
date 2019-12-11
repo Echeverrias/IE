@@ -9,6 +9,8 @@ import re
 import sqlite3
 import datetime
 from django.utils import timezone
+from django.db.utils import InterfaceError
+from django import db
 import copy
 from dateutil.relativedelta import relativedelta
 from job.models import Job, Company, Country, City, Province, Language
@@ -376,13 +378,6 @@ class CleanPipeline(CleanupPipeline_):
     def process_item(self, item, spider):
         print('CleanPipeline.process_item')
         write_in_a_file('CleanPipeline.process_item', {}, 'pipeline.txt')
-        j = Job.objects.all().count()
-        write_in_a_file('CleanPipeline.process_item', {'j': j}, 'pipeline.txt')
-        c = Company.objects.all().count()
-        write_in_a_file('CleanPipeline.process_item', {'c': c}, 'pipeline.txt')
-        ci = City.objects.all().count()
-        write_in_a_file('CleanPipeline.process_item', {'ci': ci}, 'pipeline.txt')
-        debug = {}
         try:
             debug.setdefault('raw item',item)
             clean_item = self._cleanup[item.get_model_name()](item)

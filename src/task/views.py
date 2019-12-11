@@ -1,10 +1,12 @@
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponse, JsonResponse
-from .tasks import CrawlProcess
+from .tasks import CrawlProcess, run_crawler_script
 from .models import Task
 from django.contrib.auth.models import User
 from django.contrib.admin.views.decorators import staff_member_required
 from utilities import write_in_a_file
+
+import time
 
 
 # Create your views here.
@@ -37,7 +39,8 @@ def run_crawler_view(request, *args):
     context = {
         'task': last_task,
         'is_running': is_running,
-        'cp': c.crawler_process,
+        'cp': c._crawler_process,
+        'p': c.process and c.process.pid,
         'running_state': Task.STATE_RUNNING,
         'ajax': False,
         'req': req,
@@ -80,3 +83,8 @@ def run_crawler_view(request, *args):
         write_in_a_file('view request', {'is_running': is_running, 'context': context}, 'debug.txt')
         template_name = 'task/main.html'
         return render(request, template_name, context)
+
+
+def test_view(request):
+    run_crawler_script()
+    return HttpResponse('<h2>Crawler Script running</h2>')

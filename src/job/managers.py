@@ -65,6 +65,9 @@ class JobManager(models.Manager):
     def registered_or_modified_timedelta_ago(self, timedeltadict):
         return self.get_queryset().registered_or_modified_timedelta_ago(timedeltadict)
 
+    def registered_or_modified_after(self, tz):
+        return self.get_queryset().registered_or_modified_after(tz)
+
     def first_publication_date_timedelta_ago(self, timedeltadict):
         return self.get_queryset().first_publication_date_timedelta_ago(timedeltadict)
 

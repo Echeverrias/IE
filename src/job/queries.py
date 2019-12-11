@@ -75,6 +75,12 @@ class JobQuerySet(models.QuerySet):
         except:
             return self.none()
 
+    def registered_or_modified_after(self, tz):
+        try:
+            return self.filter(Q(created_at__gte=tz) | Q(updated_at__gte=tz))
+        except:
+            return self.none()
+
     def first_publication_date_timedelta_ago(self, timedeltadict):
         try:
             today = datetime.today()
