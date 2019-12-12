@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
+{% block title %}Ofertas de trabajo{% endblock %}
+{% block extra_css%} {% include 'job/css.html' %}{% endblock %}
 {% block content %}
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/job/job.css' %}">
-    <div class="ie-job">
-        {% block subtitle %}{% endblock %}
-        {% block job %}
-        {% endblock %}
-    </div>
+ <div id="ie-job" class="app-container">
+     {% block job %}
+     {% endblock %}
+ </div>
 {% endblock %}
-{% block js %}
+{% block extra_js %}
       {% include 'job/js.html' %}
 {% endblock %}

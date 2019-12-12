@@ -1,36 +1,45 @@
 {% extends 'job/base.html' %}
-{% block subtitle %}<h2 class="title">Búsquedas</h2>{% endblock %}
 {% block job %}
-<p>{{ prueba }}</p>
-<div>
-    <div id='btn-filters' class="btn dropdown-toggle ie-btn">
-        Filtros
-    </div>
-    <div id="filters" class="hidden">
-    <form method="GET" action="." enctype="multipart/form-data">{% csrf_token %}
-         {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Aplicar filtros</button>
-    </form>
-    </div>
-    <script type="text/javascript">
-        $( function() {
-            $("#id_datepicker").datepicker({format:'dd/mm/yyyy'});
-            $("#id_datepicker").addClass('date');
-        } );
-     </script>
-</div><br>
-    {% if job_list %}
-        <h4 class="title">Resultados encontrados</h4><br>
-        <span>
-            Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} resultados
-        </span>
-        <div class="card-list block">
-        {% include 'job/job_list.html' with job_list=job_list %}
+<div class="query-form view">
+    <h2 class="center">Búsquedas</h2>
+    <div class="row">
+        <div class="col-lg-6 text-center">
+            {% if job_list %}
+                <h3 class="title">Resultados encontrados</h3><br>
+                <p>Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} resultados</p>
+            {% else  %}
+                <h3 class="title">No se han encontrado resultados {{ city_name }}</h3>
+            {% endif %}
         </div>
-    {% else  %}
-        <h4 class="title">No se han encontrado resultados {{ city_name }}</h4>
+        <div class="col-lg-6 text-center">
+            <div id='btn-filters' class="btn dropdown-toggle ie-btn">
+                Filtros
+            </div>
+            <div id="filters" class="hidden">
+                <form method="GET" action="." enctype="multipart/form-data">{% csrf_token %}
+                     {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+                </form>
+            </div>
+            <script type="text/javascript">
+                $( function() {
+                    $("#id_datepicker").datepicker({format:'dd/mm/yyyy'});
+                    $("#id_datepicker").addClass('date');
+                } );
+             </script>
+        </div>
+    </div>
+    {% if job_list %}
+        <div class="row">
+            <div class="col-lg-12 card-list block">
+                {% include 'job/job_list.html' with job_list=job_list %}
+            </div>
+            <div class="col-lg-12 block">
+                {% include 'job/pagination.html' with is_paginated=is_paginated  page_obj=page_obj  paginate_by=paginate_by %}
+            </div>
+        </div>
     {% endif %}
-    {% include 'job/pagination.html' with is_paginated=is_paginated  page_obj=page_obj  paginate_by=paginate_by %}
+</div>
 {% endblock %}
 
 

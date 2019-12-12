@@ -8,9 +8,25 @@ body{
     padding: 1em
 }
 
+main{
+    padding-top: 3rem;
+}
+
+main .container{
+    padding-top: 1rem;
+}
+
+.app-container{
+    padding-top: 1rem;
+}
+
 .title{
    text-align: center;
-   padding-bottom: 0.5em
+   padding-bottom: 1rem
+}
+
+.important{
+    font-weight:bold;
 }
 
 .clickeable{
@@ -35,7 +51,7 @@ form input.form-control.datetimepicker-input.date{
 }
 
 .center{
-    text-align: center;
+   margin: auto;
 }
 
 
@@ -47,6 +63,52 @@ form input.form-control.datetimepicker-input.date{
         line-height: 1.5;
 }
 
+.no-margin{
+    margin: 0;
+}
+
+div.row.no-margin{
+    margin: 0;
+}
+
+.right{
+    margin: auto 0 auto auto;
+}
+
+.left{
+    margin: auto 0 auto 0;
+}
+
+.bottom{
+    margin: auto auto 0 auto;
+}
+
+.top{
+    margin: 0 auto auto auto;
+}
+
+.right-bottom{
+    margin: auto 0 0 auto;
+}
+
+
+.left-bottom:{
+    margin: auto auto 0 0;
+}
+
+.right-top{
+    margin: 0 0 auto auto;
+}
+
+.left-top:{
+    margin: 0 auto auto 0;
+}
+
+#admin-container{
+    padding-top:3rem;
+}
+
+/* Spinner */
 
 .loader {
   border: 16px solid #f3f3f3; /* Light grey */

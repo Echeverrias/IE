@@ -1,12 +1,11 @@
 {% block job %}
-
-<ul class="list">
-    {% for job in job_list %}
-    <li>
-        <div class="job clickeable" id="{{ job.id }}">
-             {% include 'job/job_inline.html' with job=job detail=False %}
-        </div>
-    </li>
- {% endfor %}
-</ul>
+<div class="job-list view list remnant">
+    <ul class="list">
+        {% for job in job_list %}
+        <li>
+            {% include 'job/job_inline.html' with job=job detail=False %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}

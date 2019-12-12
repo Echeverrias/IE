@@ -1,9 +1,10 @@
-{% extends 'base.html' %}
-{% block content %}
-<div id="task" class="container center">
-        {% include 'task/js.html' %}
+{% extends 'task/base.html' %}
+{% block extra_css %} {% include 'task/css.html' %}{% endblock %}
+{% block extra_js %} {% include 'task/js.html' %}{% endblock %}
+{% block task %}
+<div id="main" class="view center">
         {% load task_extras %}
-        <div id="info-crawler">
+        <div class="sub-container">
         {% if is_running %}
                 {% include 'task/info_crawler_task.html' %}
         {% else %}
@@ -11,7 +12,7 @@
         {% endif %}
         </div>
         <div id="main-loader" class="loader very-slow" {% if not is_running %}hidden{% endif %}></div>
-        <div>
+        <div class="text-center">
                 <form id="stop-crawler" action="." method="GET" {% if not is_running %}hidden{% endif %} >
                         <input type="hidden" name="stop" value="True">
                         <button id="stop" class="btn btn-primary" type="submit">Parar araña</button>
@@ -23,7 +24,5 @@
                 </form>
         </div>
         <br><br><br><button class="btn btn-primary" id="AJAX">AJAX</button>
-         {% load static %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/task/task.css' %}">
 </div>
 {% endblock %}

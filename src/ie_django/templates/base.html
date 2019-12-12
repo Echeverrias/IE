@@ -7,28 +7,22 @@
     <meta name="description" content="IE Scraper">
     <meta name="author" content="JAEA">
     <meta name="generator" content="Jekyll v3.8.5">
-    <title>IE Scraper</title>
-    {% include 'css.html' %}
-
-     {% include 'js.html' %}
+    <title>{% block title %}IE Scraper{% endblock %}</title>
+      {% include 'css.html' %}
+      {% block extra_css %}{% endblock %}
   </head>
   <body>
 
   {% include 'nav.html' %}
 
-<main role="main" class="">
+<main role="main" class="main">
 
-  <div class="">
-    <h1>IE Scraper</h1>
-
+  <div class="container">
+  {% block content %} {% endblock %}
   </div>
-
-{% block content %}
-
-{% endblock %}
 </main><!-- /.container -->
-{% block js %}
-{% endblock %}
+  {% include 'js.html' %}
+  {% block extra_js %}{% endblock %}
   </body>
 </html>
 

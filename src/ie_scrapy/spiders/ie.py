@@ -31,11 +31,11 @@ class InfoempleoSpider(Spider):
     name = 'ie'
     allowed_domains = ['infoempleo.com']
 
-    start_urls = [
+    start_urlss = [
         "https://www.infoempleo.com/trabajo/area-de-empresa_banca-y-seguros/",
     ]
 
-    start_urlsz = [
+    start_urls = [
         "https://www.infoempleo.com/ofertas-internacionales/",
         "https://www.infoempleo.com/primer-empleo/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/",

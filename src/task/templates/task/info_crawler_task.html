@@ -1,7 +1,7 @@
 {% load task_extras %}
-<div id="msg">
+<div class="remnant">
     <h4 class="title">La tarea {{task.type}}-{{ task.pid }} está ejecutandose - Fecha inicio: {{ task.created_at|date:'d-m-Y' }} {{ task.created_at|time:"H:i" }}</h4>
-    <p id="count" class="title">Se están procesando <span>{{ scraped_items_number }}</span> ofertas de trabajo</p>
+    <p id="count" class="title">Se han procesado <span>{{ scraped_items_number }}</span> ofertas de trabajo</p>
     <div id="state" data-state="{{task.state}}">{{task.state}}</div>
 </div>
 ajax: {{ajax}}<br>

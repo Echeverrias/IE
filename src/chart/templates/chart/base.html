@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
+{% block title %}Gráficos{% endblock %}
+{% block extra_css%}{% include 'chart/css.html' %}{% endblock %}
 {% block content %}
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/chart/chart.css' %}">
-    <div class="ie-chart">
-        <h2 class="title">Gráficos</h2>
+    <h2 class="title">Gráficos</h2>
+    <div class="ie-chart app-container">
         {% block chart %}
         {% endblock %}
     </div>

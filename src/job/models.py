@@ -2,6 +2,7 @@ from django.db.utils import InterfaceError
 from django import db
 from django.db import models
 from django.urls import reverse
+from django.utils.text import slugify
 from django_mysql.models import ListCharField
 import language_utilities
 from simple_history.models import HistoricalRecords
@@ -19,7 +20,7 @@ class Country(models.Model):
 
     def save(self, *args, **kwargs):
         try:
-            self.slug = self.name.lower().replace(' ','-')
+            self.slug = slugify(self.name)
         except:
             pass
         super(Country, self).save(*args, **kwargs)
@@ -45,7 +46,7 @@ class Community(models.Model):
 
     def save(self, *args, **kwargs):
         try:
-            self.slug = self.name.lower().replace(' ','-')
+            self.slug = slugify(self.name)
         except:
             pass
         super(Community, self).save(*args, **kwargs)
@@ -75,7 +76,7 @@ class Province(models.Model):
 
     def save(self, *args, **kwargs):
         try:
-            self.slug = self.name.lower().replace(' ','-')
+            self.slug = slugify(self.name)
         except:
             pass
         super(Province, self).save(*args, **kwargs)
@@ -110,13 +111,13 @@ class City (models.Model):
     def save(self, *args, **kwargs):
         print('save')
         try:
-            self.slug = self.name.lower().replace(' ','-')
+            self.slug = slugify(self.name)
         except:
             pass
         super(City, self).save(*args, **kwargs)
 
     def default_slug(self):
-        return self.name.lower().replace(' ','-')
+        return slugify(self.name)
 
     def __str__(self):
         if self.province:
@@ -149,7 +150,7 @@ class Company(models.Model):
 
     def save(self, *args, **kwargs):
         try:
-            self.company_slug = self.company_name.lower().replace(' ','-')
+            self.company_slug = slugify(self.company_name)
         except:
             pass
         super(Company, self).save(*args, **kwargs)
@@ -402,6 +403,8 @@ class Job(models.Model):
         ordering = ['-created_at', 'name']  # El - delante del nombre del atributo indica que se o
         #unique_together = (('id'),)
 
+    def __str__(self):
+        return "%s - %s (%s)" % (self.name, self.type, self.cities)
 
     def save(self, *args, **kwargs):
         try:
@@ -410,13 +413,8 @@ class Job(models.Model):
             db.connection.close()
             super(Job, self).save(*args, **kwargs)
 
-
     def get_absolute_url(self):
         return reverse('detail', args=[str(self.pk)])
-
-
-    def __str__(self):
-        return "%s - %s (%s)" % (self.name, self.type, self.cities)
 
     def company_link_(self):
         return self.company.company_link

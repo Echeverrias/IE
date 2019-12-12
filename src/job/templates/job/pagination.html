@@ -1,28 +1,23 @@
-{% load job_extras %}
-
-{% if is_paginated %}
-<div>
-
-<nav aria-label="Page navigation container">
-
-
-    <ul class="pagination justify-content-center">
-
-        {% if page_obj.has_previous %}
-            <a href="?page=1" class="page-link">&laquo; first</a>
-            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">previous</a>
-        {% endif %}
-        {% for i in page_obj|page_range:5 %}
-                <li {% if page_obj.number == i %} class="page-link active" {% endif %} class="page-link">
-                    <a href="?page={{i}}">{{ i }}</a>
-                </li>
-        {% endfor %}
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="page-link">next</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">last &raquo;</a>
-        {% endif %}
-
-</ul>
-</nav>
+<div class="pagination remnant">
+    {% load job_extras %}
+    {% if is_paginated %}
+    <nav aria-label="Page navigation container">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="page-link">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-link">previous</a>
+            {% endif %}
+            {% for i in page_obj|page_range:5 %}
+                    <li {% if page_obj.number == i %} class="page-link active" {% endif %} class="page-link">
+                        <a href="?page={{i}}">{{ i }}</a>
+                    </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="page-link">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">last &raquo;</a>
+            {% endif %}
+     </ul>
+    </nav>
+    {% endif %}
 </div>
-{% endif %}
+

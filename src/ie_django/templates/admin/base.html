@@ -16,23 +16,14 @@
      {% include 'css.html' %}
      {% include 'admin/base_css.html' %}
      {% include 'js.html' %}
-    <style type=”text/css”>
-        #container{
-            padding-top:3em;
-        }
-        #ie-nav ul.navbar-nav li.nav-item.admin a.nav-link {
-            color: white;
-}
-    </style>
-</style>
 </head>
 {% load i18n %}
 
 <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}"
   data-admin-utc-offset="{% now "Z" %}">
-
+ {% include 'nav.html' %}
 <!-- Container -->
-<div id="container">
+<div id="admin-container">
 
     {% if not is_popup %}
     <!-- https://medium.com/crowdbotics/how-to-add-a-navigation-menu-in-django-admin-770b872a9531 -->
@@ -69,7 +60,7 @@
         {% block nav-global %}{% endblock %}
     </div>
     END Header -->
-    {% include 'nav.html' %}
+
     {% block breadcrumbs %}
     <div class="breadcrumbs">
     <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>

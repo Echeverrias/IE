@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Correr el scraper{% endblock %}
+{% block content %}
+ <div id="ie-task" class="app-container">
+     {% block task %}
+     {% endblock %}
+ </div>
+{% endblock %}
+{% block extra_js %}
+      {% include 'task/js.html' %}
+{% endblock %}

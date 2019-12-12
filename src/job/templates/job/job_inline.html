@@ -1,14 +1,25 @@
-<div class="card">
-     <h5 class="card-title"><a href="{{ job.get_absolute_url }}">{{job.name}} - {% for city in job.cities.all %}{{ city.name }} - {% endfor %}   ({{ job.cities.all.first.country.name }})</a></h5>
-     <div class="card-body">
-         <p class="card-text">
-             <small class="text-muted">{{ job.created_date }}</small><br>
-                City: {{ job.cities.all.first.name }}
-                Requisitos: {{ job.requirements | linebreaks | truncatewords:30 }}
-                Se ofrece: {{ job.it_is_offered | linebreaks | truncatewords:30 }}
-         </p>
-         {% if not detail %}
-            <a href="{{ job.get_absolute_url }}">Ver</a>
+<div class="job-inline remnant clickeable"  id="{{ job.id }}">
+    <h5 class="card-title">
+     <a href="{{ job.get_absolute_url }}">{{job.name}} - {% for city in job.cities.all %}{{ city.name }} - {% endfor %}   ({{ job.cities.all.first.country.name }})</a>
+   </h5>
+    <div class="card-body">
+        <hr>
+        <p class="card-text">City: {{ job.cities.all.first.name }}</p>
+        <p class="card-text">Requisitos: {{ job.requirements | linebreaks | truncatewords:30 }}</p>
+        <p class="card-text">Se ofrece: {{ job.it_is_offered | linebreaks | truncatewords:30 }}</p>
+        <div class="row no-margin">
+        {% if not detail %}
+            <div class="col-6-lg">
+                <a class="btn btn-primary" href="{{ job.get_absolute_url }}">Ver</a>
+            </div>
          {% endif %}
+         <div class="col-6-lg text-muted text-small text-right right-bottom">
+            {% if job.last_update_date %}
+                {{ job.last_update_date }}
+            {% else %}
+                {{ job.first_publication_date }}
+            {% endif %}
+        </div>
+        </div>
      </div>
  </div>

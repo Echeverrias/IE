@@ -16,7 +16,7 @@ $(document).ready(function(){
     function show_info_running_crawler(data) {
         console.log('show_info_running_crawler')
         if(data !== 'not running'){
-            $('#info-crawler').html(data)
+            $('.sub_container').html(data)
             state = $('#state', '<div>' + data + '<div>').attr('data-state')
             console.log('state: ' + state)
             console.log(data)
@@ -65,7 +65,7 @@ $(document).ready(function(){
 
     function display_msg(msg){
         html = '<p>' + msg + '</p>' ;
-        $('#info-crawler').html(html);
+        $('.sub-container').html(html);
     }
 
 

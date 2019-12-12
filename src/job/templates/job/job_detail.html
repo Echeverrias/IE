@@ -1,10 +1,9 @@
 {% extends 'job/base.html' %}
-{% block subtitle %}<h2 class="title">{{job.name}}</h2>{% endblock %}
 {% block job %}
-{% load job_extras %}
-<div class="detail">
-    <div class="main">
-        <p>{{job.name}}</p>
+<div class="job-detail card view remnant">
+    {% load job_extras %}
+    <h2 class="card-title title">{{job.name}}</h2>
+    <div class="card-body main">
         <div class="row">
              <div class="inline">
                 <span class="important">Estado de la oferta: </span>{{job.state}}
@@ -24,6 +23,7 @@
         <div id="location" class="row">
             <div class="inline">
                 {% if job.cities.all|length > 1 %}
+                {{ job.cities.all }}
                     <span class='important'>Ciudades: </span>{{ job.cities.all|get_attributes:'name'|join:', ' }}
                 {% else %}
                     <span class='important'>Ciudad </span>{{ job.cities.all.first.name }}

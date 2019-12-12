@@ -4,9 +4,9 @@ $(document).ready(function() {
         console.log('JS loaded from static')
 
 
-        $("div.card-body").addClass('hidden')
+        $(".job-inline div.card-body").addClass('hidden')
 
-        $(".job").click(function(event) {
+        $(".job-inline").click(function(event) {
             console.log(this);
             try{
                 //$('#' + this.id).toggleClass('details');
@@ -19,7 +19,7 @@ $(document).ready(function() {
             //$( this ).toggleClass( "highlight" );
         });
 
-        $("div.card").hover(function(event) {
+        $("div.job-inline").hover(function(event) {
             console.log('hover');
             //$('#' +this.id).toggleClass('highlight');
             $(this).toggleClass('highlight');

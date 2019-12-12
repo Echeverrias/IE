@@ -291,107 +291,16 @@ class CrawlProcess():
         return percentage
 
 
-class CrawlerScript():
 
-    def __init__(self):
-
-        self.process = None
-        self.items = []
-        self._count = 0
-        self.queue = None
-        self.x = 2
-        self.y = 3
-        self._init_signals()
-
-
-    def _init_signals(self):
-        dispatcher.connect(self._so, signals.spider_opened)
-        dispatcher.connect(self._item_scraped, signals.item_scraped)
-        dispatcher.connect(self._sc, signals.spider_closed)
-
-
-    def _so(self):
-        write_in_a_file('spider_opened 1', {'open': 'open!', 'x': self.x, 'process': self.process, 'process-pid': self.process and self.process.pid}, "t.txt")
-
-
-    def _sc(self):
-        write_in_a_file('spider_closed', {'scraped items': len(self.items)}, "t.txt")
-
-    def _item_scraped(self, item, **kwargs):
-        self._count = self._count + 1
-        write_in_a_file('item scraped', {'x':self.x, 'y': self.y, 'count':self._count, 'item': item, 'kwargs':kwargs, 'process': self.process, 'process-pid': self.process and self.process.pid}, "t.txt")
-        self.items.append(item)
-        self.queue.put_nowait(item)
-
-    def _crawl(self, queue, spider):
-        crawler = CrawlerProcess(get_project_settings())
-        crawler.crawl(spider)
-        write_in_a_file('signals', {'signals': dir(signals)}, 'task.txt')
-        write_in_a_file('._crawl start', {'process': self.process, 'process-pid': self.process and self.process.pid, 'db': dir(db), 'db.connection': dir(db.connection)}, "t.txt")
-        print(dir(db.connection))
-        db.connection.close()
-        crawler.start()
-        crawler.stop()
-        write_in_a_file('._crawl ended 1', {'qsize': self.queue.qsize() }, "t.txt")
-        queue.put_nowait(self.items)
-        write_in_a_file('._crawlended after q 2', {'qsize': queue.qsize()}, "t.txt")
-
-    def crawl(self, spider):
-        queue = Queue()
-        self.queue = Queue()
-        self.process = Process(target=self._crawl, args=(queue, spider))
-        self.process.start()
-        self.y = self.y + 100
-        write_in_a_file('.crawl 1', {'process': self.process, 'process-pid': self.process and self.process.pid, 'queue': self.queue.qsize()}, "t.txt")
-        self.process.join()
-        write_in_a_file('.crawl 2', {'process': self.process,
-                                   'process-pid': self.process and self.process.pid, 'queue': self.queue.qsize()}, "t.txt")
-        #return self.process, queue
-        #return queue.get(True)
-
-
-def run_crawler_script():
-    crawler = CrawlerScript()
-    spider = InfoempleoSpider
-    crawler.crawl(spider)
-
-
-def run_crawler_async():
-    #https://srv.buysellads.com/ads/click/x/GTND42QNC6BDCKQ7CV7LYKQMCYYIC2QJFTAD4Z3JCWSD42QYCYYIVKQKC6BIKKQIF6AI6K3EHJNCLSIZ?segment=placement:techiediariescom;
-
-    def f(q):
-        try:
-            crawler_settings = get_project_settings()
-            runner = CrawlerRunner(crawler_settings)
-            dispatcher.connect(lambda _: print('finish'), signal=signals.spider_closed)#'item_scraped'
-            dispatcher.connect(lambda _: print('item scraped'), signal=signals.item_scraped)#'item_scraped'
-            deferred = runner.crawl(InfoempleoSpider)
-            deferred.addBoth(lambda _: reactor.stop())
-            print('reactor...')
-            reactor.run()
-            print('run!!!!!')
-            q.put(None)
-        except Exception as e:
-            q.put(e)
-
-    q = Queue()
-    p = Process(target=f, args=(q,))
-    p.start()
-    result = q.get()
-    p.join()
-
-
-#@shared_task(name='run_crawler')
 @app.task(name="run_crawler")
 def run_crawler():
     #https://srv.buysellads.com/ads/click/x/GTND42QNC6BDCKQ7CV7LYKQMCYYIC2QJFTAD4Z3JCWSD42QYCYYIVKQKC6BIKKQIF6AI6K3EHJNCLSIZ?segment=placement:techiediariescom;
     write_in_a_file('run crawler start', {}, 'celery.txt')
-    Job.objects.filter(area=Job.AREA_BANKING_AND_INSURANCE).delete()
     try:
-        crawler_settings = get_project_settings()
-        runner = CrawlerRunner(crawler_settings)
         dispatcher.connect(lambda _: print('finish'), signal=signals.spider_closed)#'item_scraped'
         dispatcher.connect(lambda _: print('item scraped'), signal=signals.item_scraped)#'item_scraped'
+        crawler_settings = get_project_settings()
+        runner = CrawlerRunner(crawler_settings)
         deferred = runner.crawl(InfoempleoSpider)
         deferred.addBoth(lambda _: reactor.stop())
         print('reactor...')
@@ -401,34 +310,3 @@ def run_crawler():
         print('end!!!!!')
     except Exception as e:
        print(e)
-
-
-#@shared_task(name='print')
-@app.task(name='print_something')
-def print_something():
-    x = "print_something"
-    write_in_a_file('print_something',{},'celery.txt')
-    print(x)
-    return x
-
-
-@shared_task(name='print_something3')
-def print_something3():
-    x = "print_something3"
-    write_in_a_file('print_something3',{},'celery.txt')
-    print(x)
-    return x
-
-@shared_task(name='print_something4')
-def print_something4():
-    x = "print_something4"
-    write_in_a_file('print_something4',{},'celery.txt')
-    print(x)
-    return x
-
-@shared_task(name='print_something5')
-def print_something5():
-    x = "print_something5"
-    write_in_a_file('print_something5',{},'celery.txt')
-    print(x)
-    return x
