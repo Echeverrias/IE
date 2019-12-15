@@ -31,26 +31,40 @@ ALLOWED_HOSTS = []
 # Application definition
 
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+]
+
+OTHER_DJANGO_APPS = [
     'django_celery_monitor',
     'django_celery_beat',
     'django_celery_results',
-    'background_task',
     'django_filters',
-    'simple_history',
+]
+
+OTHER_APPS = [
+    'background_task',
     'mathfilters',
     'rest_framework',
     'import_export',
+    'widget_tweaks',
+]
+
+PROJECT_APPS = [
+    'core',
     'job',
     'chart',
     'task',
+    "account",
 ]
+
+INSTALLED_APPS = DJANGO_APPS + OTHER_DJANGO_APPS + OTHER_APPS + PROJECT_APPS
+
 
 BACKGROUND_TASK_RUN_ASYNC = True
 
@@ -78,6 +92,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'job/templates'),
             os.path.join(BASE_DIR, 'chart/templates'),
             os.path.join(BASE_DIR, 'task/templates'),
+            os.path.join(BASE_DIR, 'account/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -119,6 +134,13 @@ DATABASES = {
 }
 """
 
+# AUTHENTICATION
+LOGIN_URL = 'login'
+# Redirect to home URL after login (Default redirects to /accounts/profile/)
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
@@ -154,13 +176,24 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
+# https://medium.com/@nicole_a_tesla/django-static-files-configuration-fd5bd31907a3
+#https://stackoverflow.com/questions/26018372/where-to-keep-static-files-in-django-application-how-to-server-static-files-fro
 
-STATIC_URL = '/static/'
+STATIC_URL = '/staticfiles/'
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
+# python manage.py collectstatic
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+#STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 # celery
 CELERY_BROKER_URL = 'redis://localhost:6379'
