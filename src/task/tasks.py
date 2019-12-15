@@ -20,6 +20,7 @@ import time
 from task.models import Task
 from celery import Celery, shared_task, current_app
 from celery.schedules import crontab
+from django.db.utils import InterfaceError
 
 
 app = Celery()
@@ -46,7 +47,6 @@ class CrawlProcess():
             CrawlProcess.__instance = self
             self._id_task = None
             self.process = None
-            self.task = None
             self.q = None
             self.qitems = None
             self._count = 0
@@ -61,15 +61,34 @@ class CrawlProcess():
         dispatcher.connect(self._engine_stopped, signals.engine_stopped)
         dispatcher.connect(self._spider_error, signals.spider_error)
 
+    def _get_task(self, id):
+        if id:
+            try:
+                task = Task.objects.get(id=id)
+            except InterfaceError:
+                db.connection.close()
+                task = Task.objects.get(id=id)
+            return task
+        else:
+            return None
+
+    def _save_task(self, task):
+        try:
+            task.save()
+        except InterfaceError:
+            db.connection.close()
+            task.save()
+        return task
+
     def _spider_opened(self, *args, **kwargs):
         print(f'{multiprocessing.current_process().name}: *!!OPEN')
 
         write_in_a_file('CrawlerProcess.signal.open', {'args': args, 'kwargs': kwargs, 'process': self.process}, 'task.txt')
         self.count = 0
         try:
-            t = Task.objects.get_id(self._id_task)
+            t = self._get_task(self._id_task)
             t.name = str(self.process.pid)
-            t.save()
+            self._save_task(t)
         except Exception as e:
             t.name = e
             t.save()
@@ -80,11 +99,11 @@ class CrawlProcess():
     def _spider_closed(self, spider, reason):
         print(f'{multiprocessing.current_process().name}: *!!CLOSE')
         write_in_a_file('CrawlerProcess.signal.close', {'reason': reason}, 'task.txt')
-        t = Task.objects.get_id(self._id_task)
+        t = self._get_task(self._id_task)
         d = datetime.today()
         t.description = f'spider closed with count: {CrawlProcess.count} at {str(d)}'
         t.result = self._count
-        t.save()
+        self._save_task(t)
 
 
     def _item_scraped(self, item, response, spider):
@@ -142,18 +161,19 @@ class CrawlProcess():
         self.q.put_nowait(0)
         self.qresult = Queue()
         self.process = Process(target=self._crawl, args=())
-        self.task = Task.objects.create(user=user, state=Task.STATE_PENDING, type=Task.TYPE_CRAWLER)
-        self._id_task = self.task.pk
+        task = Task.objects.create(user=user, state=Task.STATE_PENDING, type=Task.TYPE_CRAWLER)
+        self._id_task = task.pk
 
 
     def _start_process(self):
         print(f'CrawlerProcess._start_process')
         self.init_datetime = timezone.now()  # Before create the task
         self.process.start()
-        self.task.pid = self.process.pid
+        task = self._get_task(self._id_task)
+        task.pid = self.process.pid
         write_in_a_file('CrawlProcess._start_process: process started', {'pid': self.process.pid}, 'debug.txt')
-        self.task.state = Task.STATE_RUNNING
-        self.task.save()
+        task.state = Task.STATE_RUNNING
+        self._save_task(task)
 
 
     def _reset_process(self, state=Task.STATE_FINISHED):
@@ -161,12 +181,14 @@ class CrawlProcess():
         try:
             self.process.terminate()
             write_in_a_file('_reset_process terminated (from stop)', {'is_running': self.process.is_alive()}, 'debug.txt')
-            self.task.state = state
-            self.task.save()
+            task = self._get_task(self._id_task)
+            task.state = state
+            self._save_task(task)
             self.process.join()  # ! IMPORTANT after .terminate -> .join
             try:
-                self.task.result = self.qitems().qsize()
-                self.task.save()
+                task = self._get_task(self._id_task)
+                task.result = self.qitems().qsize()
+                self._save_task(task)
             except Exception as  e:
                 print(e)
             write_in_a_file('_reset_process joinned (from stop)', {'is_running': self.process.is_alive()}, 'debug.txt')
@@ -197,7 +219,8 @@ class CrawlProcess():
         print(f'self.q.qsize(): {self.q and self.q.qsize()}')
 
         if not self.is_scrapping():
-            if self.task and (self.task.state == Task.STATE_RUNNING):
+            task = self._get_task(self._id_task)
+            if task and (task.state == Task.STATE_RUNNING): # The process has finished and we have to update the state
                 self._reset_process()
             self._init_process(user)
             self._start_process()
@@ -209,21 +232,22 @@ class CrawlProcess():
 
     def get_actual_task(self):
         self._update_process()
-        return self.task
+        return self._get_task(self._id_task)
 
 
     def get_latest_task(self):
         last_task = Task.objects.get_latest_crawler_task()
+        actual_task = self._get_task(self._id_task)
         # If the latest task from de db has state equal STATE_RUNNING and not is the actual task will be an incomplete task...
         #... and would have to update its state
         is_an_incomplete_task = (
                 last_task and
                 last_task.state == Task.STATE_RUNNING and
-                (not self.task or self.task.pk != last_task.pk)
+                (not actual_task or actual_task.pk != last_task.pk)
         )
         if is_an_incomplete_task:
             last_task.state = Task.STATE_INCOMPLETE
-            last_task.save()
+            self._save_task(last_task.id)
         return last_task
 
 
