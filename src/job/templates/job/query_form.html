@@ -1,7 +1,9 @@
 {% extends 'job/base.html' %}
 {% block job %}
 <div class="query-form view">
-    <h2 class="center">Búsquedas</h2>
+    <div class="text-center">
+        <h2>Búsquedas</h2>
+    </div>
     <div class="row">
         <div class="col-lg-6 text-center">
             {% if job_list %}
@@ -21,12 +23,7 @@
                     <button type="submit" class="btn btn-primary">Aplicar filtros</button>
                 </form>
             </div>
-            <script type="text/javascript">
-                $( function() {
-                    $("#id_datepicker").datepicker({format:'dd/mm/yyyy'});
-                    $("#id_datepicker").addClass('date');
-                } );
-             </script>
+
         </div>
     </div>
     {% if job_list %}

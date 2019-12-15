@@ -30,10 +30,23 @@
         </div>
       </li>
     </ul>
+
+    <!--
     <form class="form-inline my-2 my-lg-0">
       <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
       <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
     </form>
+    -->
+    <div class="debug">
+
+    </div>
+    <div class="account">
+      {% if request.user.is_authenticated %}
+        <p class="center">Hola {{ request.user.username }}  | <a href="{% url 'logout' %}">Logout</a></p>
+      {% else %}
+      <p class="center"><a href="{% url 'signin' %}">Registro</a>  | <a href="{% url 'login' %}">Login</a></p>
+      {% endif %}
+    </div>
   </div>
 </nav>
 <!--

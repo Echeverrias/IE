@@ -20,8 +20,9 @@ class ChromeBrowser:
     @classmethod
     def get_proxy(cls):
         #'151.253.158.19:8080',
+        # '178.46.160.64:54508',
         proxies = [
-            '178.46.160.64:54508',
+            '179.40.75.1:38736'
         ]
         return random.choice(proxies)
 

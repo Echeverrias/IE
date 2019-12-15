@@ -4,6 +4,7 @@ etc/
 include
 lib/
 share/
+staticfiles/
 zzz/
 xxx/
 yyy/

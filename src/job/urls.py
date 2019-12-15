@@ -18,12 +18,13 @@ from django.urls import path
 from .views import JobListView, JobDetailView, run
 from .filters import JobFilter
 from django_filters.views import FilterView
+from django.contrib.auth.decorators import login_required
 
 
 
 urlpatterns = [
     path("list/", JobListView.as_view(), name='list'),
     path("filter-job/", FilterView.as_view(filterset_class=JobFilter, template_name='job/filter_form.html'), name='filter_job'),
-    path("detail/<int:pk>/", JobDetailView.as_view(), name='detail'),
+    path("detail/<int:pk>/", login_required(JobDetailView.as_view()), name='detail'),
     path("run/", run, name='run'), #ñapa
 ]

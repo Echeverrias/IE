@@ -1,8 +1,15 @@
 {% load static %}
-<script>
-      var prueba = "{{prueba}}"
-      var city_name = "{{city_name}}"
-      var jobs = "{{jobs}}"
-      var selected_job = "{{selected_job}}"
+<script type="text/javascript">
+    $( function() {
+        $("#id_datepicker").datepicker({format:'dd/mm/yyyy'});
+        $("#id_datepicker").addClass('date');
+    } );
+     var prueba = "{{prueba}}"
+     var city_name = "{{city_name}}"
+     var jobs = "{{jobs}}"
+     var selected_job = "{{selected_job}}"
 </script>
-<script src="{% static 'js/job/job.js' %}"></script>
+<script src="{% static 'job/job.js' %}"></script>
+
+
+

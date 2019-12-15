@@ -51,6 +51,7 @@ form input.form-control.datetimepicker-input.date{
 }
 
 .center{
+   display:inline;
    margin: auto;
 }
 
@@ -106,6 +107,15 @@ div.row.no-margin{
 
 #admin-container{
     padding-top:3rem;
+}
+
+.debug{
+    display:inline;
+    background-color: yellow;
+}
+
+.c-w{
+    color: white;
 }
 
 /* Spinner */

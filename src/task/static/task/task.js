@@ -16,7 +16,7 @@ $(document).ready(function(){
     function show_info_running_crawler(data) {
         console.log('show_info_running_crawler')
         if(data !== 'not running'){
-            $('.sub_container').html(data)
+            $('.sub-container').html(data)
             state = $('#state', '<div>' + data + '<div>').attr('data-state')
             console.log('state: ' + state)
             console.log(data)

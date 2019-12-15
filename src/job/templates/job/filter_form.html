@@ -1,5 +1,5 @@
 {% extends 'job/base.html' %}
-{% block job %}
+{% block app %}
 
     <form method="GET" action="." enctype="multipart/form-data">{% csrf_token %}
          {{ filter.form.as_p }}

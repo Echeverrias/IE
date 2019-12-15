@@ -1,6 +1,6 @@
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponse, JsonResponse
-from .tasks import CrawlProcess, run_crawler_script
+from .tasks import CrawlProcess
 from .models import Task
 from django.contrib.auth.models import User
 from django.contrib.admin.views.decorators import staff_member_required
@@ -81,8 +81,3 @@ def run_crawler_view(request, *args):
         write_in_a_file('view request', {'is_running': is_running, 'context': context}, 'debug.txt')
         template_name = 'task/main.html'
         return render(request, template_name, context)
-
-
-def test_view(request):
-    run_crawler_script()
-    return HttpResponse('<h2>Crawler Script running</h2>')

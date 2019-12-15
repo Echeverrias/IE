@@ -14,6 +14,8 @@ import re
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 from django.shortcuts import render
 
@@ -82,10 +84,11 @@ def run(request):
     print('next!!')
     return HttpResponse("<h1>Process_async executing...</h1><a href='/'>Inicio</a>")
 
-
+# @method_decorator(login_required, name='dispatch')
 class JobDetailView(DetailView):
     model = Job
 
+@method_decorator(login_required, name='dispatch')
 class JobListView(ListView):
     model = Job
     context_object_name = 'job_list'  # your own name for the list as a template variable
@@ -103,12 +106,9 @@ class JobListView(ListView):
 
 
     def get_context_data(self, **kwargs):
-        print('CONTEXT')
          # Call the base implementation first to get the context
         context = super(JobListView, self).get_context_data(**kwargs)
          # Create any data and add it to the context
-        #context['form'] = CityNameForm()
         context['form'] = self.job_filtered_list.form
-        #context['paginate_by'] = self.paginate_by
         context['prueba'] = 'prueba job'
         return context
