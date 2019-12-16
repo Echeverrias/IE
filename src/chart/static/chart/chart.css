@@ -17,3 +17,11 @@ li.nav-item.chart a.nav-link{
 .ie-chart div.section .title{
     margin-bottom: 3em;
 }
+
+div.view{
+    text-align: center;
+}
+
+div.ie-chart ul{
+    list-style-type: none;
+}

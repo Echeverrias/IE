@@ -1,0 +1,144 @@
+<div class="charts remnant">
+    {% load static %}
+    {% load chart_extras %}
+    {% if charts_type and charts_type == "per_area" %}
+
+    <div class="row section">
+        <div class="col-lg-12">
+            <h3 class="title">Vacantes e inscripciones de ofertas totales</h3>
+        </div>
+          <div class="col-lg-6">
+              <img src='/chart/national-and-international-vacancies-or-registered-people-per-area/vacancies'
+                  width="700px" height="auto"/>
+        </div>
+        <div class="col-lg-6">
+              <img src='/chart/national-and-international-vacancies-or-registered-people-per-area/registered_people'
+                  width="700px" height="auto"/>
+          </div>
+    </div>
+
+    <div class="row section">
+         <div class="col-lg-12">
+            <h3 class="title">Vacantes e inscripciones de ofertas nacionales e internacionales</h3>
+         </div>
+         <div class="col-lg-6">
+            <img src='/chart/vacancies-and-registered-people-per-area/national'
+                  width="700px" height="auto"/>
+         </div>
+          <div class="col-lg-6">
+            <img src='/chart/vacancies-and-registered-people-per-area/international'
+                  width="700px" height="auto"/>
+        </div>
+    </div>
+
+    <div class="row section">
+         <div class="col-lg-12">
+            <h3 class="title">Vacantes e inscripciones de ofertas nacionales</h3>
+         </div>
+          <div class="col-lg-6">
+            <img src='/chart/vacancies-or-registered-people-per-area/national/vacancies'
+              width="700px" height="auto"/>
+          </div>
+            <div class="col-lg-6">
+                <img src='/chart/vacancies-or-registered-people-per-area/national/registered_people'
+              width="700px" height="auto"/>
+            </div>
+    </div>
+
+    <div class="row section">
+         <div class="col-lg-12">
+            <h3 class="title">Vacantes e inscripciones de ofertas internacionales</h3>
+         </div>
+            <div class="col-lg-6">
+                <img src='/chart/vacancies-or-registered-people-per-area/international/vacancies'
+              width="700px" height="auto"/>
+            </div>
+             <div class="col-lg-6">
+                <img src='/chart/vacancies-or-registered-people-per-area/international/registered_people'
+              width="700px" height="auto"/>
+            </div>
+    </div>
+
+
+    {% elif  charts_type and charts_type == "per_province" %}
+
+    <div class="row section">
+         <div class="col-lg-12">
+             <h3 class="title">Vacantes e inscripciones de ofertas</h3>
+          </div>
+      <div class="col-lg-6">
+          <img src='/chart/vacancies-or-registered-people-per-province/vacancies'
+              width="900px" height="auto"/>
+      </div>
+
+      <div class="col-lg-6">
+          <img src='/chart/vacancies-or-registered-people-per-province/registered_people'
+              width="900px" height="auto"/>
+      </div>
+
+    </div>
+
+    {% elif  charts_type and charts_type == "per_company" %}
+    <div class="row section">
+         <div class="col-lg-12">
+            <h3 class="title">Compañías con más ofertas de empleo</h3>
+         </div>
+        <div class="col-lg-6">
+            <img src='/chart/companies-with-more-vacancies/national'
+              width="700px" height="auto"/>
+        </div>
+        <div class="col-lg-6">
+          <img src='/chart/companies-with-more-vacancies/international'
+              width="700px" height="auto"/>
+      </div>
+    </div>
+
+    {% elif  charts_type and charts_type == "salaries_per_area" %}
+
+    <div class="row section">
+         <div class="col-lg-12">
+            <h3 class="title">Salarios brutos anuales</h3>
+         </div>
+       <div class="col-lg-6">
+          <img src='/chart/salaries-per-area/national'
+              width="700px" height="auto"/>
+      </div>
+      <div class="col-lg-6">
+          <img src='/chart/salaries-per-area/international'
+              width="700px" height="auto"/>
+      </div>
+    </div>
+
+        {% if charts_type == "salasdsdsds_per_area" %}
+        <div class="row">
+          <img src='/chart/national-and-international-salaries-per-area'
+              width="700px" height="auto"/><br>
+
+
+             <img src='/chart/salaries-per-area/international'
+              width="700px" height="auto"/><br>
+      </div>
+        {% endif %}
+
+     {% elif  charts_type and charts_type == "salaries_per_province" %}
+    <div class="row section">
+         <div class="col-lg-12">
+            <h3 class="title">Salarios brutos anuales por área</h3>
+         </div>
+       <div class="col-lg-12">
+          <img src='/chart/salaries-per-province'
+              width="1000px" height="auto"/><br>
+      </div>
+    </div>
+
+{% endif %}
+
+
+{% comment %}
+   <h3>Some charts examples</h3>
+   <img src='/chart/vacancies-or-registered-people-per-area/vacancies/national' width="700px" /><br>
+   <img src='{% url  view_name %}' width="700px" /><br>
+   <img src='{{ url }}' width="700px" /><br>
+{% endcomment %}
+
+</div>

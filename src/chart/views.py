@@ -1,6 +1,9 @@
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from utilities import trace
+from job.models import Job
 from .dataframes import (
     get_vacancies_per_area_df,
     get_registered_people_per_area_df,
@@ -10,7 +13,6 @@ from .dataframes import (
     get_registered_people_per_province_gdf,
     get_salary_per_province_gdf,
     get_companies_with_more_vacancies_df,
-
 )
 from .figures import (
     get_buffer_of_plot,
@@ -47,15 +49,30 @@ def _get_vacancies_or_registered_people_per_area_buffer(vacancies_or_registered_
     data = []
     legend = None
     if show_national_vacancies and show_international_vacancies:
-        title = f'{sub} por área'
+        if sub == "Vacantes":
+            title = f'{sub} nacionales e internacionales por área'
+        elif sub == "Gente registrada":
+            title = f'{sub} por área en vacantes nacionales e internacionales'
+        else:
+            title = f'{sub} nacionales e internacionales por área'
         legend=(['nacional', 'internacional'], 'upper right')
         data.append(df.loc[df['nationality']=='nacional', vacancies_or_registered_people])
         data.append(df.loc[df['nationality']=='internacional', vacancies_or_registered_people])
     elif show_national_vacancies:
-        title = f'{sub} por área en España'
+        if sub == "Vacantes":
+            title = f'{sub} por área en España'
+        elif sub == "Gente registrada":
+            title = f'{sub} en vacantes nacionales'
+        else:
+            title = f'{sub} por área en España'
         data.append(df[vacancies_or_registered_people])
     else:
-        title = f'{sub} por área en el extranjero'
+        if sub == "Vacantes":
+            title = f'{sub} por área en el extranjero'
+        elif sub == "Gente registrada":
+            title = f'{sub} en vacantes internacionales'
+        else:
+            title = f'{sub} por área en el extranjero'
         data.append(df[vacancies_or_registered_people])
 
     buffer_value = get_buffer_of_plot(df['area'].unique(), data, 'Áreas', sub, title, legend, True, ('area', df['area'].unique()))
@@ -159,10 +176,10 @@ def _get_companies_with_more_vacancies_buffer(show_national_areas=True, show_int
     data = []
     legend = None
     if not show_international_areas:
-        title = "Compañías nacionales"
+        title = "Vacantes nacionales"
         data.append(df['vacancies'])
     elif not show_national_areas:
-        title = "Compañías internacional"
+        title = "Vacantes internacionales"
         data.append(df['vacancies'])
     else:
         title = "Compañías que ofrecen más vacantes"
@@ -222,25 +239,44 @@ def salaries_per_province_view(request):
     buffer_value = _get_salaries_per_province_buffer()
     return _get_response_from_buffer_value(buffer_value, 'image/png')
 
+def _get_statistics_context():
+    available_offers = Job.objects.available_offers()
+    national_offers = available_offers.filter(type=Job.TYPE_NATIONAL)
+    international_offers = available_offers.filter(type=Job.TYPE_INTERNATIONAL)
+    first_job_offers = available_offers.filter(type=Job.TYPE_FIRST_JOB)
+    available_offers_size = available_offers.count()
+    national_offers_size = national_offers.count()
+    international_offers_size = international_offers.count()
+    first_job_offers_size = first_job_offers.count()
+    available_offers_vacancies = available_offers.aggregate(Sum('vacancies')).get('vacancies__sum')
+    national_offers_vacancies = national_offers.aggregate(Sum('vacancies')).get('vacancies__sum')
+    international_offers_vacancies = international_offers.aggregate(Sum('vacancies')).get('vacancies__sum')
+    first_job_offers_vacancies = first_job_offers.aggregate(Sum('vacancies')).get('vacancies__sum')
+    statistics_context = {
+        'available_offers': available_offers_size,
+        'available_offers_vacancies': available_offers_vacancies,
+        'national_offers_vacancies_percentage': round(national_offers_vacancies / available_offers_vacancies, 2),
+        'international_offers_vacancies_percentage': round(international_offers_vacancies / available_offers_vacancies, 2),
+        'first_job_offers_vacancies_percentage': round(first_job_offers_vacancies / available_offers_vacancies, 2),
+    }
+    return statistics_context
 
+@login_required
 def main_view(request):
     print('main_view')
     template_name = 'chart/main.html'
-    context = None
+    context = _get_statistics_context()
     print(f'request.GET: {request.GET}')
-    try:
-        charts_type = request.GET['charts_type']
-        context = {
-            'charts_type': charts_type,
-            'month': date.today().month,
-            'url': "img/chart/10/national_salaries_per_area.png"
-        }
-    except Exception as e:
-        pass
-
-   # return HttpResponse('<img src="/chart/one_example/" width="600px" />')
+    charts_type = request.GET.get('charts_type')
+    print(f'charts_type: {charts_type}')
+    get_context = {
+        'charts_type': charts_type,
+        'month': date.today().month,
+        'url': "img/chart/10/national_salaries_per_area.png"
+    }
+    context = {**context, **get_context}
+    # return HttpResponse('<img src="/chart/one_example/" width="600px" />')
     return render(request, template_name, context)
-    # return response
 
 
 if __name__ != '__main__':

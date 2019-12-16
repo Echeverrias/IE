@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Gráficos{% endblock %}
 {% block extra_css%}{% include 'chart/css.html' %}{% endblock %}
+{% block extra_js%}{% include 'chart/js.html' %}{% endblock %}
 {% block content %}
-    <h2 class="title">Gráficos</h2>
     <div class="ie-chart app-container">
         {% block app %}
         {% endblock %}
