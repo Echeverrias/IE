@@ -5,9 +5,8 @@ from job.models import Job
 from django.db.models import Sum, Count, Avg, Q, F, Value
 from django.db.models.functions import Concat
 from utilities import trace, Lock
-
 from collections import namedtuple
-
+from datetime import date
 # Creamos el constructor de la 'namedtuple'
 Annotation = namedtuple('Annotation', 'new_column operator column')
 
@@ -15,6 +14,51 @@ SPAIN_FILE = 'chart/data/spain.geojson'
 
 def get_job_queryset():
     return Job.objects.all().exclude_first_job().exclude_expirated_offers().annotate_location().annotate_mean_salary()
+
+def apply_filter_to_queryet(filter_description, **kwargs):
+    qs = kwargs.get('qs')
+    year = kwargs.get('year')
+    if not qs:
+        qs = get_job_queryset
+    if not year:
+        year = date.today().year
+    qs_d = {
+        'exclude_nationality_national': lambda *args : args[0].interationals(),
+        'filter_nationality_international': lambda *args: args[0].interationals(),
+        'exclude_nationality_international': lambda *args : args[0].nationals(),
+        'filter_nationality_national': lambda *args : args[0].nationals(),
+        'filter_available_jobs_in_year': lambda *args: args[0].availables_in_year(args[1]),
+        'filter_publication_date_jobs_in_year': lambda *args: args[0].availables_in_year(args[1]),
+        'i_filter_available_jobs_in_years_ago': lambda *args: gen_historical_available_jobs(args[1],args[0]),
+        'i_filter_publication_date_jobs_in_years_ago': lambda *args: gen_historical_first_publication_date_jobs(args[1],args[0]),
+    }
+    return qs_d.get(filter_description, lambda :None)(qs, year)
+
+
+
+def _gen_years_ago_range(n_years_ago=3):
+    actual_year = date.today().year
+    init_year = actual_year - n_years_ago
+    end_year = actual_year
+    earliest_job = Job.objects.earliest('created at')
+    earliest_job_year = earliest_job.created_at.year
+    start_year = init_year if (earliest_job_year <= init_year) else earliest_job_year
+    for i in range(start_year, end_year + 1):
+        yield i
+
+def gen_historical_available_jobs(n_years_ago=3, qs=None):
+    if not qs:
+        qs = Job.objects.all()
+    for i in _gen_years_ago_range(n_years_ago):
+        yield qs.availables_in_year(i)
+
+def gen_historical_first_publication_date_jobs(n_years_ago=3, qs=None):
+    if not qs:
+        qs = Job.objects.all()
+    for i in _gen_years_ago_range(n_years_ago):
+        yield qs.first_publication_date_in_year(i)
+
+
 
 @trace
 def fill_missings_group_by(df, groupby, groupby2, default_value):

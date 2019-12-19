@@ -100,6 +100,11 @@ def insert_locations():
     insert_provinces()
     insert_cities()
 
+def create_languages():
+    for l in Language.LANGUAGES:
+        for l_ in Language.LEVELS:
+            Language.objects.get_or_create(name=l, level=l_)
+
 
 def delete_cities_with_spaces():
     qs = City.objects.all()

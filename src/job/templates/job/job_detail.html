@@ -1,7 +1,8 @@
 {% extends 'job/base.html' %}
 {% block app %}
 <div class="job-detail card view remnant">
-    {% load job_extras %}
+    {% load custom_extras %}
+    {% load model_extras %}
     <h2 class="card-title title">{{job.name}}</h2>
     <div class="card-body main">
         <div class="row">
@@ -23,8 +24,7 @@
         <div id="location" class="row">
             <div class="inline">
                 {% if job.cities.all|length > 1 %}
-                {{ job.cities.all }}
-                    <span class='important'>Ciudades: </span>{{ job.cities.all|get_attributes:'name'|join:', ' }}
+                    <span class='important'>Ciudades: </span>{{ job.cities.all|model_list_to_dict_list|get_attributes:'name'|join:', ' }}
                 {% else %}
                     <span class='important'>Ciudad </span>{{ job.cities.all.first.name }}
                 {% endif %}

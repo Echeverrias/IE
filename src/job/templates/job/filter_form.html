@@ -12,7 +12,7 @@
         <h3 class="title">Resultados encontrados</h3><br>
         {% include 'job/job_list.html' with job_list=filter.qs %}
     {% else  %}
-        <p>No se han encontrado resultyados de búsqueda con el nombre {{ city_name }}</p>
+        <p>No se han encontrado resultados de búsqueda con el nombre {{ city_name }}</p>
     {% endif %}
     {% include 'job/pagination.html' with is_paginated=is_paginated  page_obj=page_obj  paginator=paginator %}
 

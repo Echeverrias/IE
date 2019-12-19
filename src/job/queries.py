@@ -99,12 +99,28 @@ class JobQuerySet(models.QuerySet):
         except:
             return self.none()
 
-    def available_timedelta_ago(self, timedeltadict):
+    def first_publication_or_updated_timedelta_ago(self, timedeltadict):
         try:
             today = datetime.today()
             td = timedelta(**timedeltadict)
             dt = today - td
-            return self.available_offers().filter(Q(first_publication_date__gte=dt) | Q(last_updated_date__gte=dt))
+            return self.available_offers().filter(Q(first_publication_date__gte=dt) | Q(last_updated_date__gte=dt)).available_offers()
         except:
             return self.none()
+
+    def availables_in_year(self, year):
+        return self.filter(
+            Q(first_publication_date__year=year) |
+            Q(last_updated_date__year=year)  |
+            Q(expiration_date__year=year)).exclude(
+                Q(state=STATE_CLOSED_JOB) &
+                Q(updated_at__year__lt=year))
+
+    def first_publication_date_in_year(self, year):
+        return self.filter(first_publicaction_date__year=year)
+
+    def first_publication_date_in_month(self, month):
+        return self.filter(first_publicaction_date__month=month)
+
+
 

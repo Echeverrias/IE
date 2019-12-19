@@ -446,8 +446,5 @@ class Job(models.Model):
 
 
 
-def _create_languages():
-    for l in Language.LANGUAGES:
-        for l_ in Language.LEVELS:
-            Language.objects.get_or_create(name=l, level=l_)
+
 

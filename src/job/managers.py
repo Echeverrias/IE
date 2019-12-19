@@ -74,6 +74,16 @@ class JobManager(models.Manager):
     def last_updated_date_timedelta_ago(self, timedeltadict):
         return self.get_queryset().last_updated_date_timedelta_ago(timedeltadict)
 
-    def available_timedelta_ago(self, timedeltadict):
-        return self.get_queryset().available_timedelta_ago(timedeltadict)
+    def first_publication_or_updated_timedelta_ago(self, timedeltadict):
+        return self.get_queryset().first_publication_or_updated_timedelta_ago(timedeltadict)
+
+    def availables_in_year(self, year):
+        return self.get_queryset().availables_in_year(year)
+
+    def first_publication_date_in_year(self, year):
+        return self.get_queryset().first_publication_date_in_year(year)
+
+    def first_publication_date_in_month(self, month):
+        return self.get_queryset().first_publication_date_in_month(month)
+
 

@@ -4,6 +4,7 @@ html, body{
     width: 100%;
     height: auto
 }
+
 body{
     padding: 1em
 }
@@ -16,8 +17,13 @@ main .container{
     padding-top: 1rem;
 }
 
-.app-container{
+div.app-container{
     padding-top: 1rem;
+    display: block;
+}
+
+div.remnant{
+    display:bloc;
 }
 
 .title{
@@ -116,6 +122,10 @@ div.row.no-margin{
 
 .c-w{
     color: white;
+}
+
+.bg-white-smoke{
+    background-color: rgb(245,245,245);
 }
 
 /* Spinner */
