@@ -1,10 +1,12 @@
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponse, JsonResponse
-from .tasks import CrawlProcess
+from .tasks import CrawlProcess, bg_run_crawler
 from .models import Task
 from django.contrib.auth.models import User
 from django.contrib.admin.views.decorators import staff_member_required
 from utilities import write_in_a_file
+from background_task.models import Task as tsk
+from job.models import Job
 
 import time
 
@@ -81,3 +83,12 @@ def run_crawler_view(request, *args):
         write_in_a_file('view request', {'is_running': is_running, 'context': context}, 'debug.txt')
         template_name = 'task/main.html'
         return render(request, template_name, context)
+
+
+def bg_run_crawler_view(request):
+    print('')
+    print('bg_run_crawler_view')
+    print(dir(tsk))
+    Job.objects.filter(state=Job.AREA_LEGAL).delete()
+    bg_run_crawler(repeat=tsk.HOURLY)
+    return HttpResponse(f'<h1>Running!! {tsk.HOURLY}</h1>')

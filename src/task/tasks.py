@@ -21,6 +21,7 @@ from task.models import Task
 from celery import Celery, shared_task, current_app
 from celery.schedules import crontab
 from django.db.utils import InterfaceError
+from background_task import background
 
 
 app = Celery()
@@ -334,3 +335,30 @@ def run_crawler():
         print('end!!!!!')
     except Exception as e:
        print(e)
+
+
+@background(schedule=10)
+def bg_run_crawler():
+    #https://srv.buysellads.com/ads/click/x/GTND42QNC6BDCKQ7CV7LYKQMCYYIC2QJFTAD4Z3JCWSD42QYCYYIVKQKC6BIKKQIF6AI6K3EHJNCLSIZ?segment=placement:techiediariescom;
+    write_in_a_file('run crawler start', {}, 'bg-task.txt')
+    def start():
+        try:
+            dispatcher.connect(lambda _: print('finish'), signal=signals.spider_closed)#'item_scraped'
+            dispatcher.connect(lambda _: print('item scraped'), signal=signals.item_scraped)#'item_scraped'
+            crawler_settings = get_project_settings()
+            runner = CrawlerRunner(crawler_settings)
+            deferred = runner.crawl(InfoempleoSpider)
+            deferred.addBoth(lambda _: reactor.stop())
+            print('reactor...')
+            print('run!!!!!')
+            reactor.run()
+            write_in_a_file('run crawler end', {}, 'bg-task.txt')
+            print('end!!!!!')
+        except Exception as e:
+           print(e)
+
+    p = Process(target=start)
+    p.start()
+    print('process started')
+    p.join()
+    print('process joined')
