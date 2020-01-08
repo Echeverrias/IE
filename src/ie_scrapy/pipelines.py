@@ -676,6 +676,7 @@ class StorePipeline(object):
             ##ñapa ########################
             self._set_location(job, item)
             self._set_languages(job, item)
+            job.save()
             ###############################
             self._update_job(job, item)
         else:
@@ -683,6 +684,7 @@ class StorePipeline(object):
             print('NEW JOB CREATED')
             self._set_location(job, item)
             self._set_languages(job, item)
+            job.save()
         print('#store_job: %s'%job)
         return job
 
