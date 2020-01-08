@@ -32,10 +32,6 @@ class InfoempleoSpider(Spider):
     allowed_domains = ['infoempleo.com']
 
     start_urls = [
-        "https://www.infoempleo.com/trabajo/area-de-empresa_legal/",
-    ]
-
-    start_urlss = [
         "https://www.infoempleo.com/ofertas-internacionales/",
         "https://www.infoempleo.com/primer-empleo/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/",
@@ -55,29 +51,6 @@ class InfoempleoSpider(Spider):
         "https://www.infoempleo.com/trabajo/area-de-empresa_recursos-humanos/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_telecomunicaciones/",
     ]
-
-    start_urls3 = [
-                "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_ingenieria-y-produccion/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_profesionales-artes-y-oficios/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_compras-logistica-y-transporte/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_sanidad-salud-y-servicios-sociales/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_hosteleria-turismo/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_administracion-de-empresas/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_administrativos-y-secretariado/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_atencion-al-cliente/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_banca-y-seguros/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_calidad-id-prl-y-medio-ambiente/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_construccion-e-inmobiliaria/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_educacion-formacion/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_internet/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_legal/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_marketing-y-comunicacion/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_medios-editorial-y-artes-graficas/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_recursos-humanos/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_tecnologia-e-informatica/",
-                "https://www.infoempleo.com/trabajo/area-de-empresa_telecomunicaciones/",
-                ]
 
 
     allowed_hrefs = [
@@ -108,10 +81,10 @@ class InfoempleoSpider(Spider):
         except Exception as e:
             print(f'Error_: {e}')
         print('### ')
+
+
         for job_url in job_urls:
             print('# Go to job_url: %s', job_url)
-            #job_url = "https://www.infoempleo.com/ofertasdetrabajo/convocatorias-de-trece-plazas-para-diferentes-departamentos-de-la-cnmv/palencia/2576093/"
-            #job_url = "https://www.infoempleo.com/ofertasdetrabajo/tecnicoa-back-office-reclamaciones-sustitucion-it/las-rozas/2577780/"
             yield response.follow(job_url, self.parse_item, meta={
                 UrlsState.KEY_START_URL: start_url,
                 UrlsState.KEY_TOTAL_RESULTS: total_results,
@@ -258,9 +231,9 @@ class InfoempleoSpider(Spider):
 
     def _get_company_name(self, response):
         company_name = (
+            self._extract_info(response, "//div[@class='company']//*[@class='title']/text()") or
             self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li[child::a]/a/text()") or
             self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li[2]/text()") or
-            self._extract_info(response, "//div[@class='company']//*[@class='title']/text()") or
             '?'
         )
         company_name = company_name.strip()
