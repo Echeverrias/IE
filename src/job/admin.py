@@ -35,7 +35,7 @@ class JobAdmin(ImportExportModelAdmin):
             'fields': [('state'), ('first_publication_date', 'last_update_date', 'expiration_date')]
         }),
         ('Principal', {
-            'fields': [('name'), ('id', 'link', 'type'),('summary'),('cities'),('cityname', 'provincename','countryname')]
+            'fields': [('name'), ('id', 'link', 'type'),('summary'),('cities', 'province', 'country'),('cityname', 'provincename','countryname')]
         }),
         ('Summary1', {
             'fields': [('_experience', '_salary', '_working_day', '_contract')]
@@ -81,13 +81,13 @@ class JobInLine(admin.TabularInline):
 
 @admin.register(Company) #admin.site.register(Quote, QuoteAdmin)
 class CompanyAdmin(ImportExportModelAdmin): #class CompanyAdmin(admin.ModelAdmin):
-    list_display = ['company_name', '_jobs']
-    list_filter = ['company_name', 'company_city']
-    search_fields = ['company_name']
+    list_display = ['name', '_jobs']
+    list_filter = ['name', 'city']
+    search_fields = ['name']
     """
     fieldsets = [
         ('Company', {
-            'fields': ['company_description', 'company_category', 'company_offers', company_city']
+            'fields': ['description', 'category', 'offers', city']
         }),
 
     ]

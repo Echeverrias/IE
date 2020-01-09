@@ -174,13 +174,13 @@ class InfoempleoSpider(Spider):
         print('PARSE_ITEM')
         print (response.url)
         company_dict = {
-            'company_link': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li/a/@href"),
-            'company_name': self._get_company_name(response),
-            'company_description': self._extract_info(response, "//div[@class='company']//pre/text()") or
+            'link': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li/a/@href"),
+            'name': self._get_company_name(response),
+            'description': self._extract_info(response, "//div[@class='company']//pre/text()") or
                                    self._extract_info(response, "//div[@id='content']//pre[1]/text()"),
-            'company_city_name': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[child::span]/text()"),
-            'company_category': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[@class='category']/text()"),
-            'company_offers': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[child::a]/a/text()")
+            'city_name': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[child::span]/text()"),
+            'category': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[@class='category']/text()"),
+            'offers': self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[child::a]/a/text()")
         }
 
         # doesn't support ManyToManyFields

@@ -340,10 +340,10 @@ class CleanPipeline(CleanupPipeline_):
 
 
     def _clean_company(self, item):
-        item['company_name'] = self.clean_string(item['company_name'])
-        item['company_link'] = self._clean_url(item['company_link'])
-        item['company_offers'] = get_int_from_string(item['company_offers'])
-        item['company_city_name'] = self._clean_city(item['company_city_name'])
+        item['name'] = self.clean_string(item['name'])
+        item['link'] = self._clean_url(item['link'])
+        item['offers'] = get_int_from_string(item['offers'])
+        item['city_name'] = self._clean_city(item['city_name'])
         return item
 
     def _clean_job(self, item):
@@ -545,25 +545,27 @@ class StorePipeline(object):
         debug['company'] = item
         company_dict = item.get_dict_deepcopy()
         write_in_a_file(f'StorePipeline._store_company: 1', {'company_dict': company_dict}, 'pipeline_company.txt')
-        company_id = company_dict.pop('company_name', None)
+        company_id = company_dict.pop('name', None)
         write_in_a_file(f'StorePipeline._store_company: 2', {'company_id': company_id}, 'pipeline_company.txt')
         write_in_a_file(f'StorePipeline._store_company: 3', {'company_city_name': company_dict['company_city_name']}, 'pipeline_company.txt')
-        city = self._get_city(company_dict['company_city_name'])
+        city = self._get_city(company_dict['city_name'])
         write_in_a_file(f'StorePipeline._store_company: 4', {'city': city}, 'pipeline_company.txt')
         company_dict.setdefault('created_at', timezone.now())
-        company_dict.setdefault('company_city', city)
+        company_dict.setdefault('city', city)
         company = None
         print('$$1')
         try:
-            company, is_a_new_company_created = Company.objects.get_or_create(company_name=company_id, defaults=company_dict)
+            company, is_a_new_company_created = Company.objects.get_or_create(name=company_id, defaults=company_dict)
             write_in_a_file(f'StorePipeline._store_company: 5', {'company': company, 'is_new':is_a_new_company_created}, 'pipeline.txt')
             if not is_a_new_company_created:
                 #ñapa
-                company.company_city = city
-                company.save()
+                c_city = company.city
+                if c_city != city:
+                    company.city = city
+                    company.save()
                 ############
-                if company.company_offers != company_dict['company_offers']:
-                    company.company_offers = company_dict['company_offers']
+                if company.offers != company_dict['offers']:
+                    company.company_offers = company_dict['offers']
                     company.updated_at = timezone.now()
                     company.save()
         except Exception as e:

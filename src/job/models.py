@@ -128,17 +128,17 @@ class City (models.Model):
 
 
 class Company(models.Model):
-    company_name = models.CharField(unique = True, primary_key=True, max_length=250)
-    company_link = models.URLField(null=True)
-    company_description = models.TextField(null=True)
-    company_city_name = models.CharField(max_length=50, null=True)
-    company_city = models.ForeignKey(City,
+    name = models.CharField(unique = True, primary_key=True, max_length=250)
+    link = models.URLField(null=True)
+    description = models.TextField(null=True)
+    city_name = models.CharField(max_length=50, null=True)
+    city = models.ForeignKey(City,
                             on_delete=models.CASCADE,
                             related_name='companies',
                             null = True, blank = True)
-    company_category = models.CharField(null=True, max_length=100)
-    company_offers = models.IntegerField(null=True, blank=True)
-    company_slug= models.CharField(max_length=100, null=True, blank = True)
+    category = models.CharField(null=True, max_length=100)
+    offers = models.IntegerField(null=True, blank=True)
+    slug= models.CharField(max_length=100, null=True, blank = True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)  # models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)  # models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
@@ -146,17 +146,17 @@ class Company(models.Model):
     class Meta:
         verbose_name = "Company"
         verbose_name_plural = "Companies"
-        ordering = ['company_name']
+        ordering = ['name']
 
     def save(self, *args, **kwargs):
         try:
-            self.company_slug = slugify(self.company_name)
+            self.slug = slugify(self.name)
         except:
             pass
         super(Company, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.company_name
+        return self.name
 
 class Language(models.Model):
 
@@ -404,7 +404,12 @@ class Job(models.Model):
         #unique_together = (('id'),)
 
     def __str__(self):
-        return "%s - %s (%s)" % (self.name, self.type, self.cities)
+        city = ""
+        try:
+            city = " - %s" % ( self.cities.all().first())
+        except:
+            pass
+        return "%s - %s%s" % (self.name, self.type, city)
 
     def save(self, *args, **kwargs):
         try:
@@ -417,7 +422,7 @@ class Job(models.Model):
         return reverse('detail', args=[str(self.pk)])
 
     def company_link_(self):
-        return self.company.company_link
+        return self.company.link
 
     def fields(self):
         return [field['name'] for field in self._meta.fields]
