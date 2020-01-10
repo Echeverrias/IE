@@ -22,7 +22,7 @@ apply_upper_to_author.short_description = 'Apply upper to the author field'
 class JobAdmin(ImportExportModelAdmin):
     resource_class = JobResource
     # Si no se declara 'list_display' mostrará por defecto su conversión a string
-    list_display = ['name', 'state', 'type', 'contract', 'working_day', 'category_level', 'area', 'company', 'display_cities']
+    list_display = ['name', 'state', 'type', 'contract', 'working_day', 'category_level', 'area', 'company', '_location']
     list_filter =  ['type','contract','working_day', 'nationality', 'area']
     #search_fields = ['name', 'id', 'functions', 'requirements', 'it_is_offered']
     search_fields = ['name', 'id', 'functions', 'requirements', 'it_is_offered']
@@ -60,17 +60,20 @@ class JobAdmin(ImportExportModelAdmin):
         })
     ]
 
-    #Job.display_cities
-    def _cities(self, obj):
+    def _location(self, obj):
         cities = obj.cities.all()[0:3]
         if cities:
-            names = [city.name for city in cities]
-            return f'{", ".join(names)} ({cities[0].country.name})'
+            city_names = [city.name for city in cities]
+            return f'{", ".join(city_names)}{" - " + obj.province.name if obj.province and not obj.province.name in city_names else ""} ({cities[0].country.name})'
         else:
-            return None
+            province = obj.province
+            if province:
+                return f'{province.name} {"(" + obj.country.name + ")" if obj.country else ""}'
+            else:
+                None
 
-
-    _cities.short_description = 'Cities (Country)'
+    # Field name of '_location' in list_display
+    _location.short_description = 'Location'
 
 
     #actions = [apply_upper_to_author]
