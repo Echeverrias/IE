@@ -11,6 +11,7 @@ import datetime
 from django.utils import timezone
 from django.db.utils import InterfaceError
 from django import db
+from django.db.models.functions import Length
 import copy
 from dateutil.relativedelta import relativedelta
 from job.models import Job, Company, Country, City, Province, Language
@@ -39,11 +40,6 @@ from utilities import (
 
 )
 
-import time
-from .items import JobItem, CompanyItem
-from django.db import transaction
-
-
 debug={'location':None, 'value':None, 'value_in': None, 'value_out':None}
 
 
@@ -53,6 +49,8 @@ class CleanupPipeline_(object):
         print('#clean_string: %s'%string)
         try:
             clean_string = string.strip()
+            if clean_string.endswith('.'):
+                clean_string = clean_string[:-1]
         except Exception as e:
             clean_string = ''
         return clean_string
@@ -77,7 +75,7 @@ class CleanPipeline(CleanupPipeline_):
         origin = 'https://www.infoempleo.com'
         href = pathname_or_href
         try:
-            if not (origin in pathname_or_href):
+            if pathname_or_href and not (origin in pathname_or_href):
                 href = origin + pathname_or_href
         except Exception as e:
             print('Error in CleanupPipeline._clean_url(%s): %s'%(href,e))
@@ -191,14 +189,6 @@ class CleanPipeline(CleanupPipeline_):
             return "nacional"
 
 
-    def _company_id_cleanup2(self, url):
-        # DEPRECATED
-        try:
-            href = self._clean_url(url)
-            return href.split('/')[-2]
-        except:
-            return "." #%
-
     def _clean_job_date(self, string):
         print(f'CleanPipeline._clean_job_date({string})')
         today = datetime.date.today()
@@ -272,7 +262,7 @@ class CleanPipeline(CleanupPipeline_):
         KEYS = {
             'year': ['bruto anual', 'b/a', 'bruto al año'],
             'month': ['bruto mensual', 'b/m', 'bruto al mes'],
-            'day': ['bruto al día', 'b/d', 'bruto al día'],
+            'day': ['bruto al día', 'b/d', 'bruto al dia'],
         }
         salary = [None, None]
         if text:
@@ -338,10 +328,173 @@ class CleanPipeline(CleanupPipeline_):
             item['first_publication_date'] = None
         return item
 
+    def _clean_company_name(self, company_item):
+
+        def _get_company_name_in_resume(resume):
+            try:
+                match = re.search(r'S.(L|A)|S.l.u| slu| S(L|A)', resume)
+                result = resume if (match or resume.isupper()) else ''
+            except:
+                result = ""
+            return result
+
+        def _get_company_name_in_description(description):
+
+            def _get_company_name_from_description_start(string):
+                words = string.split(" ")
+                result = []
+                for word in words:
+                    if word.islower() or word == "Para":
+                        break
+                    elif (word.istitle() and word != "En") or word.isupper():
+                        result.append(word)
+                if result and len(result) > 1:
+                    return " ".join(result)
+                else:
+                    return ""
+
+            # Comprobamos si hay algun indicio de que aparezca el nombre de la empresa
+            to_search = [' es una empresa', ' es una compañía', ', empresa ', ', Empresa ', ', compañía ',
+                         ', Compañía ']
+            for i in to_search:
+                try:
+                    index = description.index(i)
+                    break
+                except:
+                    index = 0
+            result = ''
+            if index:
+                if result.startswith('Para '):  # Para Cantabria, Empresa dedicada al sector...
+                    return ''
+                # Nos quedamos com la parte inicial de la descripción donde puede esatr el nombre de la empresa
+                result = description[0:index]
+                # Hacemos una limpieza del final de la cadena resultante
+                result = result[0:-1] if result.endswith(',') else result
+                to_search = ['\n', '\t', '\r']
+                for i in to_search:
+                    try:
+                        index = result.index(i)
+                        break
+                    except:
+                        index = 0
+                if index:
+                    result = result[0:index]
+                result = result.strip()
+                # Obtenemos el nombre buscando las palabras que empiecen por mayúscula
+                result = _get_company_name_from_description_start(result)
+            return result
+
+        if not company_item['link']:
+            name = _get_company_name_in_resume(company_item['resume']) if company_item['resume'] else ''
+            if not name:
+                name = _get_company_name_in_description(company_item['description']) if company_item['description'] else ''
+        else:
+            name = self.clean_string(company_item['name'])
+        return name
+
+    def _clean_company_category(self, company_item):
+
+        def _get_company_category_in_resume(resume):
+            result = ""
+            try:
+                result = re.sub(
+                    r"(((Importante|Destacada|Reconocida|Gran) )?empresa (l(i|í)der )?(dedicada )?((en|de|a) (el|la|los|las)|del|de|al) )", "", resume, flags=re.I)
+                if result != resume:
+                    result = result.replace('.', '').strip()
+                    result_lower = result.lower()
+                    result = '' if (result_lower == 'sector' or "nacional" in result_lower) else result
+                else:
+                    result = ""
+            except:
+                pass
+            return result
+
+        def _get_company_category_in_description(desc):
+
+            def clean_final_coma(string):
+                return string[0:-1] if string.endswith(',') else string
+
+            category = ""
+            to_search = ['Empresa', 'empresa', 'Compañía', 'compañía']
+            for i in to_search:
+                try:
+                    index = desc.index(i)
+                    break;
+                except:
+                    index = -1
+            if index >= 0:
+                category_text = desc[index + len(i) + 1:]
+                len_category_text = len(category_text)
+                to_search = ['Zona', ' ubicada', ' zona', 'centro', 'Centro', 'oficina', ';', 'província', 'provincia',
+                             'ciudad', 'Comunidad', ':', '.', '\n', '\t', '\r']
+                index = len_category_text
+                for i in to_search:
+                    try:
+                        aux_index = category_text.index(i)
+                    except:
+                        aux_index = len_category_text
+                    finally:
+                        index = aux_index if aux_index < index else index
+                category_text = category_text[0:index]
+                category_text = category_text.replace('España', "").replace('Española', "")
+                words = category_text.split(" ")
+                count = 0
+                result = []
+                aux = []
+                init_count = False
+                coma_found = False
+                location_found = False
+                prohibited_words = ['Líder', 'Lider', 'Dedicada', "Nacional", "Multinacional"]
+                for word in words:
+                    count += 1
+                    if aux and aux[-1] in ['en', 'para'] and (word.istitle() or word.isupper()):  # 'xxxx en Segovia'
+                        aux.pop()
+                        location_found = True
+                        break
+                    elif (word.istitle() or word.isupper()) and (not word in prohibited_words):
+                        if aux and (not init_count):
+                            aux = []
+                        elif aux:
+                            for i in aux:
+                                result.append(i)
+                            aux = []
+                        aux_word = clean_final_coma(word)
+                        coma_found = aux_word != word
+                        result.append(aux_word)
+                        init_count = True
+                    elif init_count and (not coma_found) and (not word in prohibited_words):
+                        aux_word = clean_final_coma(word)
+                        coma_found = aux_word != word
+                        aux.append(aux_word)
+                    elif word in ["en", 'para'] and not init_count:
+                        aux.append(word)
+                    elif not init_count:
+                        aux = []
+                    if len(aux) >= 3 or coma_found:
+                        break
+                if aux and (len(aux[-1]) > 4) and (coma_found or location_found or count == len(words)):
+                    result = result + aux
+                if result:
+                    category = " ".join(result)
+                category = category if (len(category) > 4) or (len(category) >= 2 and category.isupper()) else ''
+                category = category if category not in "Sector" else ''
+                return category
+
+        if not company_item['link']:
+            category = _get_company_category_in_resume(company_item['resume']) if company_item['resume'] else ''
+            if not category:
+                category = _get_company_category_in_description(company_item['description']) if company_item['description'] else ''
+        else:
+            category = self.clean_string(company_item['category'])
+        return category
+
 
     def _clean_company(self, item):
-        item['name'] = self.clean_string(item['name'])
         item['link'] = self._clean_url(item['link'])
+        item['resume'] = self.clean_string(item['resume'])
+        item['description'] = self.clean_string(item['description'])
+        item['name'] = self._clean_company_name(item)
+        item['category'] = self._clean_company_category(item)
         item['offers'] = get_int_from_string(item['offers'])
         item['city_name'] = self._clean_city(item['city_name'])
         return item
@@ -545,33 +698,56 @@ class StorePipeline(object):
         debug['company'] = item
         company_dict = item.get_dict_deepcopy()
         write_in_a_file(f'StorePipeline._store_company: 1', {'company_dict': company_dict}, 'pipeline_company.txt')
-        company_id = company_dict.pop('name', None)
-        write_in_a_file(f'StorePipeline._store_company: 2', {'company_id': company_id}, 'pipeline_company.txt')
-        write_in_a_file(f'StorePipeline._store_company: 3', {'company_city_name': company_dict['company_city_name']}, 'pipeline_company.txt')
+        write_in_a_file(f'StorePipeline._store_company: 3', {'company_city_name': company_dict['city_name']}, 'pipeline_company.txt')
         city = self._get_city(company_dict['city_name'])
         write_in_a_file(f'StorePipeline._store_company: 4', {'city': city}, 'pipeline_company.txt')
         company_dict.setdefault('created_at', timezone.now())
         company_dict.setdefault('city', city)
         company = None
         print('$$1')
+        # Can be companies with different name and same link
         try:
-            company, is_a_new_company_created = Company.objects.get_or_create(name=company_id, defaults=company_dict)
+            if company_dict['name']:
+                company_name = company_dict.pop('name', None)
+                company, is_a_new_company_created = Company.objects.get_or_create(name=company_name, defaults=company_dict)
+            else:
+                is_a_new_company_created = False
+                qs =  Company.objects.filter(name="").annotate(desc_len=Length('description'))
+                qs1 = qs.filter(desc_len__gt=70)
+                qs1_ = qs1.filter(description__iexact=company_dict['description'])
+                if qs1_:
+                    company = qs1_[0]
+                else:
+                    qs2 = qs.filter(desc_len__lte=70)
+                    qs2_ = qs2.filter(description__iexact=company_dict['description'])
+                    if qs2_ :
+                        for c in qs2_:
+                            if c.resume == company_dict['resume']:
+                                company = c
+                                break
+                    if not company:
+                        is_a_new_company_created = True
+                        company = Company(**company_dict)
+                        company.save()
+
             write_in_a_file(f'StorePipeline._store_company: 5', {'company': company, 'is_new':is_a_new_company_created}, 'pipeline.txt')
             if not is_a_new_company_created:
-                #ñapa
-                c_city = company.city
-                if c_city != city:
-                    company.city = city
-                    company.save()
-                ############
-                if company.offers != company_dict['offers']:
-                    company.company_offers = company_dict['offers']
+                try:
+                    offers_number = int(company_dict['offers'])
+                except:
+                    offers_number = 0
+                if offers_number and (company.offers != offers_number):
+                    company.company_offers = offers_number
                     company.updated_at = timezone.now()
                     company.save()
         except Exception as e:
-            print('!!Company.objects.get_or_create')
-            save_error(e, {**debug, 'pipeline':'StorePipeline','company_id': item['company_name'], 'company_link': item['company_link']})
+            print();
+            print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+            print('ERROR')
+            print('!!!Company.objects.get_or_create')
+            save_error(e, {**debug, 'pipeline':'StorePipeline','company_id': item['name'], 'company_link': item['link']})
             print(e)
+            print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 
         return company
 
@@ -642,12 +818,12 @@ class StorePipeline(object):
             qs.update(**job_dict)
             self._set_location(job, item)
             self._set_languages(job, item)
-        elif job.registered_people != item['registered_people']:
+            job.save()
+        if job.registered_people != item['registered_people']:
             debug['_update_job'] = "job.registered_people != item['registered_people']"
             job.registered_people = item['registered_people']
-            job.state = item['state'] #ñapa
             job.save()
-        elif job.state != item['state']:
+        if job.state != item['state']:
             debug['_update_job'] = "job.state != item['state']"
             print('3')
             job.state = item['state']
@@ -665,7 +841,7 @@ class StorePipeline(object):
             print('$$Company stored!!')
         except Exception as e:
             print(f'!!Error StorePipeline._store_job (storing company): {e}')
-            save_error(e, {**debug, 'pipeline':'StorePipeline', 'company_id': item['company_name'], 'company_link': item['company_link'], 'item': item})
+            save_error(e, {**debug, 'pipeline':'StorePipeline', 'company_id': item['name'], 'company_link': item['link'], 'item': item})
 
         job_dict = copy.deepcopy(item.get_dict_deepcopy())
         job_id = job_dict.pop('id', None)
@@ -678,11 +854,6 @@ class StorePipeline(object):
         print(f'is_new_item_created: {is_new_item_created}')
         if not is_new_item_created:
             debug['location'] = f'CleanPipeline._store_job get_or_create not is_new_item_created'
-            ##ñapa ########################
-            self._set_location(job, item)
-            self._set_languages(job, item)
-            job.save()
-            ###############################
             self._update_job(job, item)
         else:
             debug['location'] = f'CleanPipeline._store_job get_or_create is_new_item_created'
@@ -705,109 +876,3 @@ class StorePipeline(object):
             print(f'Error StorePipeline.process_item: {e}')
             save_error(e, {**debug, 'pipeline':'StorePipeline', 'model':item.get_model_name() , 'line':723, 'id':item['id'], 'link':item['link'], 'item': item})
             return item
-        """
-        print()
-        print('StorePipeline.process_item')
-
-        try:
-            company_item = self.store_company(item)
-        except Exception as e:
-            print('Error storing the company in pipeline: %s'%e)
-            print('item: %s'%item)
-            print('Successful: %i, Errors: %i'%(self.job, self.errors))
-            company_item = None
-        try:
-            self.store_job(item, company_item)
-            self.job += 1
-        except Exception as e:
-            print('Error storing the job in pipeline: %s' % e)
-            self.errors += 1
-            #print('item: %s' % item)
-            print('Successful: %i, Errors: %i' % (self.job, self.errors))
-        print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
-        print()
-        print('Successful: %i, Errors: %i' % (self.job, self.errors))
-        print()
-        print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
-        return item
-        """
-
-class SqlitePipeline(object):
-
-    db = "ie2.db"
-    def __init__(self):
-        self.create_connection()
-        self.drop_tables() #%
-        self.create_tables()
-
-
-    def create_connection(self):
-        self.connection = sqlite3.connect(self.db)
-        self.curr = self.connection.cursor()
-
-
-    def create_tables(self):
-        self.create_jobs_table()
-        self.create_companies_table()
-
-    def drop_tables(self):
-        self.curr.execute("""drop table if exists job""")
-        self.connection.commit()
-        self.curr.execute("""drop table if exists companies""")
-        self.connection.commit()
-
-
-    def create_jobs_table(self):
-        self.curr.execute("""create table IF NOT EXISTS job( 
-        id integer,
-        name text,
-        link text,
-        company_id text,
-        area text,
-        requisites text, 
-        city text,
-        country text,
-        nationality text,
-        subscribers integer,
-        time text
-        )""")
-        self.connection.commit()
-
-    def create_companies_table(self):
-        self.curr.execute("""create table IF NOT EXISTS companies( 
-                id integer,
-                name text,
-                link text,
-                city text,
-                category text,
-                description text, 
-                vacancies integer
-               )""")
-        self.connection.commit()
-
-    def store_item(self, item):
-        item_name = item.get_name()
-        if item_name == 'JobItem':
-            self.insert_job(item.tuple_of_values())
-        elif item_name == 'CompanyItem':
-            self.insert_company(item.tuple_of_values())
-
-    def insert_job(self, tuple):
-        print('INSERT JOB')
-        print(tuple)
-        print([type(e) for e in tuple])
-        self.curr.execute("""insert into job values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", tuple)
-        self.connection.commit()
-
-    def insert_company(self, tuple):
-        self.curr.execute("""insert into job values(?, ?, ?, ?, ?, ? ,?)""", tuple)
-        self.connection.commit()
-
-    def process_item(self, item, spider):
-        self.store_item(item)
-        return item
-
-    def close_spider(self, spider):
-        self.curr.close()
-        self.connection.close()
-
