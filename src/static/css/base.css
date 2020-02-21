@@ -23,7 +23,8 @@ div.app-container{
 }
 
 div.remnant{
-    display:bloc;
+    display: block;
+    margin: auto;
 }
 
 .title{
@@ -69,6 +70,12 @@ form input.form-control.datetimepicker-input.date{
         font-weight: 400;
         line-height: 1.5;
 }
+
+
+.navbar-dark .nav-item .navbar-brand{
+    color: rgba(255,255,255,.5)
+}
+
 
 .no-margin{
     margin: 0;
