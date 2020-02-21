@@ -8,6 +8,11 @@ import language_utilities
 from simple_history.models import HistoricalRecords
 from .managers import JobManager
 
+"""
+python manage.py makemigrations 
+python manage.py migrate 
+"""
+
 
 class Country(models.Model):
     id = models.AutoField(primary_key=True)
@@ -128,9 +133,11 @@ class City (models.Model):
 
 
 class Company(models.Model):
-    name = models.CharField(unique = True, primary_key=True, max_length=250)
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(null=True, blank=True, max_length=300)
     link = models.URLField(null=True)
     description = models.TextField(null=True)
+    resume = models.CharField(max_length=300, null=True, blank=True)
     city_name = models.CharField(max_length=50, null=True)
     city = models.ForeignKey(City,
                             on_delete=models.CASCADE,
@@ -138,7 +145,7 @@ class Company(models.Model):
                             null = True, blank = True)
     category = models.CharField(null=True, max_length=100)
     offers = models.IntegerField(null=True, blank=True)
-    slug= models.CharField(max_length=100, null=True, blank = True)
+    slug = models.CharField(max_length=300, null=True, blank = True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)  # models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)  # models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
@@ -236,7 +243,7 @@ class Job(models.Model):
     WORKING_DAY_CHOICES = (
         (WORKING_DAY_UNSPECIFIED, "sin especificar"),
         (WORKING_DAY_INTENSIVE, "intensiva"),
-        (WORKING_DAY_INDIFFERENT, "indiferente"),
+        (WORKING_DAY_INDIFFERENT, "flexible"),
         (WORKING_DAY_PARTIAL, "parcial"),
         (WORKING_DAY_WEEKEND, "fin de semana"),
         (WORKING_DAY_COMPLETE, "completa"),

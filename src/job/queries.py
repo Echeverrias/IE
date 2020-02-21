@@ -117,10 +117,16 @@ class JobQuerySet(models.QuerySet):
                 Q(updated_at__year__lt=year))
 
     def first_publication_date_in_year(self, year):
-        return self.filter(first_publicaction_date__year=year)
+        return self.filter(first_publication_date__year=year)
 
     def first_publication_date_in_month(self, month):
-        return self.filter(first_publicaction_date__month=month)
+        return self.filter(first_publication_date__month=month)
+
+    def first_publication_date_in_year_range(self, start_year, end_year):
+        return self.filter(first_publication_date__year__range=(start_year, end_year))
+
+    def _first_publication_date_in_month_range_(self, start_month, end_month):
+        return self.filter(first_publication_date__month__range=(start_month, end_month))
 
 
 

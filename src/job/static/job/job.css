@@ -2,6 +2,10 @@ li.nav-item.job a.nav-link{
     color:white;
 }
 
+#ie-nav .navbar-dark .nav-item .navbar-brand{
+    color: rgba(255,255,255,.5)
+}
+
 #ie-job .card{
     padding: 1em;
 }
