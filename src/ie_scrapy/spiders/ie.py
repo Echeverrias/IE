@@ -86,6 +86,7 @@ class InfoempleoSpider(Spider):
 
         for job_url in job_urls:
             print('# Go to job_url: %s', job_url)
+            job_url = 'https://www.infoempleo.com/ofertasdetrabajo/administrativoa-juridico/madrid/2596681/'
             yield response.follow(job_url, self.parse_item, meta={
                 START_URL: start_url,
                 TOTAL_RESULTS: total_results,

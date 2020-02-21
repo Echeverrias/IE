@@ -717,14 +717,14 @@ class StorePipeline(object):
         #debug['_update_company'] = f'company.name: {company.name}, item.name: {item["name"]}'
         if self._has_been_the_company_updated(company, item):
             print('_____________________________')
-            print('_update_company - va a acrualizar')
+            print(f'_update_company - va a actualizar compañia {company.id}')
             debug['_update_company'] = '_has_been_the_company_updated'
             company_dict = copy.deepcopy(item.get_dict_deepcopy())
             company_dict.pop('id', None)
             id = company.id
             qs = Company.objects.filter(id=id)
             qs.update(**company_dict)
-            #company.save()
+            company = qs[0]
         try:
             offers_number  = int(item['offers'])
         except:
@@ -862,7 +862,7 @@ class StorePipeline(object):
             id = job.id
             qs = Job.objects.filter(id=id)
             qs.update(**job_dict)
-            job = Job.objects.get(id=id)
+            job = qs[0]
             self._set_location(job, item)
             self._set_languages(job, item)
             job.save()
@@ -872,6 +872,7 @@ class StorePipeline(object):
             job.save()
         if job.state != item['state']:
             debug['_update_job'] = "job.state != item['state']"
+
             print('3')
             job.state = item['state']
             job.save()
