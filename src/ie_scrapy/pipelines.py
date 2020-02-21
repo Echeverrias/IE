@@ -7,8 +7,10 @@
 
 import re
 import sqlite3
+import time
 import datetime
 from django.utils import timezone
+from django.utils.text import slugify
 from django.db.utils import InterfaceError
 from django import db
 from django.db.models.functions import Length
@@ -691,6 +693,51 @@ class StorePipeline(object):
         return cities, province, country
 
 
+    def _has_been_the_company_updated(self, company, item):
+        # Checks for any change in the company description
+        print('_____________________________')
+        print('_has_been_the_company_updated')
+        print(f'company: {company}:{type(company)}')
+        print(company.description)
+        print(item['description'])
+        print(company.resume)
+        print(item['resume'])
+
+        update = (
+            company.description != item['description'] or
+            company.resume != item['resume']
+        )
+        print(f'UPDATE company: {update}')
+        debug['_has_been_the_company_updated'] = update
+        return update
+
+    def _update_company(self, company, item):
+        print('_____________________________')
+        print('_update_company')
+        #debug['_update_company'] = f'company.name: {company.name}, item.name: {item["name"]}'
+        if self._has_been_the_company_updated(company, item):
+            print('_____________________________')
+            print('_update_company - va a acrualizar')
+            debug['_update_company'] = '_has_been_the_company_updated'
+            company_dict = copy.deepcopy(item.get_dict_deepcopy())
+            company_dict.pop('id', None)
+            id = company.id
+            qs = Company.objects.filter(id=id)
+            qs.update(**company_dict)
+            #company.save()
+        try:
+            offers_number  = int(item['offers'])
+        except:
+            offers_number = 0
+        print('_____________________________')
+        print(f'offers numbers: {offers_number}')
+        #if offers_number and (company.offers != offers_number):
+        if offers_number and (company.offers != offers_number):
+            print('actualizando offers')
+            company.offers = offers_number
+            company.save()
+
+
     def _store_company(self, item):
         print('$$store_company')
         write_in_a_file(f'StorePipeline._store_company({item})', {}, 'pipeline_company.txt')
@@ -708,8 +755,11 @@ class StorePipeline(object):
         # Can be companies with different name and same link
         try:
             if company_dict['name']:
-                company_name = company_dict.pop('name', None)
-                company, is_a_new_company_created = Company.objects.get_or_create(name=company_name, defaults=company_dict)
+                company_name = company_dict['name']
+                company, is_a_new_company_created = Company.objects.get_or_create(slug=slugify(company_name), defaults=company_dict)
+                #""
+                print(company.name)
+                print(is_a_new_company_created)
             else:
                 is_a_new_company_created = False
                 qs =  Company.objects.filter(name="").annotate(desc_len=Length('description'))
@@ -732,14 +782,10 @@ class StorePipeline(object):
 
             write_in_a_file(f'StorePipeline._store_company: 5', {'company': company, 'is_new':is_a_new_company_created}, 'pipeline.txt')
             if not is_a_new_company_created:
-                try:
-                    offers_number = int(company_dict['offers'])
-                except:
-                    offers_number = 0
-                if offers_number and (company.offers != offers_number):
-                    company.company_offers = offers_number
-                    company.updated_at = timezone.now()
-                    company.save()
+                #"""
+                print('_____________________________')
+                print('not is_a_new_company_created')
+                self._update_company(company, item)
         except Exception as e:
             print();
             print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
@@ -774,7 +820,7 @@ class StorePipeline(object):
         return job
 
     # Checks for any change in the offer
-    def _has_been_updated(self, job, item):
+    def _has_been_the_job_updated(self, job, item):
         update = (
             (item['state'] == Job.STATE_UPDATED) and (item['last_update_date'] != job.last_update_date) or
             (item['state'] in [Job.STATE_CREATED, Job.STATE_WITHOUT_CHANGES]) and (item['first_publication_date'] != job.first_publication_date) or
@@ -782,30 +828,30 @@ class StorePipeline(object):
         )
         if (not update) and (item['state'] == Job.STATE_CLOSED) and (job.state != Job.STATE_CLOSED):
             update = (
-                job['vacancies'] != item['vacancies'] or
-                job['type'] != item['type'] or
-                job['contract'] != item['contract'] or
-                job['working_day'] != item['working_day'] or
-                job['minimum_years_of_experience'] != item['minimum_years_of_experience'] or
-                job['recommendable_years_of_experience'] != item['recommendable_years_of_experience'] or
-                job['minimum_salary'] != item['minimum_salary'] or
-                job['maximum_salary'] != item['maximum_salary'] or
-                job['functions'] != item['functions'] or
-                job['requirements'] != item['requirements'] or
-                job['it_is_offered'] != item['it_is_offered'] or
-                job['area'] != item['area'] or
-                job['category_level'] != item['category_level']
+                job.vacancies != item['vacancies'] or
+                job.type != item['type'] or
+                job.contract != item['contract'] or
+                job.working_day != item['working_day'] or
+                job.minimum_years_of_experience != item['minimum_years_of_experience'] or
+                job.recommendable_years_of_experience != item['recommendable_years_of_experience'] or
+                job.minimum_salary != item['minimum_salary'] or
+                job.maximum_salary != item['maximum_salary'] or
+                job.functions != item['functions'] or
+                job.requirements != item['requirements'] or
+                job.it_is_offered != item['it_is_offered'] or
+                job.area != item['area'] or
+                job.category_level != item['category_level']
             )
         print(f'UPDATE: {update}')
-        debug['_has_been_updated']=update
+        debug['_has_been_the_job_updated']=update
         return update
 
 
     def _update_job(self, job, item):
         # if job.last_update_date != item['last_update_date']: -> Actualizamos cuando la oferta ha caducado (por si no hemos hecho scraping  sobre una actualización)
         debug['_update_job'] = f'job.id: {job.id}, item.id: {item["id"]}'
-        if self._has_been_updated(job, item):
-            print('1'); debug['_update_job']='_has_been_updated'
+        if self._has_been_the_job_updated(job, item):
+            print('1'); debug['_update_job']='_has_been_the_job_updated'
             job_dict = copy.deepcopy(item.get_dict_deepcopy())
             job_dict.pop('id', None)
             if item['state'] == Job.STATE_CLOSED:
@@ -816,6 +862,7 @@ class StorePipeline(object):
             id = job.id
             qs = Job.objects.filter(id=id)
             qs.update(**job_dict)
+            job = Job.objects.get(id=id)
             self._set_location(job, item)
             self._set_languages(job, item)
             job.save()

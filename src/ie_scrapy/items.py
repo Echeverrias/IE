@@ -9,7 +9,6 @@ from scrapy import Item, Field
 from scrapy_djangoitem import DjangoItem
 from job.models import Job, Company, Language, Country, City
 import copy
-from django.forms.models import model_to_dict
 
 
 
@@ -48,25 +47,27 @@ class CompanyItem(BaseItem):
         return self.django_model.__name__
 
 
-# doesn't support ManyToManyFields
+# Doesn't support ManyToManyFields
 class JobItem(BaseItem):
 
     django_model = Job
-    #languages = Field()
+
     def get_model_name(self):
         return self.django_model.__name__
+
 
 class LanguageItem(BaseItem):
 
     django_model = Language
-    #languages = Field()
+
     def get_model_name(self):
         return self.django_model.__name__
+
 
 class CountryItem(BaseItem):
 
     django_model = Country
-    #languages = Field()
+
     def get_model_name(self):
         return self.django_model.__name__
 
@@ -74,6 +75,5 @@ class CountryItem(BaseItem):
 class CityItem(BaseItem):
 
     django_model = City
-    #languages = Field()
     def get_model_name(self):
         return self.django_model.__name_dict_

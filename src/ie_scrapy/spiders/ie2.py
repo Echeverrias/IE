@@ -2,7 +2,7 @@
 from scrapy.spiders import Spider,CrawlSpider, Rule
 from scrapy import signals
 from ..items import JobItem, CompanyItem
-from ..keys import START_URL, TOTAL_RESULTS
+from ..state_ import UrlsState
 import re
 from collections import namedtuple
 
@@ -23,7 +23,7 @@ class NonElementFoundError(BaseException):
 
 class InfoempleoSpider(Spider):
 
-    name = 'ie'
+    name = 'ie2'
     allowed_domains = ['infoempleo.com']
 
     start_urls = [
@@ -79,7 +79,6 @@ class InfoempleoSpider(Spider):
         try:
             total_results =  self._get_the_total_number_of_results(response)
         except Exception as e:
-            total_results = 0
             print(f'Error_: {e}')
         print('### ')
 
@@ -87,8 +86,8 @@ class InfoempleoSpider(Spider):
         for job_url in job_urls:
             print('# Go to job_url: %s', job_url)
             yield response.follow(job_url, self.parse_item, meta={
-                START_URL: start_url,
-                TOTAL_RESULTS: total_results,
+                UrlsState.KEY_START_URL: start_url,
+                UrlsState.KEY_TOTAL_RESULTS: total_results,
             })
             break
         try:
@@ -114,7 +113,7 @@ class InfoempleoSpider(Spider):
             results_showed = response.xpath("//p[contains(text(),'Mostrando')]/text()").extract_first()
             text = results_showed.replace('-', ' ')  # Mostrando 1 20 de 1028 ofertas
             numbers = [int(s) for s in text.split() if s.isdigit()]
-            InfoResults = namedtuple('ResultsNumberInfo',['first_result_showed', 'last_result_showed', TOTAL_RESULTS])
+            InfoResults = namedtuple('ResultsNumberInfo',['first_result_showed', 'last_result_showed', UrlsState.KEY_TOTAL_RESULTS])
             return InfoResults(numbers[0], numbers[1], numbers[2])
         except Exception as e:
             print('Error in _get_info_of_number_of_results: {}'.format(e))
@@ -194,7 +193,7 @@ class InfoempleoSpider(Spider):
             'first_publication_date': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][2]//li[2]/text()"),
             'last_update_date': self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][2]//li[2]/text()"),
             'summary': self._extract_info(response, "//div[@class='main-title']//p/text()"),
-            'type': response.meta[START_URL],
+            'type': response.meta[UrlsState.KEY_START_URL],
             'nationality': self._extract_info(response, "//nav[@class='breadcrumbs']//li[2]/a/text()"),
             'cityname': self._extract_info(response, "//div[@class='main-title']//ul[contains(@class,'details')][2]/li[1]/text()"),
             'provincename': self._extract_info(response, "//div[@class='main-title']//ul[contains(@class,'details')][2]/li[1]/text()"),

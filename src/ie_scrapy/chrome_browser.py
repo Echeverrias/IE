@@ -9,22 +9,40 @@ import os
 import random
 
 
+CHROME_DRIVER_PATH = './chromedriver'
+
 class ChromeBrowser:
+
+    proxies = []
+    user_agents = []
+
+    @classmethod
+    def _set_user_agents(cls):
+        cls.user_agents = [
+            'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html) ',
+            "DuckDuckBot/1.0; (+http://duckduckgo.com/duckduckbot.html)",
+        ]
 
     @classmethod
     def get_user_agent(cls):
-        user_agents = ['Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html) ',
-                       "DuckDuckBot/1.0; (+http://duckduckgo.com/duckduckbot.html)"]
-        return random.choice(user_agents)
+        if not cls.user_agents:
+            cls._set_user_agents()
+        return random.choice(cls.user_agents)
+
+    @classmethod
+    def _set_proxies(cls):
+        # '151.253.158.19:8080',
+        # '178.46.160.64:54508',
+        cls.proxies = [
+            "182.253.175.141:8080",
+        ]
 
     @classmethod
     def get_proxy(cls):
-        #'151.253.158.19:8080',
-        # '178.46.160.64:54508',
-        proxies = [
-            '179.40.75.1:38736'
-        ]
-        return random.choice(proxies)
+
+        if not cls.proxies:
+            cls._set_proxies()
+        return random.choice(cls.proxies)
 
     @classmethod
     def __get_chrome_options(cls, config={'proxy':None, 'user_agent':None}):
@@ -53,26 +71,5 @@ class ChromeBrowser:
         print(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))##
         options = {'proxy': proxy, 'user_agent': user_agent}
         chrome_options = cls.__get_chrome_options(options)
-        driver = webdriver.Chrome('./chromedriver', options=chrome_options)
+        driver = webdriver.Chrome(CHROME_DRIVER_PATH, options=chrome_options)
         return driver
-
-    """
-        def __get_chrome_browser(self, request=None):
-            print('set_chrome_Browser') ##
-            print(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))##
-            options = {'proxy': None, 'user_agent': None}
-            if request:
-                try:
-                    options['user_agent'] = str(request.headers['User-Agent'])
-                except Exception as e:
-                    print(e)
-                    user_agents = cls._get_a_random_user_agent()
-                try:
-                    options['proxy'] = request.meta['proxy']
-                    #options['proxy'] = '153.232.171.254:8080'
-                except Exception as e:
-                    print(e)
-            chrome_options = self.__get_chrome_options(options)
-            driver = webdriver.Chrome('./chromedriver', options=chrome_options)
-            return driver
-        """
