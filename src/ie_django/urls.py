@@ -20,7 +20,6 @@ from django.views.generic import RedirectView
 
 from task.views import  run_crawler_view
 
-
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('chart/', include('chart.urls')),
@@ -31,6 +30,8 @@ urlpatterns = [
     path('home/', init_view, name='home'),
     path('', RedirectView.as_view(url='/home', permanent=True)),
 ]
+
+print("URLS")
 
 """
   re_path(r'job/', JobView.as_view(), name='jobs2'),

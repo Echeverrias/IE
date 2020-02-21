@@ -29,7 +29,7 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
+#####################################################################################################
 
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -65,6 +65,7 @@ PROJECT_APPS = [
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
+#####################################################################################################
 
 BACKGROUND_TASK_RUN_ASYNC = True
 
