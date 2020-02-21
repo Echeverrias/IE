@@ -5,6 +5,7 @@
 <div id="main" class="view center">
         {% load task_extras %}
         <div class="sub-container">
+        % is_running: {{is_running}}<br>
         {% if is_running %}
                 {% include 'task/info_crawler_task.html' %}
         {% else %}
@@ -13,11 +14,12 @@
         </div>
         <div id="main-loader" class="loader very-slow" {% if not is_running %}hidden{% endif %}></div>
         <div class="text-center">
+                <!--
                 <form id="stop-crawler" action="." method="GET" {% if not is_running %}hidden{% endif %} >
                         <input type="hidden" name="stop" value="True">
                         <button id="stop" class="btn btn-primary" type="submit">Parar araña</button>
                 </form>
-
+                -->
                 <form id="run-crawler" action="." method="GET"  {% if is_running %}hidden{% endif %} >
                         <input type="hidden" name="crawl" value="True">
                         <button id="start" class="btn btn-primary" type="submit">Correr araña</button>

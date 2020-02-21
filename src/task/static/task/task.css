@@ -1,3 +1,7 @@
 #msg{
     text-align: center;
 }
+
+li.nav-item.task a.nav-link{
+    color:white;
+}

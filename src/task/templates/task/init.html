@@ -1,3 +1,5 @@
+% init.html
+% task: {{task}} : if task..
 {% if task %}
 <div class="init remnant">
     <h4 class="title">Última tarea ejecutada: {{ task.type }}-{{ task.pid }} iniciada el {{ task.created_at|date:'d/m/Y' }} {{ task.created_at|time:"H:i" }}</h4>
