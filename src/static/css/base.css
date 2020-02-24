@@ -122,6 +122,16 @@ div.row.no-margin{
     padding-top:3rem;
 }
 
+#admin-container #content{
+    width: 70%;
+    margin: auto;
+}
+
+#admin-container #content #login-form div.submit-row{
+    text-align: center;
+    padding-left: 0em;
+}
+
 .debug{
     display:inline;
     background-color: yellow;
