@@ -9,14 +9,11 @@ def signin_view(request):
         form = SignInForm(request.POST)
         if form.is_valid():
             user = form.save()
-            """
-            login(request, user)
-            """
-            email = form.cleaned_data.get('email')
-            raw_password = form.cleaned_data.get('password1')
-            account = authenticate(email=email, password=raw_password)
+            username, raw_password = form.cleaned_data.get('username'), form.cleaned_data.get('password1')
+            account = authenticate(username=username, password=raw_password)
             user.email_user('Bienvenido a IE', f'Bienvenido {user.username}, te has registrado con éxito.')
             login(request, account)
+            #login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
     else: # GET request
         form = SignInForm()
