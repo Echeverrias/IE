@@ -1,3 +1,6 @@
+import copy
+from django.core.exceptions import FieldDoesNotExist
+from django.db.models import ForeignKey
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 from simple_history.admin import SimpleHistoryAdmin
@@ -8,6 +11,18 @@ from .resources import JobResource
 
 admin.site.site_header = "Infoempleo";
 admin.site.site_title = "Infoempleo";
+
+
+def custom_titled_filter(title):
+    print(dir(admin))
+    print()
+    class Wrapper(admin.RelatedFieldListFilter):
+        def __new__(cls, *args, **kwargs):
+            print(args)
+            instance = admin.RelatedFieldListFilter.create(*args, **kwargs)
+            instance.title = title
+            return instance
+    return Wrapper
 
 
 def apply_upper_to_author(modelAdmin, request, queryset):
@@ -85,8 +100,8 @@ class JobInLine(admin.TabularInline):
 @admin.register(Company) #admin.site.register(Quote, QuoteAdmin)
 class CompanyAdmin(ImportExportModelAdmin): #class CompanyAdmin(admin.ModelAdmin):
     list_display = ['name', '_jobs']
-    list_filter = ['name', 'city']
-    search_fields = ['name']
+    list_filter = (('city__province__name', custom_titled_filter('Province name') ),)
+    search_fields = ['name', 'city__name']
     """
     fieldsets = [
         ('Company', {
@@ -100,6 +115,32 @@ class CompanyAdmin(ImportExportModelAdmin): #class CompanyAdmin(admin.ModelAdmin
     def _jobs(self, obj):
         #return obj.quotes.all().count()
         return obj.jobs.all().count()
+
+    def get_field(self, name, many_to_many=True):
+        """
+        Returns the requested field by name. Raises FieldDoesNotExist on error.
+        """
+        to_search = many_to_many and (self.fields + self.many_to_many) or self.fields
+        if hasattr(self, '_copy_fields'):
+            to_search += self._copy_fields
+        for f in to_search:
+            if f.name == name:
+                return f
+        if not name.startswith('__') and '__' in name:
+            f = None
+            model = self
+            path = name.split('__')
+            for field_name in path:
+                f = model._get_field(field_name)
+                if isinstance(f, ForeignKey):
+                    model = f.rel.to._meta
+            f = copy.deepcopy(f)
+            f.name = name
+            if not hasattr(self, "_copy_fields"):
+                self._copy_fields = list()
+            self._copy_fields.append(f)
+            return f
+        raise FieldDoesNotExist('%s has no field named %r' % (self.object_name, name))
 
     _jobs.short_description = 'Count of jobs'
     _jobs.admin_order_field = 'job'
