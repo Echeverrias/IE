@@ -5,6 +5,8 @@ from ..items import JobItem, CompanyItem
 from ..keys import START_URL, TOTAL_RESULTS
 import re
 from collections import namedtuple
+from ..pipelines import CleanPipeline, StorePipeline
+
 
 
 class BaseException(Exception):
@@ -27,10 +29,6 @@ class InfoempleoSpider(Spider):
     allowed_domains = ['infoempleo.com']
 
     start_urls = [
-        "https://www.infoempleo.com/trabajo/area-de-empresa_legal/",
-    ]
-
-    start_urlss = [
 
         "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_ingenieria-y-produccion/",
@@ -58,6 +56,11 @@ class InfoempleoSpider(Spider):
         "https://www.infoempleo.com/trabajo/",
         "https://www.infoempleo.com/primer-empleo/",
     ]
+
+    pipelines = set([
+        CleanPipeline,
+        StorePipeline,
+    ])
 
 
     @classmethod

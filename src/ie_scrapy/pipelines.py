@@ -4,7 +4,7 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-
+import functools
 import re
 import sqlite3
 import time
@@ -43,6 +43,22 @@ from utilities import (
 )
 
 debug={'location':None, 'value':None, 'value_in': None, 'value_out':None}
+
+
+def check_spider_pipeline(process_item_method):
+
+    @functools.wraps(process_item_method)
+    def wrapper(self, item, spider):
+        pipeline_name = self.__class__.__name__
+
+        if self.__class__ in spider.pipelines:
+            spider.logger.info(f'{pipeline_name} executing')
+            return process_item_method(self, item, spider)
+        else:
+            spider.logger.info(f'{pipeline_name} skipping')
+            return item
+
+    return wrapper
 
 
 class CleanupPipeline_(object):
@@ -529,7 +545,7 @@ class CleanPipeline(CleanupPipeline_):
             save_error(e, {**debug, 'pipeline': 'CleanPipeline', 'id': item['id'], 'link': item['link'], 'item': item})
         return item
 
-
+    @check_spider_pipeline
     def process_item(self, item, spider):
         print('CleanPipeline.process_item')
         write_in_a_file('CleanPipeline.process_item', {}, 'pipeline.txt')
@@ -912,7 +928,7 @@ class StorePipeline(object):
         print('#store_job: %s'%job)
         return job
 
-
+    @check_spider_pipeline
     def process_item(self, item, spider):
         print('StorePipeline.process_item')
         print(item)
