@@ -9,7 +9,7 @@ LANGUAGES = [
     'inglés','francés', 'alemán',
     'italiano', 'ruso', 'chino', 'japonés',
     'canadiense', 'portugués', 'euskera',
-    'catalán', 'gallego', 'vasco', 'valenciano'
+    'catalán', 'gallego', 'vasco', 'valenciano',
     'castellano', 'español',
     'danés', 'sueco', 'suizo', 'holandés',
     'noruego', 'finés', 'lapón',
