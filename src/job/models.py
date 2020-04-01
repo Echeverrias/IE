@@ -143,7 +143,10 @@ class Company(models.Model):
                             on_delete=models.CASCADE,
                             related_name='companies',
                             null = True, blank = True)
-    category = models.CharField(null=True, max_length=100)
+    area = ListCharField(base_field=models.CharField(max_length=45),
+                             size=34,
+                             max_length=(1570), null=True, blank=True)
+    category = models.CharField(null=True, blank=True, max_length=100)
     offers = models.IntegerField(null=True, blank=True)
     slug = models.CharField(max_length=300, null=True, blank = True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)  # models.DateTimeField(auto_now_add=True)
@@ -157,13 +160,20 @@ class Company(models.Model):
 
     def save(self, *args, **kwargs):
         try:
-            self.slug = slugify(self.name)
+            if self.name:
+                self.slug = slugify(self.name)
+            elif self.link:
+                if self.link.endswith('/'):
+                    slug = self.link.split('/')[-3]
+                else:
+                    slug = self.link.split('/')[-2]
+                self.slug = slug
         except:
             pass
         super(Company, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return self.name or ''
 
 class Language(models.Model):
 
@@ -264,6 +274,7 @@ class Job(models.Model):
         (CATEGORY_UNSPECIFIED, "Sin especificar"),
     )
 
+    # 20 areas
     AREA_EDUCATION_TRAINING = "Educación, formación"
     AREA_TECHNOLOGY_AND_INFORMATICS = "Tecnología e informática"
     AREA_HEALTH_HEALTH_AND_SOCIAL_SERVICES = "Sanidad, salud y servicios sociales"
