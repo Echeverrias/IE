@@ -6,7 +6,7 @@ from django.utils.text import slugify
 from django_mysql.models import ListCharField
 from utilities import languages_utilities
 from simple_history.models import HistoricalRecords
-from .managers import JobManager #, CompanyManager
+from .managers import JobManager
 import os
 
 """
@@ -160,7 +160,6 @@ class Company(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)  # models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)  # models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
-    #objects = CompanyManager()
 
     class Meta:
         verbose_name = "Company"

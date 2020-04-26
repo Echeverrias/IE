@@ -130,3 +130,9 @@ class JobQuerySet(models.QuerySet):
 
 
 
+class CompanyQuerySet(models.QuerySet):
+
+    def registered_companies(self):
+        return self.exclude(link=None).exclude(link='')
+
+

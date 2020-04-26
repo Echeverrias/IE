@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import F
-from .queries import JobQuerySet
+from .queries import JobQuerySet, CompanyQuerySet
 from datetime import date
 
 
@@ -12,8 +12,7 @@ class JobManager(models.Manager):
 
 
     def get_queryset(self):
-
-        # Don't apply filters, don't return a modified queryset
+        # Don't apply filters here, don't return a modified queryset
         return JobQuerySet(
             model=self.model,
             using=self._db,
@@ -87,3 +86,15 @@ class JobManager(models.Manager):
         return self.get_queryset().first_publication_date_in_month(month)
 
 
+class CompanyManager(models.Manager):
+
+    def get_queryset(self):
+        # Don't apply filters here, don't return a modified queryset
+        return CompanyQuerySet(
+            model=self.model,
+            using=self._db,
+            hints=self._hints
+        )
+
+    def registered_companies(self):
+        return self.get_queryset().registered_companies()
