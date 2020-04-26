@@ -7,30 +7,11 @@
 
 from scrapy import Item, Field
 from scrapy_djangoitem import DjangoItem
-from job.models import Job, Company, Language, Country, City
 import copy
-
+from job.models import Job, Company, Language, Country, City
 
 
 class BaseItem(DjangoItem):
-
-    def tuple_of_values(self):
-        return tuple(self.values())
-
-    def list_of_values(self):
-        return list(self.values())
-
-    def list_of_keys(self):
-        return list(self.keys())
-
-    def tuple_of_keys(self):
-        return tuple(self.keys())
-
-    def get_list_of_tuples(self):
-        return list(self.items())
-
-    def get_name(self):
-        return self.__class.__name__
 
     def get_dict(self):
         return dict(self.items())
@@ -38,42 +19,33 @@ class BaseItem(DjangoItem):
     def get_dict_deepcopy(self):
         return copy.deepcopy(self.get_dict())
 
+    def get_model_name(self):
+        return self.django_model.__name__
+
 
 class CompanyItem(BaseItem):
 
     django_model = Company
+    _location = Field()
 
-    def get_model_name(self):
-        return self.django_model.__name__
 
 
 # Doesn't support ManyToManyFields
 class JobItem(BaseItem):
 
     django_model = Job
+    _languages = Field()
+    """
+    _summary = Field()
+    _cities = Field()
+    _province = Field()
+    _country = Field()
+"""
+    """
+    # % Remove from the model:
+    _experience = Field()
+    _salary = Field()
+    _working_day = Field()
+    _contract = Field()
+    """
 
-    def get_model_name(self):
-        return self.django_model.__name__
-
-
-class LanguageItem(BaseItem):
-
-    django_model = Language
-
-    def get_model_name(self):
-        return self.django_model.__name__
-
-
-class CountryItem(BaseItem):
-
-    django_model = Country
-
-    def get_model_name(self):
-        return self.django_model.__name__
-
-
-class CityItem(BaseItem):
-
-    django_model = City
-    def get_model_name(self):
-        return self.django_model.__name_dict_
