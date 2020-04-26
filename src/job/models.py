@@ -4,9 +4,10 @@ from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
 from django_mysql.models import ListCharField
-import language_utilities
+from utilities import languages_utilities
 from simple_history.models import HistoricalRecords
-from .managers import JobManager
+from .managers import JobManager #, CompanyManager
+import os
 
 """
 python manage.py makemigrations 
@@ -17,6 +18,7 @@ python manage.py migrate
 class Country(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=30)
+    slug = models.CharField(max_length=30)
 
     class Meta:
         verbose_name = "Country"
@@ -136,13 +138,19 @@ class Company(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(null=True, blank=True, max_length=300)
     link = models.URLField(null=True)
+    reference = models.IntegerField(null=True, blank=True)
+    is_registered = models.BooleanField(null=True, blank=True)
     description = models.TextField(null=True)
     resume = models.CharField(max_length=300, null=True, blank=True)
-    city_name = models.CharField(max_length=50, null=True)
+    location_name = models.CharField(max_length=50, null=True)
     city = models.ForeignKey(City,
                             on_delete=models.CASCADE,
                             related_name='companies',
                             null = True, blank = True)
+    country = models.ForeignKey(Country,
+                             on_delete=models.CASCADE,
+                             related_name='companies',
+                             null=True, blank=True)
     area = ListCharField(base_field=models.CharField(max_length=45),
                              size=34,
                              max_length=(1570), null=True, blank=True)
@@ -152,6 +160,7 @@ class Company(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)  # models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)  # models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
+    #objects = CompanyManager()
 
     class Meta:
         verbose_name = "Company"
@@ -175,10 +184,19 @@ class Company(models.Model):
     def __str__(self):
         return self.name or ''
 
+    def get_slug_from_link(self):
+        link = self.link
+        link = link[:-1] if self.link.endswith('/') else link
+        try:
+            slug = link.split('/')[-2]
+        except Exception as e:
+            slug = ''
+        return slug
+
 class Language(models.Model):
 
     id = models.AutoField(primary_key=True)
-    LANGUAGES = language_utilities.LANGUAGES
+    LANGUAGES = languages_utilities.LANGUAGES
     LANGUAGES_CHOICES = ((l, l) for l in LANGUAGES)
 
     LEVELS = ['C2', 'C1', 'B2', 'B1', 'A2', 'A1']
@@ -198,8 +216,6 @@ class Language(models.Model):
         verbose_name = "Language"
         verbose_name_plural = "Languages"
         ordering = ['name', 'level']
-
-
 
     def __str__(self):
         return f'{self.name} - {self.level}'
@@ -333,7 +349,7 @@ class Job(models.Model):
         choices=TYPE_CHOICES,
         default=TYPE_NATIONAL,
     )
-    summary = ListCharField(base_field=models.CharField(max_length=100),
+    _summary = ListCharField(base_field=models.CharField(max_length=100),
         size=6,
         max_length=(6 * 101), null=True)
     _experience = models.CharField(max_length=40, null=True, blank=True)
@@ -344,21 +360,17 @@ class Job(models.Model):
     recommendable_years_of_experience = models.PositiveIntegerField(null=True, blank=True, default=0)
     minimum_salary = models.PositiveIntegerField(null=True, blank=True)
     maximum_salary = models.PositiveIntegerField(null=True, blank=True)
-    #working_day = models.CharField(max_length=30, null=True, blank=True)
     working_day = models.CharField(
         max_length=30,
         choices=WORKING_DAY_CHOICES,
         default=CATEGORY_UNSPECIFIED
     )
-    #contract = models.CharField(max_length=30, null=True, blank=True)
     contract = models.CharField(
         max_length=40,
         choices=CONTRACT_CHOICES,
         default=CONTRACT_UNSPECIFIED,
     )
-    cityname = ListCharField(base_field=models.CharField(max_length=100),
-        size=6,
-        max_length=(6 * 101), null=True, blank=True)
+
     cities = models.ManyToManyField(City,
                             related_name='jobs',
                             null = True, blank = True)
@@ -373,8 +385,11 @@ class Job(models.Model):
     languages = models.ManyToManyField(Language,
                             related_name='jobs',
                             null = True, blank = True)
-    provincename = models.CharField(null=True, max_length=100, blank=True)  # Model
-    countryname = models.CharField(null=True, max_length=30) #Model
+    _cities = ListCharField(base_field=models.CharField(max_length=100),
+                             size=6,
+                             max_length=(6 * 101), null=True, blank=True)
+    _province = models.CharField(null=True, max_length=100, blank=True)  # Model
+    _country = models.CharField(null=True, max_length=30) #Model
     nationality = models.CharField(max_length=30)
     first_publication_date = models.DateField(null=True, blank=True, default=None)
     last_update_date = models.DateField(null=True, blank=True, default=None)
@@ -384,12 +399,10 @@ class Job(models.Model):
     requirements = models.TextField(null=True, blank=True)
     it_is_offered = models.TextField(null=True, blank=True) #NULL constraint
     tags = models.TextField(null=True, blank=True) #Model
-    #area = models.CharField(null=True,max_length=100, blank=True) #Model
     area = models.CharField(
         max_length=40,
         choices=AREA_CHOICES,
     )
-    #category_level = models.CharField(null=True,max_length=100, blank=True)
     category_level = models.CharField(
         max_length=20,
         choices=CATEGORY_CHOICES,
@@ -410,15 +423,12 @@ class Job(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)  # models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)  # models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
-    #objects = JobQuerySet.as_manager()
     objects = JobManager()
-    #first_publication_date = models.DateField(null=True, blank=True, default=None)
-    #fake = models.CharField(max_length=30, null=True, blank=True, default='fake')
 
     class Meta:
         verbose_name = "Job"
         verbose_name_plural = "Jobs"
-        ordering = ['-created_at', 'name']  # El - delante del nombre del atributo indica que se o
+        ordering = ['-created_at', 'name']
         #unique_together = (('id'),)
 
     def __str__(self):
@@ -463,8 +473,11 @@ class Job(models.Model):
 
     @classmethod
     def add_city(cls, job, city):
-        job_, is_new = cls.objects.get_or_create(id=job.id)
-        job_.cities.add(city)
+        try:
+            job_ = cls.objects.get(id=job.id)
+            job_.cities.add(city)
+        except Exception as e:
+            pass
 
 
 
