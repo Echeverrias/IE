@@ -36,6 +36,9 @@ import os, sys
 #from .process_ import ProcessExecutor, process_async #ñapa
 import time
 
+from .init_db import initialize_database
+
+
 @staff_member_required
 def run_crawler(request):
     #https://srv.buysellads.com/ads/click/x/GTND42QNC6BDCKQ7CV7LYKQMCYYIC2QJFTAD4Z3JCWSD42QYCYYIVKQKC6BIKKQIF6AI6K3EHJNCLSIZ?segment=placement:techiediariescom;
@@ -112,3 +115,9 @@ class JobListView(ListView):
         context['form'] = self.job_filtered_list.form
         context['prueba'] = 'prueba job'
         return context
+
+if __name__ != '__main__':
+    try:
+        initialize_database()
+    except Exception as e:
+        print(e)
