@@ -17,13 +17,13 @@ from django.db.models.functions import Length
 import copy
 from dateutil.relativedelta import relativedelta
 from job.models import Job, Company, Country, City, Province, Language
-from language_utilities import get_languages_and_levels_pairs
-from utilities import (
+from utilities.languages_utilities import get_languages_and_levels_pairs
+from utilities.utilities import (
     get_int_list_from_string,
     get_text_before_sub,
+    get_text_after_key,
     replace_multiple,
-    save_error,
-    raise_function_exception,
+
     get_coincidences,
     get_acronym,
     get_string_number_from_string,
@@ -32,13 +32,15 @@ from utilities import (
     get_text_between_parenthesis,
     get_text_before_parenthesis,
     get_int_list_from_string,
-    get_text_after_key,
+
     get_date_from_string,
     get_end_index_of_a_paragraph_from_string,
     get_slice_from_sub_to_end_of_the_paragraph,
     get_a_list_of_enumerates_from_string,
+    raise_function_exception,
     trace,
     write_in_a_file,
+    save_error,
 
 )
 
@@ -61,13 +63,29 @@ def check_spider_pipeline(process_item_method):
     return wrapper
 
 
-class CleanupPipeline_(object):
 
-    def clean_string(self, string):
-        print('#clean_string: %s'%string)
+class CleaningPipeline():
+
+    def __init__(self):
+        self._cleaning = {
+            'Job': self._clean_job,
+            'Company': self._clean_company,
+        }
+
+        self.job_areas = [ t[0] for t in Job.AREA_CHOICES]
+
+    def clean_string(self, string, clean_end_point=False):
+        print('#clean_string: %s' % string)
         try:
-            clean_string = string.strip()
-            if clean_string.endswith('.'):
+            remap = {
+                ord('\r'): None,
+                ord('\t'): " ",
+                ord('\f'): " ",
+                ord('\n'): " ",
+            }
+            clean_string =  string.translate(remap)
+            clean_string = clean_string.strip()
+            if clean_end_point and clean_string.endswith('.'):
                 clean_string = clean_string[:-1]
         except Exception as e:
             clean_string = ''
@@ -76,27 +94,17 @@ class CleanupPipeline_(object):
     def clean_string_list(self, some_list):
         return list(map(lambda e: e.strip(), some_list))
 
-
-class CleanPipeline(CleanupPipeline_):
-
-    def __init__(self):
-
-        self._cleanup = {
-            'Job': self._clean_job,
-            'Company': self._clean_company,
-        }
-
-        self.job_areas = [ t[0] for t in Job.AREA_CHOICES]
-
-
     def _clean_url(self, pathname_or_href):
         origin = 'https://www.infoempleo.com'
         href = pathname_or_href
         try:
-            if pathname_or_href and not (origin in pathname_or_href):
+            if pathname_or_href == origin or not pathname_or_href:
+                href = ''
+            elif pathname_or_href and not ('http' in pathname_or_href):
                 href = origin + pathname_or_href
         except Exception as e:
             print('Error in CleanupPipeline._clean_url(%s): %s'%(href,e))
+            href = ''
         return href
 
     def _clean_country(self, string):
@@ -116,73 +124,43 @@ class CleanPipeline(CleanupPipeline_):
 
     def _clean_province(self, string):
         try:
-            print(f'#province_cleanup({string})')
             l = get_text_between_parenthesis(string)
-            print(f'value_out-get_text_between_parenthesis: {l}')
             if l and len(l[-1]) > 3:
                 province = l[-1]
             else:
                 province = string or ''
-            print(f'value_out-_province_clenaup: {province}');
             return province
         except TypeError as e:
-            print(f'_clean_province -> Error: {e}')
             return ''
 
-    def _city_cleanup2(self, string):
-        city = string
-        if '(' in city:
-            city = city[0:city.find('(')].strip()
-        return city
-
-
-    def _clean_city(self, string):
+    def _clean_location(self, string):
         try:
-            print(f'$$$$$$$  _clean_city: {string}');
-            write_in_a_file(f'CleanPipeline._clean_city({string})', {}, 'pipeline.txt')
-            print();
-            debug['_city_cleanup - init'] = f'arg: {string}'
-            print(f'$$_clean_city({string})')
-            debug['_citiy_cleanup'] = f'get_text_before_parenthesis({string})'
+            write_in_a_file(f'CleanPipeline._clean_location({string})', {}, 'pipeline.txt')
             city = get_text_before_parenthesis(string) or string
-            debug['_citiy_cleanup - city'] = f'{city}'
-            debug['_citiy_cleanup'] = f'get_text_between_parenthesis({string})'
             parenthesis = get_text_between_parenthesis(string)
-            debug['_citiy_cleanup - parenthesis'] = f'{parenthesis}'
             if parenthesis and len(parenthesis[0]) < 4:
                 # Bercial (el) -> el Bercial
                 city = parenthesis[0].capitalize() + " " + city
-            debug['_citiy_cleanup - city2'] = f'{city}'
             if city and city.isupper():
                 city = city.title()
-            debug['_citiy_cleanup - city3'] = f'{city}'
-            alrededores = re.compile(r'(a|A)ldedores|(a|A)lredores|(a|A)lredor|(a|A)lrededores')
-            debug['_city_cleanup'] = f'sub({"Alrededores", city})'
-            city = alrededores.sub("Alrededores", city)
-            debug['_citiy_cleanup - city4'] = f'{city}'
-            print(city)
-            debug['_city_cleanup'] = f'replace({city})'
-            city = city.replace('.', "")
-            debug['_citiy_cleanup - city5'] = f'{city}'
-            print(city)
-            debug['_city_cleanup - return'] = f'return: {city}'
+            alrededores = re.compile(r'(a|A)ldedores (de )?|(a|A)lredores (de )?|(a|A)lredor (de )?|(a|A)lrededores (de )?|(a|A)ldedor (de )?|(a|A)lrededor (de )?')
+            city = alrededores.sub('', city)
+            city = city.replace('.', "").replace('-', "").replace('etc', "")
             return city.strip()
         except Exception as e:
-            debug['_citiy_cleanup - error'] = f'error: {e}'
             return ''
 
     def _clean_cities(self, string):
-        print(f'$$$$$$$  _clean_cities: {string}')
         cities = get_a_list_of_enumerates_from_string(string)
-        print(f'$$$$$$$  _clean_cities - cities: {cities}');
-
-        print();
-        debug['_clean_cities'] = f'{len(cities)} cities: {cities}'
-        return [self._clean_city(city) for city in cities]
+        clean_cities = []
+        for city in cities:
+            clean_city = self._clean_location(city)
+            if clean_city:
+                clean_cities.append(clean_city)
+        return  clean_cities
 
     def _clean_job_type(self, url):
         return re.findall('ofertas-internacionales|primer-empleo|trabajo', url)[0]
-
 
     def _clean_state(self, string):
         print(f'_state_clean_up{string}')
@@ -196,7 +174,7 @@ class CleanPipeline(CleanupPipeline_):
     def _clean_nationality(self, string):
         """
         Comprueba la url de la oferta:
-        - Si es una oferta inernacional devuelve 'internacional'
+        - Si es una oferta internacional (/ofertas-internacionales/) devuelve 'internacional'
         - Si es no una oferta inernacional devuelve 'nacional'
         :param string:
         :return: "international" or "nacional"
@@ -206,18 +184,14 @@ class CleanPipeline(CleanupPipeline_):
         else:
             return "nacional"
 
-
     def _clean_job_date(self, string):
-        print(f'CleanPipeline._clean_job_date({string})')
         today = datetime.date.today()
         try:
             number = get_int_from_string(string)
-            print(f'number{number}')
             job_date = today
             if 'dia' in string or 'día' in string or 'hora' in string:
-                if 'hora' in string:
-                    number = int(number/24)
-                job_date = today - relativedelta(days=number)
+                days = int(number/24) if 'hora' in string else number
+                job_date = today - relativedelta(days=days)
             elif 'mes' in string:
                 job_date = today - relativedelta(months=number)
             elif 'año' in string:
@@ -252,6 +226,13 @@ class CleanPipeline(CleanupPipeline_):
         return salary
 
     def _clean_salary(self, salary):
+        """
+        Look for two numbers in salary argument and return both
+        If only a number is in the string return this value twice
+        If there isn't any number return None twice
+        :param salary: a string
+        :return: two integers
+        """
         money = get_int_list_from_string(salary) # can have length 0,1 or 2
         money = (money + money + [None, None])[0:2]
         minimum_salary = money[0]
@@ -271,12 +252,15 @@ class CleanPipeline(CleanupPipeline_):
         return get_text_after_key('contrato', contract)
 
     def _clean_area(self, area):
-        print(f'*!!clean_area{area} ')
-        if 'Area' in area:
-            area = area.replace('Area de', "").replace('Área de', "").strip()
+        area = area.replace('Area de', "").replace('Área de', "").strip()
         return area
 
     def _get_annual_salary(self, text):
+        """
+        Look for a number in the argument 'text' that refers to a salary
+        :param text: a string
+        :return: an integer refer to the b/y salary
+        """
         KEYS = {
             'year': ['bruto anual', 'b/a', 'bruto al año'],
             'month': ['bruto mensual', 'b/m', 'bruto al mes'],
@@ -301,40 +285,28 @@ class CleanPipeline(CleanupPipeline_):
                     salary = [i * 12 for i in salary]
         return salary
 
-
     def _clean_summary(self, item):
-        print('#summary_cleanup: %s'%item['summary'])
-        summary = item['summary']
+        summary = item['_summary']
         summary_list = re.split('-', summary)
         summary_list = self.clean_string_list(summary_list)
-        print('summary_list: %s'%summary_list)
         experience = self._get_experience(summary_list)
-        print('#experience: %s' % (experience))
         item['minimum_years_of_experience'], item['recommendable_years_of_experience'] = self._clean_experience(experience)
         salary = self._get_salary(summary_list)
-        print('#salary: %s' % (salary))
         item['minimum_salary'], item['maximum_salary'] = self._clean_salary(salary)
         if not item['minimum_salary']:
-            print('Looking for salary in "it_is_offered"')
+            # Looking for salary in "it_is_offered"
             item['minimum_salary'], item['maximum_salary'] = self._get_annual_salary(item['it_is_offered'])
         working_day = self._get_working_day(summary_list)
-        print('#working_day: %s' % (working_day))
         item['working_day'] = self._get_working_day(summary_list)# self._clean_working_day(working_day)
         contract = self._get_contract(summary_list)
-        print('#contract: %s' % (contract))
         item['contract'] = self._get_contract(summary_list)# self._clean_contract(contract)
         item['_experience'] = experience
         item['_salary'] = salary
         item['_working_day'] = working_day
         item['_contract'] = contract
-        print('#set: %s %s %s %s'%(experience, salary, working_day, contract))
-        print('#experience:  %s %s' % (item['minimum_years_of_experience'], item['recommendable_years_of_experience']))
-        print('#salary:  %s %s' % (item['minimum_salary'], item['maximum_salary']))
-        print('#summary: %s'%summary_list)
         return summary_list
 
-    def _clean_job_dates(self, item):
-        print('CleanUpPipeline._clean_job_dates')
+    def _clean_job_date_from_state(self, item):
         if item['state'] in [Job.STATE_CREATED, Job.STATE_WITHOUT_CHANGES]:
             item['first_publication_date'] = self._clean_job_date(item['first_publication_date'])
             item['last_update_date'] = None
@@ -364,7 +336,7 @@ class CleanPipeline(CleanupPipeline_):
                 for word in words:
                     if word.islower() or word == "Para":
                         break
-                    elif (word.istitle() and word != "En") or word.isupper():
+                    elif (word.istitle() and word not in ["En", 'Desde', 'Somos']) or word.isupper():
                         result.append(word)
                 if result and len(result) > 1:
                     return " ".join(result)
@@ -374,6 +346,7 @@ class CleanPipeline(CleanupPipeline_):
             # Comprobamos si hay algun indicio de que aparezca el nombre de la empresa
             to_search = [' es una empresa', ' es una compañía', ', empresa ', ', Empresa ', ', compañía ',
                          ', Compañía ']
+            index = 0
             for i in to_search:
                 try:
                     index = description.index(i)
@@ -384,7 +357,7 @@ class CleanPipeline(CleanupPipeline_):
             if index:
                 if result.startswith('Para '):  # Para Cantabria, Empresa dedicada al sector...
                     return ''
-                # Nos quedamos com la parte inicial de la descripción donde puede esatr el nombre de la empresa
+                # Nos quedamos com la parte inicial de la descripción donde puede estar el nombre de la empresa
                 result = description[0:index]
                 # Hacemos una limpieza del final de la cadena resultante
                 result = result[0:-1] if result.endswith(',') else result
@@ -402,13 +375,42 @@ class CleanPipeline(CleanupPipeline_):
                 result = _get_company_name_from_description_start(result)
             return result
 
-        if not company_item['link']:
-            name = _get_company_name_in_resume(company_item['resume']) if company_item['resume'] else ''
+        name = ''
+        if not company_item.get('link') and not company_item.get('is_registered'):
+            name = _get_company_name_in_resume(company_item.get('resume')) if company_item.get('resume') else ''
             if not name:
-                name = _get_company_name_in_description(company_item['description']) if company_item['description'] else ''
-        else:
-            name = self.clean_string(company_item['name'])
+                name = _get_company_name_in_description(company_item.get('description')) if company_item.get('description') else ''
+        elif company_item.get('name'):
+            name = self.clean_string(company_item.get('name'))
+            translate_map = {
+                'Ã¡': 'á',
+                'Ã ': 'à',
+                'Ã‰': 'É',
+                'Ã©': 'é',
+                'Ã­': 'í',
+                'Ã': 'Í',
+                'Ã³': 'ó',
+                'Ã–': 'Ö',
+                'Ã“': 'Ó',
+                'Ãš': 'Ú',
+                'Ã‘': 'Ñ',
+                'Ã±': 'ñ',
+            }
+            for k, v in translate_map.items():
+                name = name.replace(k, v)
         return name
+
+    def _clean_company_description(self, description):
+        """
+        Clean from the description the empty spaces from the start an the end.
+        If the word 'Revisa' is in the description the function returns '' because the description has no meaning.
+        :param description: a string
+        :return: a string
+        """
+        try:
+            return '' if 'Revisa' in description else self.clean_string(description)
+        except:
+            return ''
 
     def _clean_company_category(self, company_item):
 
@@ -434,6 +436,7 @@ class CleanPipeline(CleanupPipeline_):
 
             category = ""
             to_search = ['Empresa', 'empresa', 'Compañía', 'compañía']
+            index = -1
             for i in to_search:
                 try:
                     index = desc.index(i)
@@ -503,71 +506,68 @@ class CleanPipeline(CleanupPipeline_):
             if not category:
                 category = _get_company_category_in_description(company_item['description']) if company_item['description'] else ''
         else:
-            category = self.clean_string(company_item['category'])
+            category = self.clean_string(company_item['category'], True)
         return category
 
-
     def _clean_company(self, item):
-        item['link'] = self._clean_url(item['link'])
-        item['resume'] = self.clean_string(item['resume'])
-        item['description'] = self.clean_string(item['description'])
         item['name'] = self._clean_company_name(item)
+        if item.get('is_registered'):
+            item['is_registered'] = True
+        else:
+            item['is_registered'] = True if item.get('link') else False
+        item['link'] = self._clean_url(item.get('link'))
+        item['resume'] = self.clean_string(item.get('resume'))
+        item['description'] = self._clean_company_description(item.get('description'))
         item['category'] = self._clean_company_category(item)
-        item['offers'] = get_int_from_string(item['offers'])
-        item['city_name'] = self._clean_city(item['city_name'])
+        item['offers'] = get_int_from_string(item.get('offers'), 0)
+        item['_location'] = self._clean_location(item.get('_location'))
+        print('EXIT _clean_company')  # %
         return item
 
     def _clean_job(self, item):
-        print('CleanPipeline._clean_job')
         item['name'] = self.clean_string(item['name'])
+        item['functions'] = self.clean_string(item['functions'])
+        item['requirements'] = self.clean_string(item['requirements'])
+        item['it_is_offered'] = self.clean_string(item['it_is_offered'])
         item['state']= self._clean_state(item['state'])
         item['type'] = self._clean_job_type(item['type'])
-        item['summary'] = self._clean_summary(item)
+        item['_summary'] = self._clean_summary(item)
         item['area'] = self._clean_area(item['area'])
         item['id'] = get_int_from_string(item['id'])
         item['vacancies'] = get_int_from_string(item['vacancies'])
         item['registered_people'] = get_int_from_string(item['registered_people'])
-        item['provincename'] = self._clean_province(item['provincename'])
-        print(f'_job.cleanup - item["provincename"] -> {item["provincename"]}')
-        item['cityname'] = self._clean_cities(item['cityname'])
-        item = self._clean_job_dates(item)
+        item['_province'] = self._clean_province(item['_province'])
+        item['_cities'] = self._clean_cities(item['_cities'])
+        item = self._clean_job_date_from_state(item)
         item['nationality'] = self._clean_nationality(item['nationality'])
         if item['nationality'] == "nacional":
-            item['countryname'] = 'España'
+            item['_country'] = 'España'
         else:
-            item['countryname'] = self._clean_country(item['countryname'])
+            item['_country'] = self._clean_country(item['_country'])
         item['expiration_date'] = get_date_from_string(item['expiration_date'])
+        item['_languages'] = get_languages_and_levels_pairs(item['requirements'])
         try:
             company = item['company']
-            item['company'] = self._cleanup[company.get_model_name()](company)
+            item['company'] = self._cleaning[company.get_model_name()](company)
         except Exception as e:
             print(e)
-            save_error(e, {**debug, 'pipeline': 'CleanPipeline', 'id': item['id'], 'link': item['link'], 'item': item})
+            save_error(e, { 'pipeline': 'CleanPipeline', 'id':item.get('id'), 'link': item.get('link'), 'item': item})
         return item
 
-    @check_spider_pipeline
+    #@check_spider_pipeline
     def process_item(self, item, spider):
-        print('CleanPipeline.process_item')
-        write_in_a_file('CleanPipeline.process_item', {}, 'pipeline.txt')
         try:
-            debug.setdefault('raw item',item)
-            clean_item = self._cleanup[item.get_model_name()](item)
-            print('ITEM CLEANED:')
-            print(clean_item)
+            clean_item = self._cleaning[item.get_model_name()](item)
             return clean_item
         except Exception as e:
-            print('Error CleanPipeline.process_item: {}'.format(e))
-            save_error(e, {**debug, 'pipeline':'CleanPipeline', 'id':item['id'], 'link':item['link'], 'item':item })
+            save_error(e, { 'pipeline':'CleanPipeline', 'id':item.get('id'), 'link':item.get('link'), 'item':item })
             return item
-        #return self.ie_item_cleanup(item)
 
 
-class StorePipeline(object):
-
+class StoragePipeline(object):
 
     def __init__(self):
-
-        self.store= {
+        self._storage= {
             'Job': self._store_job,
             'Company': self._store_company,
         }
@@ -584,30 +584,27 @@ class StorePipeline(object):
                 pass
         return item
 
-    def _get_languages(self, string):
-        print('_get_languages')
-        print()
-        print('GET_LANGUAGES')
-        language_and_level_pairs = get_languages_and_levels_pairs(string)
-        print(f'language_and_level_pairs: {language_and_level_pairs}')
+    def _get_item_without_temporal_fields(self, item):
+        def drop_keys_that_starts_with(c, d):
+            keys_to_delete = [key for key in d.keys() if key.startswith(c)]
+            for key in keys_to_delete:
+                del d[key]
+            return d
+        item_ =  item.get_dict_deepcopy()
+        item_ = drop_keys_that_starts_with('_', item_)
+        return item_
+
+    def _get_languages(self, language_and_level_tuples):
         languages = []
-        for l_l in language_and_level_pairs:
-            print(f'l_l: {l_l}')
-            language, is_new_language = Language.objects.get_or_create(name=l_l[0], level=l_l[1])
-            print(f'language: {language}')
+        for language, level in language_and_level_tuples:
+            language, is_new_language = Language.objects.get_or_create(name=language, level=level)
             languages.append(language)
-        print(f'languages: {languages}')
         return languages
 
     def _get_city(self, city_name, province=None, country=None):
         write_in_a_file('StorePipeline._get_city', {'city_name': city_name + '.', 'province':province, 'country': country}, 'pipeline.txt')
-        debug['location'] = f'CleanPipeline._get_city'
-        debug['value'] = f'city_name {city_name}'
-        print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
-        print(f'__get_city{city_name, province, country}')
         if not city_name:
             return None
-
         city = None
         if country and country.name == 'España':
             print('The country is España')
@@ -618,21 +615,15 @@ class StorePipeline(object):
             else:
                 print('Province == None (iexact)')
                 cities_qs = City.objects.filter(country=country, name__iexact=city_name)
-            print(f'result: {cities_qs}')
             # second search with icontains
             if cities_qs:
                 city = cities_qs[0]
-            else:
-                print('not iexact city found')
+            else: # not iexact city found
                 if province:
-                    print('Province <> None (icontains)')
                     cities_qs = City.objects.filter(country=country, province=province, name__icontains=city_name)
                 else:
-                    print('Province == None (icontains)')
                     cities_qs = City.objects.filter(country=country, name__icontains=city_name)
-                print(f'result: {cities_qs}')
                 if cities_qs.count() > 1:
-                    print(f'more than one result')
                     cities_qs = cities_qs.filter(name__icontains='/')
                     for city in cities_qs:
                         cities = [city for name in city.name.split('/') if city_name.lower() == name.lower()]
@@ -644,11 +635,9 @@ class StorePipeline(object):
                         city.save()
                 elif province and (city_name != province.name):
                     city = City.objects.create(name=city_name, province=province, country=country)
-
         elif country and (city_name.lower() == country.name.lower() or city_name.lower() == get_acronym(country.name).lower()):
             return None
-        # a foreign city:
-        elif country :
+        elif country : # a foreign city:
             print('a foreign city')
             cities_qs = City.objects.filter(name__iexact=city_name,  country=country)
             if cities_qs:
@@ -681,25 +670,27 @@ class StorePipeline(object):
                 write_in_a_file('StorePipeline._get_city',
                                 {'if': 'cities_qs.count() == 1'}, 'pipeline.txt')
                 city = cities_qs[0]
-
         write_in_a_file('StorePipeline._get_city',
                         {'city': city}, 'pipeline.txt')
         return city
 
+    def _get_country (self, country_name):
+        if country_name:
+            try:
+                return Country.objects.get(slug=slugify(country_name))
+            except Exception as e:
+                pass
+
     def _get_location(self, city_names, province_name, country_name):
-        debug['_get_location'] = f'city: {city_names}, province: {province_name}, country: {country_name})'
-        print('#Pipeline__get_location: %s %s %s'%(city_names, province_name, country_name))
         country = None
         province = None
         if country_name:
             country, is_a_new_country = Country.objects.get_or_create(name=country_name)
         try:
             provinces = Province.objects.filter(name__iexact=province_name)
-            print('provinces %s' % provinces)
             province = provinces[0]
-        except:
-            print('Error getting the province')
-        print('Country: %s'%country)
+        except Exception as e:
+            pass
         cities = []
         for city_name in city_names:
             cities.append(self._get_city(city_name, province, country))
@@ -708,86 +699,67 @@ class StorePipeline(object):
         print('#_get_location return: %s %s %s'%(cities, province, country))
         return cities, province, country
 
+    def _get_company_upgrade(self, company, item):
+        """
+        Checks for any change in the company description, resume and number of offers
 
-    def _has_been_the_company_updated(self, company, item):
-        # Checks for any change in the company description
-        print('_____________________________')
-        print('_has_been_the_company_updated')
-        print(f'company: {company}:{type(company)}')
-        print(company.description)
-        print(item['description'])
-        print(company.resume)
-        print(item['resume'])
-
-        update = (
-            company.description != item['description'] or
-            company.resume != item['resume']
-        )
-        print(f'UPDATE company: {update}')
-        debug['_has_been_the_company_updated'] = update
-        return update
+        :param company: Company
+        :param item: CompanyItem
+        :return: a boolean
+        """
+        upgrade = {}
+        if item.get('description') and company.description != item.get('description'):
+            upgrade['description'] = item.get('description')
+        if item.get('resume')and company.resume != item.get('resume'):
+            upgrade['resume'] = item.get('resume')
+        if item.get('offers') and company.offers != item.get('offers'):
+            upgrade['offers'] = item.get('offers')
+        if item.get('is_registered') and not company.is_registered:
+            upgrade['is_registered'] = True
+        if item.get('link') and not company.link:
+            upgrade['link'] = item.get('link')
+        area = item.get('area')
+        if area and not company.area:
+            upgrade['area'] = item.get('area')
+        elif area and area not in company.area:
+            upgrade['area'] = company.area + [area]
+        if item.get('category') and company.category != item.get('category'):
+            upgrade['category'] = item.get('category')
+        return upgrade
 
     def _update_company(self, company, item):
-        print('_____________________________')
-        print('_update_company')
-        #debug['_update_company'] = f'company.name: {company.name}, item.name: {item["name"]}'
-        if self._has_been_the_company_updated(company, item):
-            print('_____________________________')
-            print(f'_update_company - va a actualizar compañia {company.id}')
-            debug['_update_company'] = '_has_been_the_company_updated'
-            company_dict = copy.deepcopy(item.get_dict_deepcopy())
-            company_dict.pop('id', None)
+        upgrade = self._get_company_upgrade(company, item)
+        if upgrade:
             id = company.id
             qs = Company.objects.filter(id=id)
-            qs.update(**company_dict)
+            qs.update(**upgrade)
             company = qs[0]
-        try:
-            offers_number  = int(item['offers'])
-        except:
-            offers_number = 0
-        print('_____________________________')
-        print(f'offers numbers: {offers_number}')
-        #if offers_number and (company.offers != offers_number):
-        if offers_number and (company.offers != offers_number):
-            print('actualizando offers')
-            company.offers = offers_number
-            company.save()
-
+        return company
 
     def _store_company(self, item):
-        print('$$store_company')
-        write_in_a_file(f'StorePipeline._store_company({item})', {}, 'pipeline_company.txt')
-        debug['location'] = f'CleanPipeline._store_company'
-        debug['company'] = item
-        company_dict = item.get_dict_deepcopy()
-        write_in_a_file(f'StorePipeline._store_company: 1', {'company_dict': company_dict}, 'pipeline_company.txt')
-        write_in_a_file(f'StorePipeline._store_company: 3', {'company_city_name': company_dict['city_name']}, 'pipeline_company.txt')
-        city = self._get_city(company_dict['city_name'])
-        write_in_a_file(f'StorePipeline._store_company: 4', {'city': city}, 'pipeline_company.txt')
+        city = self._get_city(item.get('_location'))
+        country = city.country if city else self._get_country(item.get('_location'))
+        company_dict = self._get_item_without_temporal_fields(item)
         company_dict.setdefault('created_at', timezone.now())
         company_dict.setdefault('city', city)
+        company_dict.setdefault('country', country)
         company = None
-        print('$$1')
         # Can be companies with different name and same link
+        # A company can have different links but always the same reference
         try:
             if company_dict['name']:
                 company_name = company_dict['name']
                 company, is_a_new_company_created = Company.objects.get_or_create(slug=slugify(company_name), defaults=company_dict)
-                #""
-                print(company.name)
-                print(is_a_new_company_created)
             else:
                 is_a_new_company_created = False
                 qs =  Company.objects.filter(name="").annotate(desc_len=Length('description'))
-                qs1 = qs.filter(desc_len__gt=70)
-                qs1_ = qs1.filter(description__iexact=company_dict['description'])
-                if qs1_:
-                    company = qs1_[0]
-                else:
-                    qs2 = qs.filter(desc_len__lte=70)
-                    qs2_ = qs2.filter(description__iexact=company_dict['description'])
-                    if qs2_ :
-                        for c in qs2_:
+                qs1 = qs.filter(desc_len__gt=70).filter(description__iexact=company_dict['description'])
+                if qs1:
+                    company = qs1[0]
+                else: # for descriptions length under 70 the resume is too compared
+                    qs2 = qs.filter(desc_len__lte=70).filter(description__iexact=company_dict['description'])
+                    if qs2 :
+                        for c in qs2:
                             if c.resume == company_dict['resume']:
                                 company = c
                                 break
@@ -795,55 +767,41 @@ class StorePipeline(object):
                         is_a_new_company_created = True
                         company = Company(**company_dict)
                         company.save()
-
-            write_in_a_file(f'StorePipeline._store_company: 5', {'company': company, 'is_new':is_a_new_company_created}, 'pipeline.txt')
             if not is_a_new_company_created:
-                #"""
-                print('_____________________________')
-                print('not is_a_new_company_created')
                 self._update_company(company, item)
         except Exception as e:
-            print();
-            print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-            print('ERROR')
-            print('!!!Company.objects.get_or_create')
-            save_error(e, {**debug, 'pipeline':'StorePipeline','company_id': item['name'], 'company_link': item['link']})
-            print(e)
-            print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-
+            save_error(e, { 'pipeline':'StorePipeline','company_id': item['name'], 'company_link': item.get('link')})
+        print('EXIT STORE_COMPANY') #%
         return company
 
     def _set_location(self, job, item):
-        print('StorePipeline._set_location')
-        cities, province, country = self._get_location(item['cityname'], item['provincename'], item['countryname'])
-        print(cities, province, country)
-
+        cities, province, country = self._get_location(item['_cities'], item['_province'], item['_country'])
         job.country = country
         job.province = province
         job.cities.clear()
         job.cities.set(cities)
-        print(job);print();print()
-
         return job
 
     def _set_languages(self, job, item):
-        print('StorePipeline._set_languages')
-        languages = self._get_languages(item['requirements'])
-        print(f'languages: {languages}')
+        languages = self._get_languages(item.get('_languages'))
         job.languages.clear()
         job.languages.set(languages)
-        print(job);print();print()
         return job
 
-    # Checks for any change in the offer
     def _has_been_the_job_updated(self, job, item):
-        update = (
+        """
+        # Checks for any change in the offer
+        :param job: Job
+        :param item: JobItem
+        :return: Boolean
+        """
+        updated = (
             (item['state'] == Job.STATE_UPDATED) and (item['last_update_date'] != job.last_update_date) or
             (item['state'] in [Job.STATE_CREATED, Job.STATE_WITHOUT_CHANGES]) and (item['first_publication_date'] != job.first_publication_date) or
             (item['state'] == Job.STATE_CLOSED) and (item['expiration_date'] != job.expiration_date)
         )
-        if (not update) and (item['state'] == Job.STATE_CLOSED) and (job.state != Job.STATE_CLOSED):
-            update = (
+        if (not updated) and (item['state'] == Job.STATE_CLOSED) and (job.state != Job.STATE_CLOSED):
+            updated = (
                 job.vacancies != item['vacancies'] or
                 job.type != item['type'] or
                 job.contract != item['contract'] or
@@ -858,17 +816,12 @@ class StorePipeline(object):
                 job.area != item['area'] or
                 job.category_level != item['category_level']
             )
-        print(f'UPDATE: {update}')
-        debug['_has_been_the_job_updated']=update
-        return update
-
+        return updated
 
     def _update_job(self, job, item):
         # if job.last_update_date != item['last_update_date']: -> Actualizamos cuando la oferta ha caducado (por si no hemos hecho scraping  sobre una actualización)
-        debug['_update_job'] = f'job.id: {job.id}, item.id: {item["id"]}'
         if self._has_been_the_job_updated(job, item):
-            print('1'); debug['_update_job']='_has_been_the_job_updated'
-            job_dict = copy.deepcopy(item.get_dict_deepcopy())
+            job_dict = copy.deepcopy(self._get_item_without_temporal_fields(item))
             job_dict.pop('id', None)
             if item['state'] == Job.STATE_CLOSED:
                 job_dict.pop('first_publication_date', None)
@@ -883,60 +836,34 @@ class StorePipeline(object):
             self._set_languages(job, item)
             job.save()
         if job.registered_people != item['registered_people']:
-            debug['_update_job'] = "job.registered_people != item['registered_people']"
             job.registered_people = item['registered_people']
             job.save()
         if job.state != item['state']:
-            debug['_update_job'] = "job.state != item['state']"
-
-            print('3')
             job.state = item['state']
             job.save()
 
-
     def _store_job(self, item):
-        print('*store_job')
         try:
-            debug['location'] = f'CleanPipeline._store_job'
             company = item['company']
-            print(company)
-            item['company'] = self.store[company.get_model_name()](company)
-            debug['location'] = f'CleanPipeline._store_job (company has been stored)'
-            print('$$Company stored!!')
+            item['company'] = self._storage[company.get_model_name()](company)
         except Exception as e:
-            print(f'!!Error StorePipeline._store_job (storing company): {e}')
-            save_error(e, {**debug, 'pipeline':'StorePipeline', 'company_id': item['name'], 'company_link': item['link'], 'item': item})
-
-        job_dict = copy.deepcopy(item.get_dict_deepcopy())
+            save_error(e, { 'pipeline':'StorePipeline', 'company_id': item['name'], 'company_link': item.get('link'), 'item': item})
+        job_dict = copy.deepcopy(self._get_item_without_temporal_fields(item))
         job_id = job_dict.pop('id', None)
-        debug['location'] = f'CleanPipeline._store_job get_or_create'
         job, is_new_item_created = Job.objects.get_or_create(id=job_id, defaults=job_dict)
-        print('??????????????????????????????????????????????????')
-        print(f'id: {job.id}')
-        print(job.get_absolute_url())
-        print(job)
-        print(f'is_new_item_created: {is_new_item_created}')
         if not is_new_item_created:
-            debug['location'] = f'CleanPipeline._store_job get_or_create not is_new_item_created'
             self._update_job(job, item)
         else:
-            debug['location'] = f'CleanPipeline._store_job get_or_create is_new_item_created'
-            print('NEW JOB CREATED')
             self._set_location(job, item)
             self._set_languages(job, item)
             job.save()
-        print('#store_job: %s'%job)
         return job
 
-    @check_spider_pipeline
+    #@check_spider_pipeline
     def process_item(self, item, spider):
-        print('StorePipeline.process_item')
-        print(item)
-        debug = {}
         try:
-            debug['cleaned item']=item
-            return self.store[item.get_model_name()](item)
+            self._storage[item.get_model_name()](item)
+            return item
         except Exception as e:
-            print(f'Error StorePipeline.process_item: {e}')
-            save_error(e, {**debug, 'pipeline':'StorePipeline', 'model':item.get_model_name() , 'line':723, 'id':item['id'], 'link':item['link'], 'item': item})
+            save_error(e, { 'pipeline':'StorePipeline', 'model':item.get_model_name() , 'line':723, 'id':item.get('id'), 'link':item.get('link'), 'item': item})
             return item
