@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 #####################################################################################################
 
-DJANGO_APPS = [
+DJANGO_DEFAULT_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,6 +45,7 @@ OTHER_DJANGO_APPS = [
     'django_celery_beat',
     'django_celery_results',
     'django_filters',
+    'django_mysql',
 ]
 
 OTHER_APPS = [
@@ -56,6 +57,7 @@ OTHER_APPS = [
 ]
 
 PROJECT_APPS = [
+    'ie_scrapy',
     'core',
     'job',
     'chart',
@@ -63,7 +65,7 @@ PROJECT_APPS = [
     "account",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + OTHER_DJANGO_APPS + OTHER_APPS + PROJECT_APPS
+INSTALLED_APPS = DJANGO_DEFAULT_APPS + OTHER_DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
 #####################################################################################################
 
@@ -166,7 +168,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Madrid'
 
 USE_I18N = True
 
