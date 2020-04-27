@@ -17,12 +17,12 @@ python manage.py migrate
 
 class Country(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, verbose_name="nombre")
     slug = models.CharField(max_length=30)
 
     class Meta:
-        verbose_name = "Country"
-        verbose_name_plural = "Countries"
+        verbose_name = "País" #"Country"
+        verbose_name_plural = "Países" #"Countries"
         ordering = ['name']
 
     def save(self, *args, **kwargs):
@@ -39,16 +39,17 @@ class Country(models.Model):
 class Community(models.Model):
     id = models.IntegerField(primary_key=True)
     slug = models.CharField(max_length=30)
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, verbose_name="nombre")
     capital_id = models.IntegerField(null=True)
     country = models.ForeignKey(Country,
                                 on_delete=models.CASCADE,
                                 related_name='communities',
-                                null=True, blank=True)
+                                null=True, blank=True,
+                                verbose_name="país")
 
     class Meta:
-        verbose_name = "Community"
-        verbose_name_plural = "Communities"
+        verbose_name = "Comunidad" #"Community"
+        verbose_name_plural = "Comunidades" #"Communities"
         ordering = ['name']
 
     def save(self, *args, **kwargs):
@@ -67,18 +68,20 @@ class Province(models.Model):
     country = models.ForeignKey(Country,
                                 on_delete=models.CASCADE,
                                 related_name='provinces',
-                                null=True, blank=True)
+                                null=True, blank=True,
+                                verbose_name="país")
     community = models.ForeignKey(Community,
                                 on_delete=models.CASCADE,
                                 related_name='provinces',
-                                null=True)
+                                null=True, verbose_name="comunidad autónoma")
     slug = models.CharField(max_length=30)
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, verbose_name="nombre")
     community_number = models.IntegerField(null=True, blank=True)
     capital_id = models.IntegerField(null=True)
 
     class Meta:
-        verbose_name = "Province"
+        verbose_name = "Provincia" #"Province"
+        verbose_name_plural = "Provincias"  # "Provinces"
         ordering = ['name']
 
     def save(self, *args, **kwargs):
@@ -99,20 +102,21 @@ class City (models.Model):
     province = models.ForeignKey(Province,
                                  on_delete=models.CASCADE,
                                  related_name='cities',
-                                 null = True, blank = True)
+                                 null = True, blank = True,
+                                 verbose_name="provincia")
     country = models.ForeignKey(Country,
                                 on_delete=models.CASCADE,
                                 related_name='cities',
-                                null = True, blank = True)
-    name = models.CharField(max_length=100)
+                                null = True, blank = True,
+                                verbose_name="país")
+    name = models.CharField(max_length=100, verbose_name="nombre")
     slug = models.CharField(max_length=100, null=True, blank = True)
-
-    latitude = models.FloatField(null=True, blank = True)
-    longitude = models.FloatField(null=True, blank = True)
+    latitude = models.FloatField(null=True, blank = True, verbose_name="latitud")
+    longitude = models.FloatField(null=True, blank = True, verbose_name="longitud")
 
     class Meta:
-        verbose_name = "City"
-        verbose_name_plural = "Cities"
+        verbose_name = "Ciudad" #"City"
+        verbose_name_plural = "Ciudades" #"Cities"
         ordering = ['name']
 
     def save(self, *args, **kwargs):
@@ -136,35 +140,35 @@ class City (models.Model):
 
 class Company(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(null=True, blank=True, max_length=300)
+    name = models.CharField(null=True, blank=True, max_length=300, verbose_name="nombre")
     link = models.URLField(null=True)
-    reference = models.IntegerField(null=True, blank=True)
-    is_registered = models.BooleanField(null=True, blank=True)
-    description = models.TextField(null=True)
-    resume = models.CharField(max_length=300, null=True, blank=True)
+    reference = models.IntegerField(null=True, blank=True, verbose_name="nº de referencia")
+    is_registered = models.BooleanField(null=True, blank=True, verbose_name="empresa colaboradora")
+    description = models.TextField(null=True, verbose_name="descripción")
+    resume = models.CharField(max_length=300, null=True, blank=True, verbose_name="resumen")
     location_name = models.CharField(max_length=50, null=True)
     city = models.ForeignKey(City,
                             on_delete=models.CASCADE,
                             related_name='companies',
-                            null = True, blank = True)
+                            null = True, blank = True, verbose_name="ciudad")
     country = models.ForeignKey(Country,
                              on_delete=models.CASCADE,
                              related_name='companies',
-                             null=True, blank=True)
+                             null=True, blank=True, verbose_name="país")
     area = ListCharField(base_field=models.CharField(max_length=45),
                              size=34,
-                             max_length=(1570), null=True, blank=True)
-    category = models.CharField(null=True, blank=True, max_length=100)
-    offers = models.IntegerField(null=True, blank=True)
+                             max_length=(1570), null=True, blank=True, verbose_name="área")
+    category = models.CharField(null=True, blank=True, max_length=100, verbose_name="categoría")
+    offers = models.IntegerField(null=True, blank=True,  verbose_name="nº de ofertas")
     slug = models.CharField(max_length=300, null=True, blank = True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True)  # models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True)  # models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, verbose_name="fecha de creción del registro")  # models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, verbose_name="fecha de actualización del registro")  # models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
     objects = CompanyManager()
 
     class Meta:
-        verbose_name = "Company"
-        verbose_name_plural = "Companies"
+        verbose_name = "Compañía" #"Company"
+        verbose_name_plural = "Compañías" #"Companies"
         ordering = ['name']
 
     def save(self, *args, **kwargs):
@@ -180,6 +184,9 @@ class Company(models.Model):
         except:
             pass
         super(Company, self).save(*args, **kwargs)
+        if not self.slug:
+            self.slug = str(self.id)
+            super(Company, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name or ''
@@ -193,6 +200,7 @@ class Company(models.Model):
             slug = ''
         return slug
 
+
 class Language(models.Model):
 
     id = models.AutoField(primary_key=True)
@@ -205,16 +213,18 @@ class Language(models.Model):
         max_length=15,
         choices=LANGUAGES_CHOICES,
         default='',
+        verbose_name = "nombre",
     )
     level = models.CharField(
         max_length=2,
         choices=LEVELS_CHOICES,
         default='',
+        verbose_name = "nivel"
     )
 
     class Meta:
-        verbose_name = "Language"
-        verbose_name_plural = "Languages"
+        verbose_name = "Idioma" #"Language"
+        verbose_name_plural = "Idiomas" #"Languages"
         ordering = ['name', 'level']
 
     def __str__(self):
@@ -334,7 +344,7 @@ class Job(models.Model):
         (AREA_MARKETING_AND_COMMUNICATION, "Marketing y comunicación"),
     )
     id = models.IntegerField(unique=True, primary_key=True)
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, verbose_name="nombre")
     link = models.URLField(null=True)
 
     state = models.CharField(
@@ -342,12 +352,14 @@ class Job(models.Model):
         choices=STATE_CHOICES,
         null=True,
         blank=True,
+        verbose_name = "estado"
     )
 
     type = models.CharField(
         max_length=30,
         choices=TYPE_CHOICES,
         default=TYPE_NATIONAL,
+        verbose_name = "tipo",
     )
     _summary = ListCharField(base_field=models.CharField(max_length=100),
         size=6,
@@ -356,78 +368,82 @@ class Job(models.Model):
     _salary = models.CharField(max_length=40, null=True, blank=True)
     _contract = models.CharField(max_length=40, null=True, blank=True)
     _working_day = models.CharField(max_length=40, null=True, blank=True)
-    minimum_years_of_experience = models.PositiveIntegerField(null=True, blank=True, default=0)
-    recommendable_years_of_experience = models.PositiveIntegerField(null=True, blank=True, default=0)
-    minimum_salary = models.PositiveIntegerField(null=True, blank=True)
-    maximum_salary = models.PositiveIntegerField(null=True, blank=True)
+    minimum_years_of_experience = models.PositiveIntegerField(null=True, blank=True, default=0, verbose_name="experiencia mínima")
+    recommendable_years_of_experience = models.PositiveIntegerField(null=True, blank=True, default=0, verbose_name="experiencia recomendable")
+    minimum_salary = models.PositiveIntegerField(null=True, blank=True, verbose_name="salario míminimo")
+    maximum_salary = models.PositiveIntegerField(null=True, blank=True, verbose_name="salario máximo")
     working_day = models.CharField(
         max_length=30,
         choices=WORKING_DAY_CHOICES,
-        default=CATEGORY_UNSPECIFIED
+        default=CATEGORY_UNSPECIFIED,
+        verbose_name="jornada laboral",
     )
     contract = models.CharField(
         max_length=40,
         choices=CONTRACT_CHOICES,
         default=CONTRACT_UNSPECIFIED,
+        verbose_name = "tipo de contrato",
     )
 
     cities = models.ManyToManyField(City,
                             related_name='jobs',
-                            null = True, blank = True)
+                            null = True, blank = True,
+                            verbose_name="ciudades",)
     province = models.ForeignKey(Province,
                                  on_delete=models.CASCADE,
                                  related_name='jobs',
-                                 null=True, blank=True)
+                                 null=True, blank=True,
+                                 verbose_name="provincia",)
     country = models.ForeignKey(Country,
                                 on_delete=models.CASCADE,
                                 related_name='jobs',
-                                null=True, blank=True)
+                                null=True, blank=True,
+                                verbose_name="país",)
     languages = models.ManyToManyField(Language,
                             related_name='jobs',
-                            null = True, blank = True)
+                            null = True, blank = True,
+                            verbose_name="idiomas",)
     _cities = ListCharField(base_field=models.CharField(max_length=100),
                              size=6,
                              max_length=(6 * 101), null=True, blank=True)
     _province = models.CharField(null=True, max_length=100, blank=True)  # Model
     _country = models.CharField(null=True, max_length=30) #Model
-    nationality = models.CharField(max_length=30)
-    first_publication_date = models.DateField(null=True, blank=True, default=None)
-    last_update_date = models.DateField(null=True, blank=True, default=None)
-    expiration_date = models.DateField(null=True, blank=True, default=None)  # models.DateTimeField(auto_now_add=True)
-    description = models.TextField(null=True, blank=True)
-    functions = models.TextField(null=True, blank=True)
-    requirements = models.TextField(null=True, blank=True)
-    it_is_offered = models.TextField(null=True, blank=True) #NULL constraint
-    tags = models.TextField(null=True, blank=True) #Model
+    nationality = models.CharField(max_length=30, verbose_name="nacionalidad")
+    first_publication_date = models.DateField(null=True, blank=True, default=None, verbose_name="fecha de publicación de la oferta")
+    last_update_date = models.DateField(null=True, blank=True, default=None, verbose_name="fecha de actualización de la oferta")
+    expiration_date = models.DateField(null=True, blank=True, default=None, verbose_name="fecha de caducidad de la oferta")  # models.DateTimeField(auto_now_add=True)
+    description = models.TextField(null=True, blank=True, verbose_name="descripción")
+    functions = models.TextField(null=True, blank=True, verbose_name="funciones")
+    requirements = models.TextField(null=True, blank=True, verbose_name="requisitos")
+    it_is_offered = models.TextField(null=True, blank=True,verbose_name="se ofrece") #NULL constraint
+    tags = models.TextField(null=True, blank=True,verbose_name="etiquetas") #Model
     area = models.CharField(
         max_length=40,
         choices=AREA_CHOICES,
+        verbose_name = "área"
     )
     category_level = models.CharField(
         max_length=20,
         choices=CATEGORY_CHOICES,
         default=CATEGORY_UNSPECIFIED,
-        null=True
+        null=True,
+        verbose_name="categoría o nivel",
     )
-    vacancies = models.PositiveIntegerField(null=True, blank=True)
-    registered_people = models.PositiveIntegerField(default=0)
+    vacancies = models.PositiveIntegerField(null=True, blank=True, verbose_name="nº de vacantes")
+    registered_people = models.PositiveIntegerField(default=0, verbose_name="inscritos")
     vacancies_update = models.PositiveIntegerField(null=True, blank=True)
-
     company = models.ForeignKey(
         Company,
         on_delete=models.CASCADE,
-        related_name='jobs', null=True)
-   
-    
-
-    created_at = models.DateTimeField(auto_now_add=True, null=True)  # models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)  # models.DateTimeField(auto_now=True)
+        related_name='jobs', verbose_name="compañía")
+    created_at = models.DateTimeField(auto_now_add=True, null=True, verbose_name="fecha de creación del registro")  # models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True, verbose_name="fecha de actualización del registro")  # models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
     objects = JobManager()
 
     class Meta:
-        verbose_name = "Job"
-        verbose_name_plural = "Jobs"
+        verbose_name = "Oferta de empleo"
+        verbose_name_plural = "Ofertas de empleo"
         ordering = ['-created_at', 'name']
         #unique_together = (('id'),)
 
