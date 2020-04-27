@@ -7,13 +7,21 @@ from simple_history.admin import SimpleHistoryAdmin
 from .models import Job, Company, Province, City, Community, Country, Language
 from .resources import JobResource
 
+
+print(dir(admin))
 #admin.site.register(Job)
 
-admin.site.site_header = "Infoempleo";
-admin.site.site_title = "Infoempleo";
+admin.site.site_header = "InfoempleoH";
+admin.site.site_title = "InfoempleoT";
 
 
 def custom_titled_filter(title):
+    """
+    Usage: list_filter = (('some_field_name', custom_titled_filter('My custom field name') ),)
+
+    :param title: a string with the custom filter field name
+    :return: RelatedFieldListFilter
+    """
     print(dir(admin))
     print()
     class Wrapper(admin.RelatedFieldListFilter):
@@ -50,7 +58,7 @@ class JobAdmin(ImportExportModelAdmin):
             'fields': [('state'), ('first_publication_date', 'last_update_date', 'expiration_date')]
         }),
         ('Principal', {
-            'fields': [('name'), ('id', 'link', 'type'),('summary'),('cities', 'province', 'country'),('cityname', 'provincename','countryname')]
+            'fields': [('name'), ('id', 'link', 'type'),('_summary'),('cities', 'province', 'country'),('_cities', '_province','_country')]
         }),
         ('Summary1', {
             'fields': [('_experience', '_salary', '_working_day', '_contract')]
@@ -99,22 +107,36 @@ class JobInLine(admin.TabularInline):
 
 @admin.register(Company) #admin.site.register(Quote, QuoteAdmin)
 class CompanyAdmin(ImportExportModelAdmin): #class CompanyAdmin(admin.ModelAdmin):
-    list_display = ['name', '_jobs']
-    list_filter = (('city__province__name', custom_titled_filter('Province name') ),)
-    search_fields = ['name', 'city__name']
-    """
+
+    list_display = ['name', 'area', '_jobs_count']
+    list_filter = ('area', 'country',)
+    search_fields = ['name', 'city__name', 'description']
+
+    readonly_fields = ['_location']
     fieldsets = [
-        ('Company', {
-            'fields': ['description', 'category', 'offers', city']
+        ('Compañía', {
+            'fields': ['name', 'area', '_location',]
+        }),
+         ('Descripción', {
+            'fields': ['resume', 'description', 'offers']
         }),
 
     ]
-    """
     inlines = [JobInLine]
 
-    def _jobs(self, obj):
+    def _jobs_count(self, obj):
         #return obj.quotes.all().count()
         return obj.jobs.all().count()
+
+    _jobs_count.allow_tags = False
+    _jobs_count.short_description = 'nº de ofertas' # 'Count of jobs'
+    _jobs_count.admin_order_field = 'job'
+
+    def _location(self, obj):
+        return obj.city.name
+
+    _location.allow_tags = False
+    _location.short_description = 'localización'
 
     def get_field(self, name, many_to_many=True):
         """
@@ -142,8 +164,7 @@ class CompanyAdmin(ImportExportModelAdmin): #class CompanyAdmin(admin.ModelAdmin
             return f
         raise FieldDoesNotExist('%s has no field named %r' % (self.object_name, name))
 
-    _jobs.short_description = 'Count of jobs'
-    _jobs.admin_order_field = 'job'
+
 
 
 
@@ -156,6 +177,8 @@ class CityAdmin(ImportExportModelAdmin):
 
     def _jobs_count(self, obj):
         return obj.jobs.all().count()
+    _jobs_count.allow_tags = False
+    _jobs_count.short_description = 'nº de ofertas'  # 'Count of jobs'
     
     def _jobs(self, obj):
         return obj.jobs.all()
@@ -169,11 +192,14 @@ class CityInLine(admin.TabularInline):
 
 @admin.register(Province)
 class ProvinceAdmin(ImportExportModelAdmin):
-    list_display = ['name', '_cities', 'country']
+    list_display = ['name', '_cities_count', 'country']
     search_fields = ['name']
 
-    def _cities(self, obj):
+    def _cities_count(self, obj):
         return obj.cities.all().count()
+
+    _cities_count.allow_tags = False
+    _cities_count.short_description = "nº de ciudades"
 
     inlines = [CityInLine]
 
@@ -185,11 +211,16 @@ class ProvinceInLine(admin.TabularInline):
 
 @admin.register(Community)
 class CommunityAdmin(ImportExportModelAdmin):
-    list_display = ['name', '_provincies']
+    list_display = ['name', '_provinces_count']
     search_fields = ['name']
 
-    def _provincies(self, obj):
+    def _provinces_count(self, obj):
         return obj.provinces.all().count()
+
+    _provinces_count.allow_tags = False
+    _provinces_count.short_description = 'nº de provincias'  # 'Count of jobs'
+
+
 
     inlines = [ProvinceInLine]
 
@@ -201,12 +232,15 @@ class CommunityInLine(admin.TabularInline):
 
 @admin.register(Country)
 class CountryAdmin(ImportExportModelAdmin):
-    list_display = ['name', '_cities']
+    list_display = ['name', '_cities_count']
     search_fields = ['name']
 
-    def _cities(self, obj):
+    def _cities_count(self, obj):
         self._init_inlines(obj)
         return obj.cities.all().count()
+
+    _cities_count.allow_tags = False
+    _cities_count.short_description = "nº de ciudades"
 
     def _init_inlines(self, obj):
         if obj.name == 'España':
