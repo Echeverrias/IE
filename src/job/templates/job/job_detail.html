@@ -10,10 +10,17 @@
                 <span class="important">Estado de la oferta: </span>{{job.state}}
             </div>
             <div class="inline">
-                <span class="important">Creación de la oferta: </span>{{job.first_publication_date}}
+                <span class="important">Creación de la oferta: </span>
+                 {% if job.first_publication_date %}
+                    {{job.first_publication_date}}
+                 {% else %}
+                    -
+                 {% endif %}
             </div>
             <div class="inline">
-                <span class='important'>Última actualización de la oferta: </span>{{job.last_update_date}}
+                {% if job.last_update_date %}
+                    <span class='important'>Última actualización de la oferta: </span>{{job.last_update_date}}
+                {% endif %}
             </div>
             {% if job.expiration.date %}
                 <div class="inline">
@@ -58,7 +65,7 @@
             </div>
             {% if job.company %}
             <div class="inline">
-                <span class='important'>Compañia: </span><a href="company.company_link">{{ job.company.company_name }}</a>
+                <span class='important'>Compañia: </span><a href="{{ job.company.link }}">{{ job.company.name }}</a>
             </div>
             {% endif %}
         </div>
@@ -106,7 +113,7 @@
             </div>
             {% endif %}
         </div>
-        {% if job.languages %}
+        {% if job.languages.all %}
         <div id="language" class="row">
             {% for language in job.languages.all %}
                 <div class="inline">
