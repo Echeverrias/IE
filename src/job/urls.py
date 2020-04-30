@@ -1,30 +1,16 @@
-"""ie_django URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/2.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-
 from django.urls import path
-from .views import JobListView, JobDetailView, run
-from .filters import JobFilter
-from django_filters.views import FilterView
+from django.views.generic.detail import DetailView
 from django.contrib.auth.decorators import login_required
-
-
+from .views import JobListView, run
+from .models import Job
 
 urlpatterns = [
     path("list/", JobListView.as_view(), name='list'),
-    path("filter-job/", FilterView.as_view(filterset_class=JobFilter, template_name='job/filter_form.html'), name='filter_job'),
-    path("detail/<int:pk>/", login_required(JobDetailView.as_view()), name='detail'),
-    path("run/", run, name='run'), #ñapa
+    path("detail/<int:pk>/", login_required(DetailView.as_view(model=Job)), name='detail'),
+    path("run/", run, name='run'), #% ñapa
 ]
+
+"""
+# from django_filters.views import FilterView
+# path("filter-job/", FilterView.as_view(filterset_class=JobFilter, template_name='job/filter_form.html'), name='filter_job'),
+"""
