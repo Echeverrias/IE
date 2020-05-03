@@ -1,14 +1,18 @@
 {% load task_extras %}
 {% load custom_extras %}
-% info_crawler_task.html
 <div class="remnant">
-    <h4 class="title">La tarea {{task.type}}-{{ task.pid }} está ejecutandose - Fecha inicio: {{ task.created_at|date:'d-m-Y' }} {{ task.created_at|time:"H:i" }}</h4>
-    <p id="count" class="title">Se han procesado <span>{{ scraped_items_number }}</span> ofertas de trabajo</p>
-    <div id="state" data-state="{{task.state}}">{{task.state}}</div>
+    {% for task in tasks %}
+        <h4 class="title">La tarea {{ task.type }} {{task.name}} ({{ task.pid }}) está ejecutandose</h4>
+        <h5 class="title">Fecha inicio: {{ task.created_at|date:'d-m-Y' }} {{ task.started_at|time:"H:i" }}</h5>
+        <p id="count" class="title">Se han procesado <span>{{ scraped_items_number }}</span> items</p>
+        <div id="state" data-state="{{task.state}}">{{task.state}}</div>
+        <br>
+    {% endfor %}
 </div>
+<!--
 ajax: {{ajax}}<br>
 req: {{req}}<br>
 p: {{p}}<br>
 is_running: {{is_running}}<br>
-
+-->
 

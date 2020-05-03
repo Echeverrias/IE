@@ -1,12 +1,25 @@
-% init.html
-% task: {{task}} : if task..
-{% if task %}
+{% if tasks %}
 <div class="init remnant">
-    <h4 class="title">Última tarea ejecutada: {{ task.type }}-{{ task.pid }} iniciada el {{ task.created_at|date:'d/m/Y' }} {{ task.created_at|time:"H:i" }}</h4>
+    <h4 class="title">
+        {% if tasks|length == 1 %}
+            Última tarea ejecutada:
+        {% else %}
+            Últimas tareas ejecutadas:
+        {% endif %}
+    </h4>
+    <ul>
+        {% for task in tasks %}
+        <li>
+            <h4>{{task.type}} {{task.name}} ({{task.pid}}) iniciada el {{ task.started_at|date:'d/m/Y' }} y con estado {{task.state|lower}}</h4>
+        </li>
+        {% endfor %}
+    </ul>
     <div id="state" data-state="{{task.state}}">{{task.state}}</div>
 </div>
 {% endif %}
+<!--
 ajax: {{ajax}}<br>
 req: {{req}}<br>
 p: {{p}}<br>
+-->
 <br><br>

@@ -1,24 +1,8 @@
-"""ie_django URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/2.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-from django.contrib import admin
-from django.urls import  include, path, re_path #url, re_url
-from .views import run_crawler_view, bg_run_crawler_view
+from django.urls import path, re_path
+from .views import run_crawler_view
 
 urlpatterns = [
-    path('crawl/', run_crawler_view, name='run_crawler'),
-    path('bg-task/', bg_run_crawler_view, name='bg_run_crawler'),
+    path('scraping/', run_crawler_view, name='choose_spider'),
+    path('scraping/<str:model>/', run_crawler_view, name='run_crawler'),
 ]
 

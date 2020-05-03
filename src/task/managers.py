@@ -29,6 +29,12 @@ class TaskManager(models.Manager):
     def get_latest_crawler_task(self):
         return self.get_queryset().get_latest_crawler_task()
 
+    def get_latest_crawler_tasks(self):
+        return self.get_queryset().get_latest_crawler_tasks()
+
     def get_latest_finished_crawler_task(self):
         return self.get_queryset().get_latest_finished_crawler_task()
+
+    def get_latest_finished_crawler_tasks(self):
+        return self.get_queryset().get_latest_finished_crawler_tasks()
 

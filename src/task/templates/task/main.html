@@ -5,7 +5,6 @@
 <div id="main" class="view center">
         {% load task_extras %}
         <div class="sub-container">
-        % is_running: {{is_running}}<br>
         {% if is_running %}
                 {% include 'task/info_crawler_task.html' %}
         {% else %}
@@ -20,11 +19,19 @@
                         <button id="stop" class="btn btn-primary" type="submit">Parar araña</button>
                 </form>
                 -->
-                <form id="run-crawler" action="." method="GET"  {% if is_running %}hidden{% endif %} >
+                {% if not model or model == 'job' %}
+                <form id="run-job-spider" action="{{'job'|get_action_form:model}}" method="GET"  {% if is_running %}hidden{% endif %} >
                         <input type="hidden" name="crawl" value="True">
-                        <button id="start" class="btn btn-primary" type="submit">Correr araña</button>
+                        <button id="start-job-spider" class="btn btn-primary" type="submit">Ejecutar 'Jobs Spider'</button>
                 </form>
+                {% endif %}
+                <br>
+                {% if not model or model == 'company' %}
+                <form id="run-company-spider" action="{{'company'|get_action_form:model}}"method="GET"  {% if is_running %}hidden{% endif %} >
+                        <input type="hidden" name="crawl" value="True">
+                        <button id="start-company-spider" class="btn btn-primary" type="submit">Ejecutar 'Companies Spider'</button>
+                </form>
+                 {% endif %}
         </div>
-        <br><br><br><button class="btn btn-primary" id="AJAX">AJAX</button>
 </div>
 {% endblock %}
