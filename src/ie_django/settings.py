@@ -49,6 +49,7 @@ OTHER_DJANGO_APPS = [
 ]
 
 OTHER_APPS = [
+    'simple_history',
     'background_task',
     'mathfilters',
     'rest_framework',
@@ -63,8 +64,9 @@ PROJECT_APPS = [
     'chart',
     'task',
     "account",
-]
 
+]
+# "account",
 INSTALLED_APPS = DJANGO_DEFAULT_APPS + OTHER_DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
 #####################################################################################################
@@ -87,6 +89,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'ie_django.urls'
 
+# os.path.join(BASE_DIR, 'account/templates'),
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -96,6 +99,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'chart/templates'),
             os.path.join(BASE_DIR, 'task/templates'),
             os.path.join(BASE_DIR, 'account/templates'),
+
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -115,11 +119,11 @@ WSGI_APPLICATION = 'ie_django.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-
+# tasks
 DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'ie',
+            'NAME': 'locations',
             'USER': 'jaea',
             'PASSWORD': os.environ.get('mysql_pass'),
             'HOST': 'localhost',
@@ -136,6 +140,8 @@ DATABASES = {
     }
 }
 """
+
+DATE_FORMAT = 'j N Y' # día mes año #Parece que no funciona
 
 # AUTHENTICATION
 LOGIN_URL = 'login'
