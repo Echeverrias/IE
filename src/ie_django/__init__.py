@@ -6,7 +6,8 @@ from __future__ import absolute_import, unicode_literals
 from .celery import app as celery_app
 
 """
-To prevent the pymysql error:  mysqlclient 1.3.13 or newer is required; you have 0.9.3
+
+To prevent the pymysql error:  django.core.exceptions.ImproperlyConfigured: mysqlclient 1.3.13 or newer is required; you have 0.9.3.
 https://stackoverflow.com/questions/55657752/django-installing-mysqlclient-error-mysqlclient-1-3-13-or-newer-is-required
 
 But there is another error: AttributeError: 'str' object has no attribute 'decode'
@@ -21,8 +22,12 @@ You have to change the line "query = query.decode(errors='replace')" from the la
 The reason is Python3 Str only has the encode method
 """
 import pymysql
+
+
 pymysql.version_info = (1, 3, 13, "final", 0)
 pymysql.install_as_MySQLdb()
+
+
 
 
 __all__ = ('celery_app',)

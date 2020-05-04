@@ -2,7 +2,7 @@
     {% for task in tasks %}
         <h4 class="title">La tarea {{ task.type }} {{task.name}} ({{ task.pid }}) ha terminado</h4>
         <h5 class="title">Fecha inicio: {{ task.created_at|date:'d-m-Y' }} {{ task.created_at|time:"H:i" }}</h5>
-        <div id="state" data-state="{{task.state}}"></div>
+        <div id="state" data-state="{{task.state}}" hidden></div>
         <br>
     {% endfor %}
 </div>

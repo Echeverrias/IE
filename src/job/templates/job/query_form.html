@@ -2,12 +2,12 @@
 {% block app %}
 <div class="query-form view">
     <div class="text-center">
-        <h2>Búsquedas</h2>
+        <h2>Búsquedas de ofertas de empleo disponibles</h2>
     </div>
     <div class="row">
         <div class="col-lg-6 text-center">
             {% if job_list %}
-                <h3 class="title">Resultados encontrados</h3><br>
+                <!-- <h3 class="title">Resultados encontrados</h3><br> -->
                 <p>Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} resultados</p>
             {% else  %}
                 <h3 class="title">No se han encontrado resultados {{ city_name }}</h3>

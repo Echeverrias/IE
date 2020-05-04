@@ -1,5 +1,8 @@
 from django.apps import AppConfig
 
 
-class JobsConfig(AppConfig):
+class JobConfig(AppConfig):
     name = 'job'
+
+    def ready(self):
+        pass

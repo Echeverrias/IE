@@ -4,8 +4,10 @@
     {% for task in tasks %}
         <h4 class="title">La tarea {{ task.type }} {{task.name}} ({{ task.pid }}) está ejecutandose</h4>
         <h5 class="title">Fecha inicio: {{ task.created_at|date:'d-m-Y' }} {{ task.started_at|time:"H:i" }}</h5>
-        <p id="count" class="title">Se han procesado <span>{{ scraped_items_number }}</span> items</p>
-        <div id="state" data-state="{{task.state}}">{{task.state}}</div>
+        {% if scraped_items_number > -1 %}
+            <p id="count" class="title">Se han procesado <span>{{ scraped_items_number }}</span> items</p>
+        {% end if %}
+        <div id="state" data-state="{{task.state}}">#{{task.state}}</div>
         <br>
     {% endfor %}
 </div>

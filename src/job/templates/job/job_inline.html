@@ -4,7 +4,8 @@
    </h5>
     <div class="card-body">
         <hr>
-        <p class="card-text">City: {{ job.cities.all.first.name }}</p>
+        <p class="card-text">Ciudad: {{ job.cities.all.first.name }}</p>
+        <p class="card-text">Funciones: {{ job.functions | linebreaks | truncatewords:30 }}</p>
         <p class="card-text">Requisitos: {{ job.requirements | linebreaks | truncatewords:30 }}</p>
         <p class="card-text">Se ofrece: {{ job.it_is_offered | linebreaks | truncatewords:30 }}</p>
         <div class="row no-margin">

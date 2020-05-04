@@ -27,6 +27,12 @@ def login_view(request, **kwargs):
         return auth_views.LoginView.as_view(template_name="account/login.html")(request)
 
 
+
+
+
+
+
+
 def logout_view(request):
     logout(request)
     return redirect('home')

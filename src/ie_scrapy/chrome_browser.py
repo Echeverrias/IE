@@ -31,10 +31,12 @@ class ChromeBrowser:
 
     @classmethod
     def _set_proxies(cls):
-        # '151.253.158.19:8080',
-        # '178.46.160.64:54508',
+        # "201.184.151.58:45718",
         cls.proxies = [
-            "201.184.151.58:45718",
+
+
+            "167.172.138.162:8080",
+
         ]
 
     @classmethod

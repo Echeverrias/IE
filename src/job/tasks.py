@@ -8,8 +8,8 @@ import time
 from datetime import date
 import re
 
-CSV_PATH = 'static/data/csv/'
-SUFFIX = '_20200115'
+CSV_PATH = 'static/job/data/csv/'
+SUFFIX = '_20200303'
 COUNTRIES_CSV = f'{CSV_PATH}country{SUFFIX}.csv'
 COMMUNITIES_CSV = f'{CSV_PATH}community{SUFFIX}.csv'
 PROVINCES_CSV = f'{CSV_PATH}province{SUFFIX}.csv'
@@ -26,6 +26,13 @@ def get_df(path):
         pass
         df.dropna(how='all', axis=1, inplace=True)
     return df
+
+def get_model_df(smodel):
+    try:
+        path = f'{CSV_PATH}{smodel.lower()}{SUFFIX}.csv'
+        return get_df(path)
+    except Exception as e:
+        print(f'Error: {e}')
 
 def insert_countries(countries_csv=COUNTRIES_CSV):
     Country.objects.all().delete()
@@ -106,9 +113,15 @@ def insert_locations():
     insert_cities()
 
 def create_languages():
+    Language.objects.all().delete()
     for l in Language.LANGUAGES:
         for l_ in Language.LEVELS:
-            Language.objects.get_or_create(name=l, level=l_)
+            try:
+                Language.objects.get_or_create(name=l, level=l_)
+            except Exception as e:
+                print('Error:')
+                print(f"name={l}, level={l_}")
+                print(e)
 
 
 def delete_cities_with_spaces():

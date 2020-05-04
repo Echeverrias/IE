@@ -1,5 +1,6 @@
 import pandas as pd
 import math
+import os
 import threading
 import logging
 from .models import City, Province, Community, Country, Language
@@ -7,13 +8,13 @@ from .models import City, Province, Community, Country, Language
 class InitializingDataInTablesException(Exception):
     pass
 
-CSV_PATH = 'static/data/'
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CSV_PATH = os.path.join(BASE_DIR,'./job/static/job/data/csv/')
 SUFFIX = ''
 COUNTRIES_CSV = f'{CSV_PATH}country{SUFFIX}.csv'
 COMMUNITIES_CSV = f'{CSV_PATH}community{SUFFIX}.csv'
 PROVINCES_CSV = f'{CSV_PATH}province{SUFFIX}.csv'
 CITIES_CSV = f'{CSV_PATH}city{SUFFIX}.csv'
-#CITIES_CSV = f'{CSV_PATH}cities 06112019.csv'
 
 BLANK_COLUMN = 'Unnamed: 0'
 
@@ -130,6 +131,8 @@ def initialize_database():
             if Language.objects.all().count() == 0:
                 insert_languages()
             if Province.objects.all().count() == 0:
+                print(f'BASE_DIR2: {BASE_DIR}')
+                print(f'CSV_PATH2: {CSV_PATH}')
                 insert_locations()
         except Exception as e:
             message = 'Have you done the migrations with python manage.py makemigrations and python manage.py migrate?'
@@ -139,6 +142,5 @@ def initialize_database():
     thread.start()
 
 
-
-if __name__ != '__main':
+if __name__ != '__main__':
     pass

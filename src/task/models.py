@@ -3,8 +3,6 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from .managers import TaskManager
 
-
-# Create your models here.
 class Task(models.Model):
     STATE_PENDING = 'Pendiente'
     STATE_RUNNING = 'Ejecutándose'
@@ -25,9 +23,6 @@ class Task(models.Model):
     pid = models.PositiveIntegerField(null=True, blank=True)
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='usuario')
     name = models.CharField(max_length=200, null=True, default='', blank=True, verbose_name='nombre')
-    description = models.CharField(max_length=200, null=True, default='', blank=True, verbose_name='descripción')
-    result = models.IntegerField(null=True, default=0, blank=True, verbose_name='resultado')
-    error = models.CharField(max_length=200, verbose_name='error')
     state = models.CharField(
         max_length=30,
         choices=STATE_CHOICES,
@@ -40,6 +35,9 @@ class Task(models.Model):
         choices=TYPE_CHOICES,
         default='', verbose_name='tipo',
     )
+    description = models.CharField(max_length=200, null=True, default='', blank=True, verbose_name='descripción')
+    result = models.IntegerField(null=True, default=0, blank=True, verbose_name='resultado')
+    error = models.CharField(null=True, default=0, blank=True, max_length=200, verbose_name='error')
     started_at = models.DateTimeField(null=True, blank=True, default=None, verbose_name="fecha de comienzo de la tarea")
     finished_at = models.DateTimeField(null=True, blank=True, default=None, verbose_name="fecha de finalización de la tarea")
     created_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de creación del registro")  # models.DateTimeField(auto_now_add=True)

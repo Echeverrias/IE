@@ -105,23 +105,28 @@ class JobInLine(admin.TabularInline):
     model = Job
     extra = 0
 
-@admin.register(Company) #admin.site.register(Quote, QuoteAdmin)
-class CompanyAdmin(ImportExportModelAdmin): #class CompanyAdmin(admin.ModelAdmin):
+#@admin.register(Company) #admin.site.register(Quote, QuoteAdmin) #admin.site.register(Company)
 
-    list_display = ['name', 'area', '_jobs_count']
+@admin.register(Company)
+class CompanyAdmin(ImportExportModelAdmin): #class CompanyAdmin(admin.ModelAdmin): #ImportExportModelAdmin
+
+    list_display = ['name', 'area', 'city', 'country']
     list_filter = ('area', 'country',)
     search_fields = ['name', 'city__name', 'description']
 
     readonly_fields = ['_location']
     fieldsets = [
-        ('Compañía', {
-            'fields': ['name', 'area', '_location',]
+        ('Datos generales', {
+            'fields': [('name', 'area', 'offers'), ('link')]
+        }),
+        ('Localización', {
+            'fields': ['city', 'country']
         }),
          ('Descripción', {
-            'fields': ['resume', 'description', 'offers']
+            'fields': ['resume', 'description', ]
         }),
-
     ]
+
     inlines = [JobInLine]
 
     def _jobs_count(self, obj):

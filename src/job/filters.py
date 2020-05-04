@@ -1,54 +1,55 @@
-"""
-https://django-filter.readthedocs.io/en/master/guide/usage.html#the-filter
-https://stackoverflow.com/questions/30366564/daterange-on-a-django-filter
-https://stackoverflow.com/questions/21743271/how-to-use-django-filters-datefilter
-https://simpleisbetterthancomplex.com/tutorial/2016/11/28/how-to-filter-querysets-dynamically.html
-https://simpleisbetterthancomplex.com/tutorial/2019/01/03/how-to-use-date-picker-with-django.html
-"""
 
-import django_filters  # pip install django_filter (sin s al final)
+from django.utils.translation import ugettext_lazy as _
+import django_filters
 from .models import Job
 from django.db.models import Q, F
-from django import forms
 from datetime import date
-from .widgets import SelectDateWidget
-from django.contrib.admin.widgets import AdminDateWidget
-from django.views.generic.list import ListView
+from django import forms
 
+
+MONTHS = {
+    1:_('Enero'), 2:_('Febrero'), 3:_('Marzo'), 4:_('Abril'),
+    5:_('Mayo'), 6:_('Junio'), 7:_('Julio'), 8:_('Agosto'),
+    9:_('Septiembre'), 10:_('Octubre'), 11:_('Noviembre'), 12:_('Diciembre')
+}
+
+def _get_offers_years_range():
+    try:
+        early_offer_year = Job.objects.exclude(first_publication_Date=None).earliest('first_pubication_date').first_publication_date.year
+        latest_offer_year = Job.objects.latest('first_pubication_date').first_publication_date.year
+    except:
+        year = date.today().year
+        return range(year, year + 1)
+    else:
+        return range(early_offer_year,  latest_offer_year)
 
 class JobFilter(django_filters.FilterSet):
 
-    text = django_filters.CharFilter(method='search_text', label='Text')
-    minimum_salary = django_filters.NumberFilter(lookup_expr='gte', label='Minimum salary')
-    free_vacancies = django_filters.BooleanFilter(method='search_free_vacancies', label='Free vacancies')
-    cities = django_filters.CharFilter(field_name="cities", lookup_expr='name__icontains', label='City')
-    province = django_filters.CharFilter(field_name="cities", lookup_expr='province__name__icontains', label='Province')
-    country = django_filters.CharFilter(field_name="cities", lookup_expr='country__name__icontains', label='Country')
-    datepicker = django_filters.DateFilter(field_name='last_update_date',
-                                     lookup_expr=('gt'),
-                                     label='Fecha posterior',
-                                     input_formats = ['%d/%m/%Y'],
-                                     widget=forms.DateTimeInput(attrs={
-                                         'class': 'form-control datetimepicker-input',
-                                         'maxlength': 10,
-                                         'placeholder': 'dd/mm/aaaa',
-                                     }))
-    date_range = django_filters.DateRangeFilter(field_name='last_update_date', label="Período de tiempo")
-    #date2 = django_filters.DateFilter(method='after_date', label="Fecha posterior", widget=forms.SelectDateWidget)
-    #date_between = django_filters.DateFromToRangeFilter(method='between_dates', label='Fecha de oferta')
-
-
     class Meta:
         model = Job
-        fields = ['id', 'type', 'working_day', 'contract', 'area']
+        fields = ['type', 'working_day', 'contract', 'area']
 
+    text = django_filters.CharFilter(method='search_text', label='Texto')
+    minimum_salary = django_filters.NumberFilter(lookup_expr='gte', label='Salario mínimo')
+    free_vacancies = django_filters.BooleanFilter(method='search_free_vacancies', label='Vacantes libres')
+    cities = django_filters.CharFilter(field_name="cities", lookup_expr='name__icontains', label='Ciudad')
+    province = django_filters.CharFilter(field_name="cities", lookup_expr='province__name__icontains', label='Provincia')
+    #country = django_filters.CharFilter(field_name="cities", lookup_expr='country__name__icontains', label='País')
+    datepicker = django_filters.DateFilter(method='after_date',
+                                           label="Fecha posterior",
+                                           widget=forms.SelectDateWidget(
+                                               months = MONTHS,
+                                               years=_get_offers_years_range(),
+                                               empty_label=("Elige año", "Elige mes", "Elige día"),
+                                           ))
+    #date_range = django_filters.DateRangeFilter(field_name='last_update_date', label="Período de tiempo")
 
     @property
-    def qs(self, *args, **kwargs):
-        print('JobFilter.qs')
+    def qs(self):
         parent_qs = super().qs
-        print(parent_qs.count())
-        return parent_qs.available_offers()
+        available_offers = parent_qs.exclude(state=Job.STATE_CLOSED).exclude(expiration_date__lt=date.today())
+        # available_offers = parent_qs.available_offers()
+        return available_offers
 
     def search_text(self, queryset, field_name, *args, **kwargs):
         try:
@@ -78,7 +79,8 @@ class JobFilter(django_filters.FilterSet):
         print(args)
         try:
             if args:
-                return queryset.filter(Q(last_update_date__gte=args[0])).distinct()
+                return queryset.filter(Q(last_update_date__gte=args[0]) |
+                                       Q(first_publication_date__gte=args[0])).distinct()
         except:
             pass
         return queryset

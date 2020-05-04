@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
-from utilities import trace
+from utilities.utilities import trace
 from job.models import Job
 from .dataframes import (
     get_initial_queryset,

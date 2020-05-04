@@ -1,4 +1,4 @@
-from utilities import Colors_list, Lock, trace
+from utilities.utilities import Colors_list, Lock, trace
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 # pip install pillow

@@ -50,6 +50,8 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
                 else:
                     company_item = CompanyItem(name=name, area=area, is_registered=True)
                     yield company_item
+                break
+            break
 
     def _clean_company_url(self, link):
         if "http" not in link:

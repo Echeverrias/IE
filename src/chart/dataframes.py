@@ -4,7 +4,7 @@ import geopandas as gpd
 from job.models import Job
 from django.db.models import Sum, Count, Avg, Q, F, Value, Func
 from django.db.models.functions import Concat
-from utilities import trace, Lock
+from utilities.utilities import trace, Lock
 from collections import namedtuple
 from datetime import date
 # Creamos el constructor de la 'namedtuple'

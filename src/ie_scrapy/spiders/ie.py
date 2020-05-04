@@ -28,17 +28,7 @@ class InfoempleoSpider(Spider):
     name = 'ie'
     allowed_domains = ['infoempleo.com']
 
-    start_urls = [  "https://www.infoempleo.com/trabajo/area-de-empresa_profesionales-artes-y-oficios/",
-        "https://www.infoempleo.com/trabajo/area-de-empresa_compras-logistica-y-transporte/",
-        "https://www.infoempleo.com/trabajo/area-de-empresa_hosteleria-turismo/",
-                    ]
-    start_urls__ = [  "https://www.infoempleo.com/trabajo/area-de-empresa_legal/",]
-    start_urls__ = [
-        "https://www.infoempleo.com/trabajo/area-de-empresa_legal/",
-                    "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/"
-                    "https://www.infoempleo.com/trabajo/area-de-empresa_ingenieria-y-produccion/",
-    ]
-    start_urls_ = [
+    start_urls = [
 
         "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_ingenieria-y-produccion/",

@@ -13,6 +13,7 @@ import re
 import os
 import time
 from time import time as now
+import time
 import json
 import math
 from collections import namedtuple
@@ -23,14 +24,14 @@ from .keys import START_URL, TOTAL_RESULTS
 from .chrome_browser import ChromeBrowser
 from .items import JobItem
 from selenium.webdriver import ActionChains
-from utilities import write_in_a_file
+from utilities.utilities import write_in_a_file
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print('SCRAPY.MIDDLEWARES: %s'%BASE_DIR)
 
 
 
-class IeSpiderMiddleware(object):
+class IeSpiderMiddleware_(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
     # passed objects.
@@ -54,20 +55,23 @@ class IeSpiderMiddleware(object):
     def item_scraped(self, response, item, spider, signal, sender) :
 
         print('-------------------------------------------------------------------------------------------')
+        print('IeSpiderMiddleware.item_scraped')
         self.job_requests_count2 += 1
         write_in_a_file('IeSpiderMiddleware.item_scraped', {'response': response, 'count': self.job_requests_count, 'count2': self.job_requests_count2}, 'spider.txt')
-        print('IeSpiderMiddleware.item_scraped')
+        print('IeSpiderMiddleware.process_spider_item_scraped');time.sleep(10)
         print('-------------------------------------------------------------------------------------------')
 
     def process_spider_input(self, response, spider):
         # Called for each response that goes through the spider
         # middleware and into the spider.
         #"""
-        write_in_a_file('IeSpiderMiddleware.process_spider_input', {'response': response}, 'spider.txt')
+
         print();print()
         print("########################################################################")
         print("#@ IeSpiderMiddleware.process_spider_input: {}".format(response.url))
         print("######################################################################")
+        write_in_a_file('IeSpiderMiddleware.process_spider_input', {'response': response}, 'spider.txt')
+        print('IeSpiderMiddleware.process_spider_input');time.sleep(10)
         print("#######IeSpiderMiddleware.process_spider_input############################################");
         print();print()
         # Should return None or raise an exception.
@@ -99,8 +103,9 @@ class IeSpiderMiddleware(object):
             print(f'{i}')
             print('-----------------------------------------------------');print()
             print(f'job_requests_count: {self.job_requests_count}')
-
+            print('IeSpiderMiddleware.process_spider_output & yield i');time.sleep(10)
             yield i
+            print('IeSpiderMiddleware.process_spider_output  yield i ...');time.sleep(10)
         write_in_a_file('IeSpiderMiddleware.process_spider_output', {'response': response, 'result': result, 'count': self.job_requests_count, 'count2': self.job_requests_count2}, 'spider.txt')
         print("#######IeSpiderMiddleware.process_spider_output############################################");print();print()
 
@@ -151,7 +156,7 @@ class IeSpiderMiddleware(object):
 
 
 
-class IeDownloaderMiddleware(object):
+class IeDownloaderMiddleware_(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.
