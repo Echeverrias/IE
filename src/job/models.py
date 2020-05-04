@@ -2,18 +2,12 @@ from django.db.utils import InterfaceError
 from django import db
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 from django_mysql.models import ListCharField
 from utilities import languages_utilities
 from simple_history.models import HistoricalRecords
 from .managers import JobManager, CompanyManager
-import os
-
-"""
-python manage.py makemigrations 
-python manage.py migrate 
-"""
-
 
 class Country(models.Model):
     id = models.AutoField(primary_key=True)
@@ -161,8 +155,8 @@ class Company(models.Model):
     category = models.CharField(null=True, blank=True, max_length=100, verbose_name="categoría")
     offers = models.IntegerField(null=True, blank=True,  verbose_name="nº de ofertas")
     slug = models.CharField(max_length=300, null=True, blank = True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, verbose_name="fecha de creción del registro")  # models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, verbose_name="fecha de actualización del registro")  # models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de creción del registro")  # models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de actualización del registro")  # models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
     objects = CompanyManager()
 
@@ -172,6 +166,9 @@ class Company(models.Model):
         ordering = ['name']
 
     def save(self, *args, **kwargs):
+        if not self.id:
+            self.created_at = timezone.localtime(timezone.now())
+        self.updated_at = timezone.localtime(timezone.now())
         try:
             if self.name:
                 self.slug = slugify(self.name)
@@ -434,10 +431,12 @@ class Job(models.Model):
     vacancies_update = models.PositiveIntegerField(null=True, blank=True)
     company = models.ForeignKey(
         Company,
+        null=True,
+        default=None,
         on_delete=models.CASCADE,
         related_name='jobs', verbose_name="compañía")
-    created_at = models.DateTimeField(auto_now_add=True, null=True, verbose_name="fecha de creación del registro")  # models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True, verbose_name="fecha de actualización del registro")  # models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de creación del registro")  # models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(editable=False, null=True, blank=True, verbose_name="fecha de actualización del registro")  # models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
     objects = JobManager()
 
@@ -456,6 +455,9 @@ class Job(models.Model):
         return "%s - %s%s" % (self.name, self.type, city)
 
     def save(self, *args, **kwargs):
+        if not self.id:
+            self.created_at = timezone.localtime(timezone.now())
+        self.updated_at = timezone.localtime(timezone.now())
         try:
             super(Job, self).save(*args, **kwargs)
         except InterfaceError as ie:
