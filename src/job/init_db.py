@@ -19,7 +19,10 @@ CITIES_CSV = f'{CSV_PATH}city{SUFFIX}.csv'
 BLANK_COLUMN = 'Unnamed: 0'
 
 def _get_df(path):
-    df = pd.read_csv(path)
+    try:
+        df = pd.read_csv(path)
+    except Exception as e:
+        df = pd.read_csv(path, encoding="ISO-8859-1")
     try:
         df.drop([BLANK_COLUMN], axis=1, inplace=True)
     except:
