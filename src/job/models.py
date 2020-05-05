@@ -455,7 +455,7 @@ class Job(models.Model):
         return "%s - %s%s" % (self.name, self.type, city)
 
     def save(self, *args, **kwargs):
-        if not self.id:
+        if not self.created_at:
             self.created_at = timezone.localtime(timezone.now())
         self.updated_at = timezone.localtime(timezone.now())
         try:
