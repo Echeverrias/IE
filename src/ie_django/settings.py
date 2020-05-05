@@ -41,16 +41,12 @@ DJANGO_DEFAULT_APPS = [
 ]
 
 OTHER_DJANGO_APPS = [
-    'django_celery_monitor',
-    'django_celery_beat',
-    'django_celery_results',
     'django_filters',
     'django_mysql',
 ]
 
 OTHER_APPS = [
     'simple_history',
-    'background_task',
     'mathfilters',
     'rest_framework',
     'import_export',
@@ -70,9 +66,6 @@ PROJECT_APPS = [
 INSTALLED_APPS = DJANGO_DEFAULT_APPS + OTHER_DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
 #####################################################################################################
-
-BACKGROUND_TASK_RUN_ASYNC = True
-
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 
@@ -203,18 +196,3 @@ STATICFILES_DIRS = [
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 #STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-# celery
-CELERY_BROKER_URL = 'redis://localhost:6379'
-#CELERY_RESULT_BACKEND = 'redis://localhost:6379'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Europe/Madrid'
-#  django-celery-results:
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_CACHE_BACKEND = 'django-cache'
-
-
-
-
