@@ -7,3 +7,7 @@ Scrapy==2.0.1
 scrapy-djangoitem==1.1.1
 scrapy-proxy-pool==0.1.9
 scrapy-user-agents==0.1.1
+PyMySQL==0.9.3
+django-mathfilters==1.0.0
+django-widget-tweaks==1.4.8
+pandas==1.0.3
