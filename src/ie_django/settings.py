@@ -47,9 +47,8 @@ OTHER_DJANGO_APPS = [
 
 OTHER_APPS = [
     'simple_history',
-    'mathfilters',
-    'rest_framework',
     'import_export',
+    'mathfilters',
     'widget_tweaks',
 ]
 
@@ -57,7 +56,6 @@ PROJECT_APPS = [
     'ie_scrapy',
     'core',
     'job',
-    'chart',
     'task',
     "account",
 
@@ -113,12 +111,13 @@ WSGI_APPLICATION = 'ie_django.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 # tasks
+#os.environ.get('mysql_pass')
 DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'locations',
-            'USER': 'jaea',
-            'PASSWORD': os.environ.get('mysql_pass'),
+            'NAME': 'ie',
+            'USER': 'root',
+            'PASSWORD': 'root',
             'HOST': 'localhost',
             'PORT': '3306',
         }
