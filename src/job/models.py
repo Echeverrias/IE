@@ -166,9 +166,10 @@ class Company(models.Model):
         ordering = ['name']
 
     def save(self, *args, **kwargs):
-        if not self.id:
+        if not self.created_at:
             self.created_at = timezone.localtime(timezone.now())
-        self.updated_at = timezone.localtime(timezone.now())
+        else:
+            self.updated_at = timezone.localtime(timezone.now())
         try:
             if self.name:
                 self.slug = slugify(self.name)
@@ -457,7 +458,8 @@ class Job(models.Model):
     def save(self, *args, **kwargs):
         if not self.created_at:
             self.created_at = timezone.localtime(timezone.now())
-        self.updated_at = timezone.localtime(timezone.now())
+        else:
+            self.updated_at = timezone.localtime(timezone.now())
         try:
             super(Job, self).save(*args, **kwargs)
         except InterfaceError as ie:
