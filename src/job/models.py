@@ -157,6 +157,7 @@ class Company(models.Model):
     slug = models.CharField(max_length=300, null=True, blank = True)
     created_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de creción del registro")  # models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de actualización del registro")  # models.DateTimeField(auto_now=True)
+    checked_at = models.DateTimeField(editable=False, null=True, blank=True, verbose_name="fecha de comprobación del registro")  # models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
     objects = CompanyManager()
 
@@ -170,6 +171,7 @@ class Company(models.Model):
             self.created_at = timezone.localtime(timezone.now())
         else:
             self.updated_at = timezone.localtime(timezone.now())
+        self.checked_at = timezone.localtime(timezone.now())
         try:
             if self.name:
                 self.slug = slugify(self.name)
@@ -438,6 +440,7 @@ class Job(models.Model):
         related_name='jobs', verbose_name="compañía")
     created_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de creación del registro")  # models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(editable=False, null=True, blank=True, verbose_name="fecha de actualización del registro")  # models.DateTimeField(auto_now=True)
+    checked_at = models.DateTimeField(editable=False, null=True, blank=True, verbose_name="fecha de comprobación del registro")  # models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
     objects = JobManager()
 
@@ -460,6 +463,7 @@ class Job(models.Model):
             self.created_at = timezone.localtime(timezone.now())
         else:
             self.updated_at = timezone.localtime(timezone.now())
+        self.checked_at = timezone.localtime(timezone.now())
         try:
             super(Job, self).save(*args, **kwargs)
         except InterfaceError as ie:
