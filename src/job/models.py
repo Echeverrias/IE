@@ -167,11 +167,12 @@ class Company(models.Model):
         ordering = ['name']
 
     def save(self, *args, **kwargs):
+        now = timezone.localtime(timezone.now())
         if not self.created_at:
-            self.created_at = timezone.localtime(timezone.now())
+            self.created_at = now
         else:
-            self.updated_at = timezone.localtime(timezone.now())
-        self.checked_at = timezone.localtime(timezone.now())
+            self.updated_at = now if now.date() > self.created_at.date() else None
+        self.checked_at = now
         try:
             if self.name:
                 self.slug = slugify(self.name)
@@ -459,11 +460,12 @@ class Job(models.Model):
         return "%s - %s%s" % (self.name, self.type, city)
 
     def save(self, *args, **kwargs):
+        now = timezone.localtime(timezone.now())
         if not self.created_at:
-            self.created_at = timezone.localtime(timezone.now())
+            self.created_at = now
         else:
-            self.updated_at = timezone.localtime(timezone.now())
-        self.checked_at = timezone.localtime(timezone.now())
+            self.updated_at = now if now.date() > self.created_at.date() else None
+        self.checked_at = now
         try:
             super(Job, self).save(*args, **kwargs)
         except InterfaceError as ie:

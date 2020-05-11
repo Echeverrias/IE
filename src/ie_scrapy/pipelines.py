@@ -143,7 +143,7 @@ class CleaningPipeline():
                 city = parenthesis[0].capitalize() + " " + city
             if city and city.isupper():
                 city = city.title()
-            alrededores = re.compile(r'(a|A)ldedores (de )?|(a|A)lredores (de )?|(a|A)lredor (de )?|(a|A)lrededores (de )?|(a|A)ldedor (de )?|(a|A)lrededor (de )?')
+            alrededores = re.compile(r'(a|A)ldedores( de )?|(a|A)lredores( de )?|(a|A)lredor( de )?|(a|A)lrededores( de )?|(a|A)ldedor( de )?|(a|A)lrededor( de )?')
             city = alrededores.sub('', city)
             city = city.replace('.', "").replace('-', "").replace('etc', "")
             return city.strip()
@@ -740,7 +740,7 @@ class StoragePipeline(object):
         city = self._get_city(item.get('_location'))
         country = city.country if city else self._get_country(item.get('_location'))
         company_dict = self._get_item_without_temporal_fields(item)
-        company_dict.setdefault('created_at', timezone.now())
+        company_dict.setdefault('created_at', timezone.localtime(timezone.now()))
         company_dict.setdefault('city', city)
         company_dict.setdefault('country', country)
         company = None

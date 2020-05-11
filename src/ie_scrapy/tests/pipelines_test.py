@@ -36,5 +36,7 @@ def clean_cities_test():
     assert(cp._clean_cities('Móstoles, Alcorcón, Bercial (el) (Madrid)')) == ['Móstoles', 'Alcorcón', 'El Bercial']
     assert(cp._clean_cities('Móstoles, Alcorcón, Bercial (el), etc (Madrid)')) == ['Móstoles', 'Alcorcón', 'El Bercial']
     assert(cp._clean_cities('Móstoles, Alcorcón, Bercial (el), alrededores de Madrid, etc (Madrid)')) == ['Móstoles', 'Alcorcón', 'El Bercial', 'Madrid']
+    assert(cp._clean_cities('Belfast y alrededores')) == ['Belfast']
+    assert(cp._clean_cities('Oxford alrededores (Gran Bretaña)')) == ['Oxford']
     assert(cp._clean_cities('.')) == []
     return True
