@@ -5,8 +5,8 @@ from .views import JobListView
 from .models import Job
 
 urlpatterns = [
-    path("list/", JobListView.as_view(), name='list'),
-    path("detail/<int:pk>/", login_required(DetailView.as_view(model=Job)), name='detail'),
+    path("list/", JobListView.as_view(), name='job_list'),
+    path("detail/<int:pk>/", login_required(DetailView.as_view(model=Job)), name='job_detail'),
 ]
 
 """

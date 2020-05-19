@@ -127,7 +127,11 @@ def initialize_database():
     """
     Initialize Language Country, Community, Province, City tables
     """
+
     def initialization():
+        pass #%
+
+    def initialization_():
         print('Initializing database...')
         logging.info('Initializing database...')
         try:
@@ -139,7 +143,7 @@ def initialize_database():
                 insert_locations()
         except Exception as e:
             message = 'Have you done the migrations with python manage.py makemigrations and python manage.py migrate?'
-            raise InitializingDataInTablesException(f'{e}. InitializingDataInTablesException: {message}')
+            #raise InitializingDataInTablesException(f'{e}. InitializingDataInTablesException: {message}')
 
     thread = threading.Thread(target=initialization)
     thread.start()

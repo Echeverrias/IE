@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import F
 from .queries import JobQuerySet, CompanyQuerySet
 from datetime import date
+from django import db
 
 
 """
@@ -13,11 +14,16 @@ class JobManager(models.Manager):
 
     def get_queryset(self):
         # Don't apply filters here, don't return a modified queryset
-        return JobQuerySet(
+        qs = JobQuerySet(
             model=self.model,
             using=self._db,
             hints=self._hints
         )
+        try:
+            return qs
+        except:
+           # db.connection.close()
+            return qs
 
     def nationals(self):
         return self.get_queryset().nationals()
