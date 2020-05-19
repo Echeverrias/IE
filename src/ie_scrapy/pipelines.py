@@ -592,7 +592,6 @@ class CleaningPipeline():
         return item
 
     def _clean_job(self, item):
-        breakpoint()
         item['_summary'] = self._clean_summary(item)
         if not item['minimum_salary']:
             # Looking for salary in "it_is_offered"
@@ -624,8 +623,8 @@ class CleaningPipeline():
             company = item['company']
             item['company'] = self._cleaning[company.get_model_name()](company)
         except Exception as e:
-            print(f'*ERROR cleaning the company: {e}!!!!')
-            save_error(e, { 'pipeline': 'CleanPipeline', 'id':item.get('id'), 'link': item.get('link'), 'item': item})
+            print(f'!!! ERROR cleaning the company: {e}!!!!')
+            save_error(e, { 'pipeline': 'CleanPipeline.clean_job: cleaning the company', 'id':item.get('id'), 'link': item.get('link'), 'item': item}, 'errors.txt')
         return item
 
     #@check_spider_pipeline
@@ -845,10 +844,10 @@ class StoragePipeline(object):
                         company.save()
             if not is_a_new_company_created:
                 Company.objects.filter(id=company.id).update(checked_at=timezone.localtime(timezone.now()))
-                self._update_company(company, item)
+                company = self._update_company(company, item)
         except Exception as e:
             print(f'ERROR in _store_company {e}')
-            save_error(e, { 'pipeline':'StorePipeline','company_id': item['name'], 'company_link': item.get('link')})
+            save_error(e, { 'pipeline':'StorePipeline._store_company','company_id': item['name'], 'company_link': item.get('link')})
         return company
 
     def _set_location(self, job, item):
@@ -918,6 +917,7 @@ class StoragePipeline(object):
         if job.state != item['state']:
             job.state = item['state']
             job.save()
+        return job
 
     def _store_job(self, item):
         try:
@@ -930,7 +930,7 @@ class StoragePipeline(object):
         job, is_new_item_created = Job.objects.get_or_create(id=job_id, defaults=job_dict)
         if not is_new_item_created:
             Job.objects.filter(id=job.id).update(checked_at=timezone.localtime(timezone.now()))
-            self._update_job(job, item)
+            job = self._update_job(job, item)
         else:
             self._set_location(job, item)
             self._set_languages(job, item)
@@ -945,5 +945,5 @@ class StoragePipeline(object):
             return item
         except Exception as e:
             print(f'Error in StoragePipeline.process_item: {e}')
-            save_error(e, { 'pipeline':'StoragePipeline', 'model':item.get_model_name() , 'line':723, 'id':item.get('id'), 'link':item.get('link'), 'item': item})
+            save_error(e, { 'pipeline':'StoragePipeline', 'model':item.get_model_name() , 'line':723, 'id':item.get('id'), 'link':item.get('link'), 'item': item}, 'errors.txt')
             return item
