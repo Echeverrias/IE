@@ -274,7 +274,7 @@ class SpiderProcess():
         if is_an_incomplete_task:
             id = last_db_task.id
             data = {'state': Task.STATE_INCOMPLETE}
-            self._update_task(id, data)
+            last_db_task = self._update_task(id, data)
         return last_db_task
 
     def get_latest_task(self):
