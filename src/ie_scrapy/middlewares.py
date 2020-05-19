@@ -5,26 +5,20 @@
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
-
-from scrapy import signals
-from scrapy.http import HtmlResponse
-import random
-import re
+from scrapy import signals, Request
+from scrapy.http import HtmlResponse #%
+from scrapy.exceptions import IgnoreRequest
+from django.utils import timezone
 import os
 import time
+import random
 from time import time as now
-import time
-import json
-import math
-from collections import namedtuple
-import lxml.etree
-import lxml.html
-import requests
+from dateutil.relativedelta import relativedelta
 from .keys import START_URL, TOTAL_RESULTS
-from .chrome_browser import ChromeBrowser
-from .items import JobItem
-from selenium.webdriver import ActionChains
 from utilities.utilities import write_in_a_file
+from job.models import Job
+from utilities.utilities import write_in_a_file
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print('SCRAPY.MIDDLEWARES: %s'%BASE_DIR)
@@ -223,4 +217,140 @@ class IeDownloaderMiddleware_(object):
     def spider_closed(self, spider):
         write_in_a_file('IeSpiderDownloaderMiddleware.spider_closed', {}, 'spider.txt')
         spider.logger.info('Spider closed: %s' % spider.name)
+
+
+class CheckDownloaderMiddleware(object):
+
+   def process_request(self, request, spider):
+        url = request.url
+        if 'ofertasdetrabajo'in url:
+            try:
+                ref = int(os.path.basename(os.path.dirname(url)))
+                job = Job.objects.get(id=ref)
+                print('**CheckDownloaderMiddleware')
+                print(job.checked_at.date())
+                print(timezone.localtime(timezone.now()).date())
+                print(job.checked_at.date() == timezone.localtime(timezone.now()).date())
+                if (job.checked_at.date() == timezone.localtime(timezone.now()).date() or
+                    job.checked_at.date() == timezone.localtime(timezone.now()).date() - relativedelta(days=1)
+                ):
+                    print(f'* {url} checked today')
+                    print('')
+                    print('')
+                    print('IGNOREREQUEST')
+                    print('')
+                    request.meta.update({'ignore': True})
+                    print(request.meta)
+                    raise IgnoreRequest(f'Ignore request: {request.url}')
+                else:
+                    return None
+            except:
+                return None
+        elif not 'www.infoempleo.com' in url:
+            print(f'* Ignored request to {url}')
+            request.meta.update({'ignore': True})
+            raise IgnoreRequest(request.url)
+        else:
+            return None
+
+
+class PUADownloaderMiddleware(object):
+    
+    proxy = None
+    ua = None
+
+    def process_request(self, request, spider):
+        if PUADownloaderMiddleware.proxy and request.meta.get('retry'):
+            request.meta.update({'proxy_source': PUADownloaderMiddleware.proxy})
+            request.meta.update({'proxy':
+                                f'{PUADownloaderMiddleware.proxy.type}://{PUADownloaderMiddleware.proxy.host}:{PUADownloaderMiddleware.proxy.port}'})
+            request.headers.update({b'User-Agent':[PUADownloaderMiddleware.ua]})
+
+
+class ERDownloaderMiddleware(object):
+
+    def _print_data(self, request, title="INFO", exception=None):
+        print(f'&&&&&&&&&&&&&  {title} &&&&&&&&&&&&&&&&&')
+        print('meta:')
+        print(request.meta);
+        print('')
+        print('headers:')
+        print(request.headers);
+        print('')
+        print('proxy:')
+        print(request.meta.get('proxy'));
+        print('')
+        print('ua:')
+        print(request.headers.get(b'User-Agent'));
+        print('')
+        print('')
+        return {
+            'description': f'{title}',
+            'exception': exception,
+            'request': request,
+            'meta': request.meta,
+            'headers': request.headers,
+            'proxy': request.meta.get('proxy'),
+            'ua': request.headers.get(b'User-Agent'),
+        }
+
+    def _make_the_request_again(self, request):
+        if PUADownloaderMiddleware.proxy and request.meta.get('retry', 0) < 3:
+            retry = request.meta['retry'] + 1 if request.meta.get('retry') else 1
+            meta = {**request.meta, 'retry': retry}
+            request =  Request(url=request.url, meta=meta, headers=request.headers, callback=request.callback,
+                           dont_filter=True)
+        elif not PUADownloaderMiddleware.proxy:
+            meta = {**request.meta}
+            try:
+                del meta['retry']
+            except:
+                pass
+            request =  Request(url=request.url, meta=meta, headers=request.headers, callback=request.callback,
+                           dont_filter=True)
+        else:
+            print('retry: True')
+        return request
+
+    def process_request(self, request, spider):
+        if request.meta.get('ignore'):
+            print(f'!!ERDownloaderMiddleware ignore {request.url}')
+            raise IgnoreRequest(f'Ignore request: {request.url}')
+
+    def process_exception(self, request, exception, spider):
+        print(f'* ERDownloaderMiddleware exception: {exception} of type {type(exception)}')
+        if type(exception) == IgnoreRequest or request.meta.get('ignore'):
+            print(f'* IgnoreRequest: The request will be ignore: {request.url}')
+            return None
+        else:
+            d = self._print_data(request, title='EXCEPTION WITH', exception=exception)
+            write_in_a_file('EXCEPTION', d, 'z_exception.txt')
+            try:
+                if PUADownloaderMiddleware.proxy == request.meta.get('proxy_source'):
+                    d = self._print_data(request, title='VALID PROXY HAS FAILED', exception=exception)
+                    write_in_a_file('EXCEPTION', d, 'z_exception_with_a_valida_proxy.txt')
+                    print('** Valid proxy has failed')
+                    PUADownloaderMiddleware.proxy = None
+                    PUADownloaderMiddleware.ua = None
+            except:
+                pass
+            return self._make_the_request_again(request)
+
+    def process_response(self, request, response, spider):
+        if response.status == 200:
+            d = self._print_data(request, 'VALID RESPONSE')
+            write_in_a_file('VAlID RESPONSE', d, 'z_valid_request.txt')
+            PUADownloaderMiddleware.proxy = request.meta.get('proxy_source')
+            PUADownloaderMiddleware.ua = request.headers.get(b'User-Agent')
+            return response
+        else:
+            print(f'!!!! response.status: {response.status}');
+            print(f'response: {response}')
+            print(f'response: {dir(response)}')
+            print(f'request: {request}')
+            print(f'request: {dir(request)}')
+            # https://www.lightspeedsystems.com/
+            d = self._print_data(request, f'NOT A VALID RESPONSE: {response.status}')
+            write_in_a_file('NOT A VAlID RESPONSE', d, 'z_not_a_valid_request.txt')
+            return self._make_the_request_again(request)
 
