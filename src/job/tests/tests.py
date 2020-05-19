@@ -1,6 +1,6 @@
 from django.test import TestCase
 from job.models import Job, City
-# Create your tests here.
+# Create your test here.
 from datetime import date
 
 earliest_updated_job = {

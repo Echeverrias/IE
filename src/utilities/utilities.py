@@ -60,8 +60,6 @@ def _get_int_or_float_list_from_string(string, float_flag):
     try:
         # Getting the numbers of the string
         numbers = re.findall('(\d[0-9.,]*)', string)
-        print(f'numbers: {numbers}')
-
         # Cleaning the numbers
         numbers_ = []
         for number in numbers:
@@ -74,9 +72,7 @@ def _get_int_or_float_list_from_string(string, float_flag):
                 start_to_last_dot = len(number[0:last_i_dot])
                 if (last_dot_to_end_len != 3 and not ',' in last_dot_to_end) or (start_to_last_dot > 3 and len(dot_indexes) == 1):
                     number = number[0:last_i_dot] + ',' + number[last_i_dot + 1:len(number)]
-            print(f'number: {number}')
             numbers_.append(number)
-
         # Converting the string numbers to float or int type
         if float_flag:
             numbers_ = list(map(lambda e: float(e.replace('.', '').replace(',', '.')), numbers_))
@@ -86,6 +82,7 @@ def _get_int_or_float_list_from_string(string, float_flag):
         print(f'Error: {e}')
         numbers_ = []
     return numbers_
+
 
 def get_int_list_from_string(string):
     return _get_int_or_float_list_from_string(string, False)
@@ -301,7 +298,7 @@ def get_string_number_from_string(string):
     try:
         return re.findall(r'\d+', string)[0]
     except Exception as e:
-        print(f'Error get_string_number_from_string({string}): {e}')
+        print(f'Error get_string_number_from_string({string}): {e}, return ""')
         #raise_function_exception(e)
         return ''
 
