@@ -327,7 +327,7 @@ class CleaningPipeline():
                 end = min(salary_type_tl[2] + 70, len(text))
                 text = text[start:end]
                 salary = list(self._clean_salary(text, True))
-                if salary and salary_type_tl[0] == 'month':
+                if salary[0] and salary_type_tl[0] == 'month':
                     salary = [i * 12 for i in salary]
         return salary
 
@@ -592,7 +592,7 @@ class CleaningPipeline():
         return item
 
     def _clean_job(self, item):
-
+        breakpoint()
         item['_summary'] = self._clean_summary(item)
         if not item['minimum_salary']:
             # Looking for salary in "it_is_offered"

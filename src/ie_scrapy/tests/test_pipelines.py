@@ -150,6 +150,11 @@ class TestCleaningPipeline(TestCase):
         self.assertEqual(TestCleaningPipeline.cp._get_annual_salary(text), [None, None])
         text = 'Contrato temporal a través de ETT.\nJornada completa de lunes a viernes (los viernes jornada intensiva de mañana).\n18.361 Euros brutos anuales.'
         self.assertEqual(TestCleaningPipeline.cp._get_annual_salary(text), [18361, 18361])
+        text = "'La compañía ofrece:\r\n * Contratación indefinida\r\n * Incorporación inmediata\r\n * Salario fijo + salario variable mensual\r\n * Unirse a una compañía referencia en el sector'"
+        self.assertEqual(TestCleaningPipeline.cp._get_annual_salary(text), [None, None])
+        text = "'La compañía ofrece:\r\n * Contratación indefinida\r\n * Incorporación inmediata\r\n * b/m + salario variable mensual\r\n * Unirse a una compañía referencia en el sector'"
+        self.assertEqual(TestCleaningPipeline.cp._get_annual_salary(text), [None, None])
+
 
     def test_get_it_is_offered(self):
         self.assertEqual( TestCleaningPipeline.cp._get_it_is_offered("... ..."), "")
