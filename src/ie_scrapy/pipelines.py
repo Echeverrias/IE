@@ -75,7 +75,6 @@ class CleaningPipeline():
         self.job_areas = [ t[0] for t in Job.AREA_CHOICES]
 
     def clean_string(self, string, clean_end_point=False):
-        print('#clean_string: %s' % string)
         try:
             remap = {
                 ord('\r'): None,
@@ -118,7 +117,7 @@ class CleaningPipeline():
                     country = l[-1]
                 else:
                     country = ''
-            return country
+            return country.strip()
         except TypeError as e:
             return ''
 
@@ -129,7 +128,7 @@ class CleaningPipeline():
                 province = l[-1]
             else:
                 province = string or ''
-            return province
+            return province.strip()
         except TypeError as e:
             return ''
 
@@ -145,8 +144,9 @@ class CleaningPipeline():
                 city = city.title()
             alrededores = re.compile(r'(a|A)ldedores( de )?|(a|A)lredores( de )?|(a|A)lredor( de )?|(a|A)lrededores( de )?|(a|A)ldedor( de )?|(a|A)lrededor( de )?')
             city = alrededores.sub('', city)
-            city = city.replace('.', "").replace('-', "").replace('etc', "")
-            return city.strip()
+            city = city.replace('etc.', "").replace('etc', "").strip()
+            city = '' if len(city) == 1 else city # city.replace('.', "").replace('-', "")
+            return city
         except Exception as e:
             return ''
 
@@ -160,10 +160,12 @@ class CleaningPipeline():
         return  clean_cities
 
     def _clean_job_type(self, url):
-        return re.findall('ofertas-internacionales|primer-empleo|trabajo', url)[0]
+        try:
+            return re.findall('ofertas-internacionales|primer-empleo|trabajo', url)[0]
+        except Exception as e:
+            return ''
 
     def _clean_state(self, string):
-        print(f'_state_clean_up{string}')
         if string:
             states = [Job.STATE_CREATED, Job.STATE_UPDATED, Job.STATE_CLOSED]
             states_coincidences = get_coincidences(string, states)
@@ -185,7 +187,7 @@ class CleaningPipeline():
             return "nacional"
 
     def _clean_job_date(self, string):
-        today = datetime.date.today()
+        today = timezone.localtime(timezone.now()).date()
         try:
             number = get_int_from_string(string)
             job_date = today
@@ -206,6 +208,21 @@ class CleaningPipeline():
         except:
             info = ''
         return info
+    def _get_working_day(self, summary_list):
+        return self._get_specify_info_from_summary_list('jornada', summary_list)
+
+    def _clean_working_day(self, working_day):
+        return get_text_after_key('jornada', working_day)
+
+    def _get_contract(self, summary_list):
+        return self._get_specify_info_from_summary_list('contrato', summary_list)
+
+    def _clean_contract(self, contract):
+        return get_text_after_key('contrato', contract)
+
+    def _clean_area(self, area):
+        area = area.replace('Area de', "").replace('Área de', "").strip()
+        return area
 
     def _get_experience(self, summary_list):
         return self._get_specify_info_from_summary_list('experiencia', summary_list)
@@ -225,63 +242,92 @@ class CleaningPipeline():
             salary = ''
         return salary
 
-    def _clean_salary(self, salary):
+    def _clean_salary(self, salary, check=False):
         """
-        Look for two numbers in salary argument and return both
+        Look for the maximum and minimum salary in a salary argument and return both
         If only a number is in the string return this value twice
         If there isn't any number return None twice
+        The function check both values have the same length (the maximum length)
         :param salary: a string
-        :return: two integers
+        :param check: a boolean. Check that all numbers belong to the same unit time(b/a, b/m ...)
+        :return: two integers (minimum and maximum salary)
         """
-        money = get_int_list_from_string(salary) # can have length 0,1 or 2
+        money = get_int_list_from_string(salary)
+        # check that the salaries have the same unit time
+        if len(money) > 1 and check:
+            ii = [salary.find(' a '), salary.find(' o '), salary.find(' y ')]
+            ii = [i for i in ii if i > -1]
+            # get the position of the first occurrence or the half
+            i = ii[0] if ii else int(len(salary) / 2)
+            money_on_the_left = get_int_list_from_string(salary[0:i])
+            money_on_the_right = get_int_list_from_string(salary[i:len(salary)])
+            max_money = max(*money)
+            money_on_the_left = [i for i in money_on_the_left if i * 7 >= max_money]
+            money_on_the_right = [i for i in money_on_the_right if i * 7 >= max_money]
+            money_on_the_left = [money_on_the_left[-1]] if money_on_the_left else []
+            money_on_the_right = [money_on_the_right[0]] if money_on_the_right else []
+            money = money_on_the_left + money_on_the_right
         money = (money + money + [None, None])[0:2]
         minimum_salary = money[0]
         maximum_salary = money[1]
         return minimum_salary, maximum_salary
 
-    def _get_working_day(self, summary_list):
-        return self._get_specify_info_from_summary_list('jornada', summary_list)
-
-    def _clean_working_day(self, working_day):
-        return get_text_after_key('jornada', working_day)
-
-    def _get_contract(self, summary_list):
-        return self._get_specify_info_from_summary_list('contrato', summary_list)
-
-    def _clean_contract(self, contract):
-        return get_text_after_key('contrato', contract)
-
-    def _clean_area(self, area):
-        area = area.replace('Area de', "").replace('Área de', "").strip()
-        return area
-
     def _get_annual_salary(self, text):
         """
-        Look for a number in the argument 'text' that refers to a salary
+        Look for numbers in the argument 'text' that refers to a salary
         :param text: a string
-        :return: an integer refer to the b/y salary
+        :return: an integer list refer to the b/y minimum and amximum salary
         """
         KEYS = {
-            'year': ['bruto anual', 'b/a', 'bruto al año'],
-            'month': ['bruto mensual', 'b/m', 'bruto al mes'],
-            'day': ['bruto al día', 'b/d', 'bruto al dia'],
+            'year': ['b/a', 'bruto/anual', 'brutos/anual', 'bruto anual', 'brutos anual', 'bruto al año',
+                     'brutos al año', 'bruto año', 'brutos año', 'anual bruto', 'anuales bruto',
+                     'n/a', 'neto/anual', 'netos/anual', 'anual neto', 'anuales neto', 'neto al año', 'netos al año',
+                     'neto año', 'netos año', 'neto anual', 'netos anual', ],
+            'month': ['b/m', 'bruto/mensual', 'brutos/mensual', 'bruto mensual', 'brutos mensual', 'bruto al mes',
+                      'brutos al mes', 'bruto mes', 'brutos mes', 'mensual bruto', 'mensuales bruto',
+                      'n/m', 'neto/mes', 'netos/mes', 'mensual neto', 'mensuales neto', 'neto al mes', 'netos al mes',
+                      'neto mes', 'netos mes', 'neto mensual', 'netos mensual'],
+            'day': ['b/d', 'bruto/día', 'bruto/dia', 'bruto al día', 'bruto al dia', 'bruto día', 'bruto dia',
+                    'brutos/día', 'brutos/dia', 'brutos al día', 'brutos al dia', 'brutos día', 'brutos dia', ],
+            'hour': ['b/h', 'bruto/hora', 'brutos/hora', 'bruto a la hora', 'brutos a la hora',
+                     'n/h', 'neto/hora', 'netos/hora', 'neto a la hora', 'netos a la hora', ],
+        }
+        KEYS2 = {
+            'year': ['año', 'anual'],
+            'month': ['mes', 'mensual'],
+            'day': ['día', 'dia'],
+            'hour': ['hora'],
         }
         salary = [None, None]
+        text = text.lower().replace('un/a', '')
         if text:
-            salary_type_tl = [(sub, text.find(sub)) for sub in KEYS['year'] if text.find(sub) > 0]
+            salary_type_tl = ([('year', sub, text.rfind(sub)) for sub in KEYS['year'] if text.rfind(sub) > 0] or
+                              [('month', sub, text.rfind(sub)) for sub in KEYS['month'] if text.rfind(sub) > 0])
             if salary_type_tl:
-                is_monthly_salary = False
+                # get the last ocurrence
+                salary_type_tl = [salary_type_tl[0]][0]
+                # get the text around the ocurrence
+                for sentence in reversed(text.splitlines()):
+                    if salary_type_tl[1] in sentence:
+                        text = sentence
+                        # !Important: the new index must be recalculated
+                        salary_type_tl = (salary_type_tl[0], salary_type_tl[1], text.rfind(salary_type_tl[1]))
+                        break
             else:
-                salary_type_tl = [(sub, text.find(sub)) for sub in KEYS['month'] if text.find(sub) > 0]
-                is_monthly_salary = True
+                for sentence in reversed(text.splitlines()):
+                    if ('salario' in sentence) or ('sueldo' in sentence):
+                        text = sentence
+                        salary_type_tl = ([('year', sub, text.rfind(sub)) for sub in KEYS2['year'] if text.rfind(sub) > 0] or
+                                  [('month', sub, text.rfind(sub)) for sub in KEYS2['month'] if text.rfind(sub) > 0])
+                        if salary_type_tl:
+                            salary_type_tl = [salary_type_tl[0]][0]
+                        break
             if salary_type_tl:
-                i_salary = max(0, text.lower().find('salar'))
-                if i_salary == 0:
-                    text_ = get_text_before_sub(text, salary_type_tl[0][0], distance=25, separators=['\n', '\r'])
-                else:
-                    text_ = text[i_salary:salary_type_tl[0][1]]
-                salary = self._clean_salary(text_)
-                if salary and is_monthly_salary:
+                start = max(0, salary_type_tl[2] - 70)
+                end = min(salary_type_tl[2] + 70, len(text))
+                text = text[start:end]
+                salary = list(self._clean_salary(text, True))
+                if salary and salary_type_tl[0] == 'month':
                     salary = [i * 12 for i in salary]
         return salary
 
@@ -293,9 +339,6 @@ class CleaningPipeline():
         item['minimum_years_of_experience'], item['recommendable_years_of_experience'] = self._clean_experience(experience)
         salary = self._get_salary(summary_list)
         item['minimum_salary'], item['maximum_salary'] = self._clean_salary(salary)
-        if not item['minimum_salary']:
-            # Looking for salary in "it_is_offered"
-            item['minimum_salary'], item['maximum_salary'] = self._get_annual_salary(item['it_is_offered'])
         working_day = self._get_working_day(summary_list)
         item['working_day'] = self._get_working_day(summary_list)# self._clean_working_day(working_day)
         contract = self._get_contract(summary_list)
@@ -306,7 +349,32 @@ class CleaningPipeline():
         item['_contract'] = contract
         return summary_list
 
-    def _clean_job_date_from_state(self, item):
+    def _get_it_is_offered(self, text):
+        offered = ''
+        try:
+            ii = [
+                ('Se ofrece', text.rfind('Se ofrece')),
+                ('Te ofrecemos', text.rfind('Te ofrecemos')),
+                ('Te ofrece', text.rfind('Te ofrece')),
+                ('Ofrecemos',text.rfind('Ofrecemos')),
+            ]
+            ii = [t for t in ii if t[1] > 0]
+            i = ii[0] if ii else None
+            if i:
+                offered = text[i[1]:len(text)]
+                offered = offered.replace(i[0]+':','').replace(i[0],'')
+                offered = self.clean_string(offered)
+        except Exception as e:
+            pass
+        return offered
+
+    def _clean_it_is_offered(self, item):
+        it_is_offered = self.clean_string(item['it_is_offered'])
+        if not it_is_offered:
+            it_is_offered = self._get_it_is_offered(item['functions'])
+        return it_is_offered
+
+    def _set_job_dates_from_state(self, item):
         if item['state'] in [Job.STATE_CREATED, Job.STATE_WITHOUT_CHANGES]:
             item['first_publication_date'] = self._clean_job_date(item['first_publication_date'])
             item['last_update_date'] = None
@@ -519,26 +587,32 @@ class CleaningPipeline():
         item['resume'] = self.clean_string(item.get('resume'))
         item['description'] = self._clean_company_description(item.get('description'))
         item['category'] = self._clean_company_category(item)
-        item['offers'] = get_int_from_string(item.get('offers'), 0)
+        item['offers'] = get_int_from_string(item.get('offers'))
         item['_location'] = self._clean_location(item.get('_location'))
-        print('EXIT _clean_company')  # %
         return item
 
     def _clean_job(self, item):
+
+        item['_summary'] = self._clean_summary(item)
+        if not item['minimum_salary']:
+            # Looking for salary in "it_is_offered"
+            item['minimum_salary'], item['maximum_salary'] = self._get_annual_salary(item['it_is_offered'])
+            if not item['minimum_salary']:
+                item['minimum_salary'], item['maximum_salary'] = self._get_annual_salary(item['functions'])
         item['name'] = self.clean_string(item['name'])
         item['functions'] = self.clean_string(item['functions'])
         item['requirements'] = self.clean_string(item['requirements'])
-        item['it_is_offered'] = self.clean_string(item['it_is_offered'])
+        item['it_is_offered'] = self._clean_it_is_offered(item)
+
         item['state']= self._clean_state(item['state'])
         item['type'] = self._clean_job_type(item['type'])
-        item['_summary'] = self._clean_summary(item)
         item['area'] = self._clean_area(item['area'])
         item['id'] = get_int_from_string(item['id'])
         item['vacancies'] = get_int_from_string(item['vacancies'])
         item['registered_people'] = get_int_from_string(item['registered_people'])
         item['_province'] = self._clean_province(item['_province'])
         item['_cities'] = self._clean_cities(item['_cities'])
-        item = self._clean_job_date_from_state(item)
+        item = self._set_job_dates_from_state(item)
         item['nationality'] = self._clean_nationality(item['nationality'])
         if item['nationality'] == "nacional":
             item['_country'] = 'España'
@@ -550,7 +624,7 @@ class CleaningPipeline():
             company = item['company']
             item['company'] = self._cleaning[company.get_model_name()](company)
         except Exception as e:
-            print(e)
+            print(f'*ERROR cleaning the company: {e}!!!!')
             save_error(e, { 'pipeline': 'CleanPipeline', 'id':item.get('id'), 'link': item.get('link'), 'item': item})
         return item
 
@@ -567,6 +641,7 @@ class CleaningPipeline():
 class StoragePipeline(object):
 
     def __init__(self):
+        self.count = 0
         self._storage= {
             'Job': self._store_job,
             'Company': self._store_company,
@@ -585,11 +660,17 @@ class StoragePipeline(object):
         return item
 
     def _get_item_without_temporal_fields(self, item):
-        def drop_keys_that_starts_with(c, d):
-            keys_to_delete = [key for key in d.keys() if key.startswith(c)]
+        """
+        try:
+            del item['_languages']
+        except: pass
+        return item #%
+        """
+        def drop_keys_that_starts_with(character, dictionary):
+            keys_to_delete = [key for key in dictionary.keys() if key.startswith(character)]
             for key in keys_to_delete:
-                del d[key]
-            return d
+                del dictionary[key]
+            return dictionary
         item_ =  item.get_dict_deepcopy()
         item_ = drop_keys_that_starts_with('_', item_)
         return item_
@@ -607,13 +688,10 @@ class StoragePipeline(object):
             return None
         city = None
         if country and country.name == 'España':
-            print('The country is España')
             # first search with iexact
             if province:
-                print('Province <> None (iexact)')
                 cities_qs = City.objects.filter(country=country, province=province, name__iexact=city_name)
             else:
-                print('Province == None (iexact)')
                 cities_qs = City.objects.filter(country=country, name__iexact=city_name)
             # second search with icontains
             if cities_qs:
@@ -638,7 +716,6 @@ class StoragePipeline(object):
         elif country and (city_name.lower() == country.name.lower() or city_name.lower() == get_acronym(country.name).lower()):
             return None
         elif country : # a foreign city:
-            print('a foreign city')
             cities_qs = City.objects.filter(name__iexact=city_name,  country=country)
             if cities_qs:
                 city = cities_qs[0]
@@ -696,7 +773,6 @@ class StoragePipeline(object):
             cities.append(self._get_city(city_name, province, country))
         # Deleting the null cities:
         cities = list(filter(lambda c: c, cities ))
-        print('#_get_location return: %s %s %s'%(cities, province, country))
         return cities, province, country
 
     def _get_company_upgrade(self, company, item):
@@ -740,7 +816,7 @@ class StoragePipeline(object):
         city = self._get_city(item.get('_location'))
         country = city.country if city else self._get_country(item.get('_location'))
         company_dict = self._get_item_without_temporal_fields(item)
-        company_dict.setdefault('created_at', timezone.localtime(timezone.now()))
+        #% # company_dict.setdefault('created_at', timezone.localtime(timezone.now())) #%
         company_dict.setdefault('city', city)
         company_dict.setdefault('country', country)
         company = None
@@ -768,10 +844,11 @@ class StoragePipeline(object):
                         company = Company(**company_dict)
                         company.save()
             if not is_a_new_company_created:
+                Company.objects.filter(id=company.id).update(checked_at=timezone.localtime(timezone.now()))
                 self._update_company(company, item)
         except Exception as e:
+            print(f'ERROR in _store_company {e}')
             save_error(e, { 'pipeline':'StorePipeline','company_id': item['name'], 'company_link': item.get('link')})
-        print('EXIT STORE_COMPANY') #%
         return company
 
     def _set_location(self, job, item):
@@ -852,6 +929,7 @@ class StoragePipeline(object):
         job_id = job_dict.pop('id', None)
         job, is_new_item_created = Job.objects.get_or_create(id=job_id, defaults=job_dict)
         if not is_new_item_created:
+            Job.objects.filter(id=job.id).update(checked_at=timezone.localtime(timezone.now()))
             self._update_job(job, item)
         else:
             self._set_location(job, item)
@@ -861,9 +939,11 @@ class StoragePipeline(object):
 
     #@check_spider_pipeline
     def process_item(self, item, spider):
+        self.count = self.count + 1
         try:
             self._storage[item.get_model_name()](item)
             return item
         except Exception as e:
-            save_error(e, { 'pipeline':'StorePipeline', 'model':item.get_model_name() , 'line':723, 'id':item.get('id'), 'link':item.get('link'), 'item': item})
+            print(f'Error in StoragePipeline.process_item: {e}')
+            save_error(e, { 'pipeline':'StoragePipeline', 'model':item.get_model_name() , 'line':723, 'id':item.get('id'), 'link':item.get('link'), 'item': item})
             return item
