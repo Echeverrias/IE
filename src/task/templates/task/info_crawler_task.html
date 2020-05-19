@@ -6,7 +6,7 @@
         <h5 class="title">Fecha inicio: {{ task.created_at|date:'d-m-Y' }} {{ task.started_at|time:"H:i" }}</h5>
         {% if scraped_items_number > -1 %}
             <p id="count" class="title">Se han procesado <span>{{ scraped_items_number }}</span> items</p>
-        {% end if %}
+        {% endif %}
         <div id="state" data-state="{{task.state}}">#{{task.state}}</div>
         <br>
     {% endfor %}
