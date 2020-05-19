@@ -35,6 +35,7 @@ NEWSPIDER_MODULE = 'ie_scrapy.spiders'
 #USER_AGENT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 #USER_AGENT = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36";
 #USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36"
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
@@ -45,9 +46,9 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 4
 
-DOWNLOAD_TIMEOUT = 30
+DOWNLOAD_TIMEOUT = 20
 
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
@@ -107,13 +108,19 @@ DOWNLOADER_MIDDLEWARES = {
 """
 RANDOM_UA_PER_PROXY = True
 PROXY_POOL_ENABLED = True
+RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429, 400, 403] # added 400 to default codes
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware':None,
+    'ie_scrapy.middlewares.CheckDownloaderMiddleware': 200,
     'scrapy_proxy_pool.middlewares.ProxyPoolMiddleware': 300,
     'scrapy_proxy_pool.middlewares.BanDetectionMiddleware': 320,
     'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 420,
-}
+    'ie_scrapy.middlewares.PUADownloaderMiddleware': 550,
+    'scrapy.downloadermiddlewares.retry.RetryMiddleware': 600,
+    'ie_scrapy.middlewares.ERDownloaderMiddleware': 650,
 
+}
+#'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 560,
 
 
 
