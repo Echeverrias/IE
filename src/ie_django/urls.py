@@ -5,7 +5,6 @@ from .views import init_view
 
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
-    path('chart/', include('chart.urls')),
     path('job/', include('job.urls')),
     path('task/', include('task.urls')),
     path('account/', include('account.urls')),

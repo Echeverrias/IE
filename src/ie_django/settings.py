@@ -25,7 +25,7 @@ SECRET_KEY = '=26*4qpc02wu@6$#cvz#&3kx7=-nob7zn#_e3)9@=@^8-76)og'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -53,14 +53,13 @@ OTHER_APPS = [
 ]
 
 PROJECT_APPS = [
-    'ie_scrapy',
     'core',
     'job',
     'task',
     "account",
-
+    "ie_scrapy",
 ]
-# "account",
+
 INSTALLED_APPS = DJANGO_DEFAULT_APPS + OTHER_DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
 #####################################################################################################
@@ -87,7 +86,6 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'ie_django/templates'),
             os.path.join(BASE_DIR, 'job/templates'),
-            os.path.join(BASE_DIR, 'chart/templates'),
             os.path.join(BASE_DIR, 'task/templates'),
             os.path.join(BASE_DIR, 'account/templates'),
 
@@ -115,7 +113,7 @@ WSGI_APPLICATION = 'ie_django.wsgi.application'
 DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'ie',
+            'NAME': 'temp',
             'USER': 'root',
             'PASSWORD': 'root',
             'HOST': 'localhost',
