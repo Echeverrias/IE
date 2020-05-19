@@ -473,7 +473,7 @@ class Job(models.Model):
             super(Job, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('detail', args=[str(self.pk)])
+        return reverse('job_detail', args=[str(self.pk)])
 
     def company_link_(self):
         return self.company.link
@@ -496,14 +496,13 @@ class Job(models.Model):
     display_cities.short_description = 'Cities (Country)'
 
 
-
     @classmethod
     def add_city(cls, job, city):
         try:
             job_ = cls.objects.get(id=job.id)
             job_.cities.add(city)
         except Exception as e:
-            pass
+            print(f'Error in Job.add_city: {e}')
 
 
 
