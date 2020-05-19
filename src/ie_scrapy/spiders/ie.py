@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 from scrapy.spiders import Spider
-from scrapy import signals
+from scrapy import signals, Request
 from collections import namedtuple
 import re
 from ..items import JobItem, CompanyItem
 from ..pipelines import CleaningPipeline, StoragePipeline
 import ie_scrapy.keys as key
 from job.init_db import initialize_database
+import time
 
 # INFO: 197 scraped offers in 20 minutes
+# INFO: 67 scraped offers in 1 minute
+# INFO: 15000 scraped offers in 4 hours
+# INFO: 6 scraped offers in 1 minute
 
 class BaseException(Exception):
     pass
@@ -27,9 +31,12 @@ class InfoempleoSpider(Spider):
 
     name = 'ie'
     allowed_domains = ['infoempleo.com']
-
+    start_urls_ = ["https://www.infoempleo.com/trabajo/area-de-empresa_educacion-formacion/",]
     start_urls = [
-
+        "https://www.infoempleo.com/trabajo/area-de-empresa_sanidad-salud-y-servicios-sociales/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_educacion-formacion/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_tecnologia-e-informatica/",
+        "https://www.infoempleo.com/trabajo/area-de-empresa_medios-editorial-y-artes-graficas/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_comercial-ventas/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_ingenieria-y-produccion/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_profesionales-artes-y-oficios/",
@@ -65,8 +72,8 @@ class InfoempleoSpider(Spider):
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super(InfoempleoSpider, cls).from_crawler(crawler, *args, **kwargs)
-        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
         crawler.signals.connect(spider.spider_opened, signal=signals.spider_opened)
+        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
         return spider
 
     def spider_opened(self, spider):
@@ -86,19 +93,8 @@ class InfoempleoSpider(Spider):
             total_results =  self._get_the_total_number_of_results(response)
         except Exception as e:
             total_results = 0
-        """
-        job_urls = [
-            'https://www.infoempleo.com/ofertasdetrabajo/desde-casa-comercial-multinivel-networker-con-gran-compannia-abriendo-espanna/avila/2617467/',
-            'https://www.infoempleo.com/ofertasdetrabajo/desde-casa-comercial-multinivel-networker-con-gran-compannia-abriendo-espanna/sevilla/2617453/',
-            'https://www.infoempleo.com/ofertasdetrabajo/tecnico-comercial-motores-y-generadores-marinos-hm/barcelona/2618424/',
-            'https://www.infoempleo.com/ofertasdetrabajo/customer-service-sales-dutch-speaker/madrid/2618271/',
-            'https://www.infoempleo.com/ofertasdetrabajo/comercial-autonomo-a-divisiones-agroalimentaria-hosteleria-industria-talleres/valladolid/2618247/',
-            'https://www.infoempleo.com/ofertasdetrabajo/vendedors-de-cosmetica-por-catalogo/girona/2618782/',
-        ]
-        """
         for job_url in job_urls:
             print('# Go to job_url: %s', job_url) #%
-
             yield response.follow(job_url, self.parse_item, meta={
                 key.START_URL: start_url,
                 key.TOTAL_RESULTS: total_results,
@@ -106,9 +102,15 @@ class InfoempleoSpider(Spider):
         try:
             if self._is_there_next_page(response):
                 next_url = self._get_next_page_url(response.url)
-                yield response.follow(next_url, self.parse)
+                print('');
+                print('**');
+                print(f'* Next page: {next_url}')
+                if next_url:
+                    yield response.follow(next_url, self.parse)
+                else:
+                    print(f'* {next_url} has been parsed')
             else:
-                print('All the pages have been parsed')
+                print('All the pages have been requested')
         except NonExistentPageError as e:
             print(f'The url {response.url} has not jobs: {e}')
 
