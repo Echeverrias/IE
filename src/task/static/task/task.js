@@ -60,7 +60,7 @@ $(document).ready(function(){
     }
 
     function display_msg(msg){
-        html = '<p>' + msg + '</p>' ;
+        html = '<h4 class="title">' + msg + '</h4>' ;
         $('.sub-container').html(html);
     }
 
@@ -83,10 +83,7 @@ $(document).ready(function(){
         console.log("starting spider...")
         $("#run-job-spider").hide();
         $("#run-company-spider").hide();
-
-
-
-        msg = 'Iniciando la araña...';
+        msg = 'Iniciando el proceso ...';
         display_msg(msg);
         show_loader('fast');
     }
