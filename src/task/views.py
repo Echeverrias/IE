@@ -20,7 +20,8 @@ def run_crawler_view(request, model=None):
     if request.GET.get('crawl', None):
         write_in_a_file('view request - start get request', {}, 'tasks_view.txt')
         user = User.objects.get(username=request.user)
-        sp.start(spider, user)
+        if not sp.is_scrapping():
+            sp.start(spider, user)
         write_in_a_file('view request - end get request', {}, 'tasks_view.txt')
         req = 'crawl'
     if request.GET.get('crawl', None) or request.is_ajax(): # get a task at most
