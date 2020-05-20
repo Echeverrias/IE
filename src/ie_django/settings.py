@@ -31,7 +31,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 #####################################################################################################
 
-DJANGO_DEFAULT_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,19 +40,16 @@ DJANGO_DEFAULT_APPS = [
     'django.contrib.staticfiles',
 ]
 
-OTHER_DJANGO_APPS = [
+THIRD_PARTY_APPS = [
     'django_filters',
     'django_mysql',
-]
-
-OTHER_APPS = [
     'simple_history',
     'import_export',
     'mathfilters',
     'widget_tweaks',
 ]
 
-PROJECT_APPS = [
+INTERNAL_APPS = [
     'core',
     'job',
     'task',
@@ -60,9 +57,8 @@ PROJECT_APPS = [
     "ie_scrapy",
 ]
 
-INSTALLED_APPS = DJANGO_DEFAULT_APPS + OTHER_DJANGO_APPS + OTHER_APPS + PROJECT_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + INTERNAL_APPS
 
-#####################################################################################################
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 
@@ -121,15 +117,7 @@ DATABASES = {
         }
 }
 #  'PASSWORD': os.environ.get('mysql_pass'),
-"""
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-"""
 
 DATE_FORMAT = 'j N Y' # día mes año #Parece que no funciona
 
