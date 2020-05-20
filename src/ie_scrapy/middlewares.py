@@ -224,27 +224,27 @@ class CheckDownloaderMiddleware(object):
    def process_request(self, request, spider):
         url = request.url
         if 'ofertasdetrabajo'in url:
+            ref = int(os.path.basename(os.path.dirname(url)))
             try:
-                ref = int(os.path.basename(os.path.dirname(url)))
                 job = Job.objects.get(id=ref)
-                print('**CheckDownloaderMiddleware')
-                print(job.checked_at.date())
-                print(timezone.localtime(timezone.now()).date())
-                print(job.checked_at.date() == timezone.localtime(timezone.now()).date())
-                if (job.checked_at.date() == timezone.localtime(timezone.now()).date() or
-                    job.checked_at.date() == timezone.localtime(timezone.now()).date() - relativedelta(days=1)
-                ):
-                    print(f'* {url} checked today')
-                    print('')
-                    print('')
-                    print('IGNOREREQUEST')
-                    print('')
-                    request.meta.update({'ignore': True})
-                    print(request.meta)
-                    raise IgnoreRequest(f'Ignore request: {request.url}')
-                else:
-                    return None
             except:
+                return None
+            print('**CheckDownloaderMiddleware')
+            print(job.checked_at.date())
+            print(timezone.localtime(timezone.now()).date())
+            print(job.checked_at.date() == timezone.localtime(timezone.now()).date())
+            if (job.checked_at.date() == timezone.localtime(timezone.now()).date() or
+                job.checked_at.date() == timezone.localtime(timezone.now()).date() - relativedelta(days=1)
+            ):
+                print(f'* {url} checked today')
+                print('')
+                print('')
+                print('IGNOREREQUEST')
+                print('')
+                request.meta.update({'ignore': True})
+                print(request.meta)
+                raise IgnoreRequest(f'Ignore request: {request.url}')
+            else:
                 return None
         elif not 'www.infoempleo.com' in url:
             print(f'* Ignored request to {url}')
@@ -260,7 +260,7 @@ class PUADownloaderMiddleware(object):
     ua = None
 
     def process_request(self, request, spider):
-        if PUADownloaderMiddleware.proxy and request.meta.get('retry'):
+        if PUADownloaderMiddleware.proxy:# and request.meta.get('retry'):
             request.meta.update({'proxy_source': PUADownloaderMiddleware.proxy})
             request.meta.update({'proxy':
                                 f'{PUADownloaderMiddleware.proxy.type}://{PUADownloaderMiddleware.proxy.host}:{PUADownloaderMiddleware.proxy.port}'})

@@ -116,10 +116,10 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy_proxy_pool.middlewares.BanDetectionMiddleware': 320,
     'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 420,
     'ie_scrapy.middlewares.PUADownloaderMiddleware': 550,
-    'scrapy.downloadermiddlewares.retry.RetryMiddleware': 600,
     'ie_scrapy.middlewares.ERDownloaderMiddleware': 650,
 
 }
+#'scrapy.downloadermiddlewares.retry.RetryMiddleware': 600,
 #'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 560,
 
 
