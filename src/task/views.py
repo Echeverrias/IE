@@ -11,6 +11,7 @@ from utilities.utilities import write_in_a_file #%
 @staff_member_required
 def run_crawler_view(request, model=None):
     sp = SpiderProcess.get_instance()
+    is_running = sp.is_scrapping()
     req = ''
     write_in_a_file('view request - start', {}, 'tasks_view.txt')
     try:
@@ -19,9 +20,10 @@ def run_crawler_view(request, model=None):
         spider = None
     if request.GET.get('crawl', None):
         write_in_a_file('view request - start get request', {}, 'tasks_view.txt')
-        user = User.objects.get(username=request.user)
-        if not sp.is_scrapping():
+        if not is_running:
+            user = User.objects.get(username=request.user)
             sp.start(spider, user)
+            is_running = True
         write_in_a_file('view request - end get request', {}, 'tasks_view.txt')
         req = 'crawl'
     if request.GET.get('crawl', None) or request.is_ajax(): # get a task at most
@@ -32,7 +34,6 @@ def run_crawler_view(request, model=None):
         last_tasks = (actual_task and [actual_task]) or sp.get_latest_tasks()
         last_tasks = [task  for task in last_tasks if task.name == spider.name] if spider else last_tasks
     write_in_a_file('view request - continue', {}, 'tasks_view.txt')
-    is_running = sp.is_scrapping()
     write_in_a_file('view request - continue after call is_scrapping', {}, 'tasks_view.txt')
     write_in_a_file('view request - continue after call get_actual_task and get_latest_task', {}, 'tasks_view.txt')
     context = {
