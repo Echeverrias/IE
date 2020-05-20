@@ -682,6 +682,7 @@ class StoragePipeline(object):
         return languages
 
     def _get_city(self, city_name, province=None, country=None):
+        breakpoint()
         write_in_a_file('StorePipeline._get_city', {'city_name': city_name + '.', 'province':province, 'country': country}, 'pipeline.txt')
         if not city_name:
             return None
@@ -702,6 +703,7 @@ class StoragePipeline(object):
                     cities_qs = City.objects.filter(country=country, name__icontains=city_name)
                 if cities_qs.count() > 1:
                     cities_qs = cities_qs.filter(name__icontains='/')
+                    cities = []
                     for city in cities_qs:
                         cities = [city for name in city.name.split('/') if city_name.lower() == name.lower()]
                     cities_qs = cities
@@ -736,7 +738,7 @@ class StoragePipeline(object):
                 cities_qs = City.objects.filter(name__contains=city_name) # contains to avoid coincidence in the middle of the string
                 if cities_qs and cities_qs.count() > 1:
                     cities_qs = cities_qs.filter(name__icontains='/')
-                    cities = None
+                    cities = []
                     for city in cities_qs:
                         cities = [city for name in city.name.split('/') if city_name.lower() == name.lower()]
                     cities_qs = cities
