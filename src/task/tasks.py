@@ -1,10 +1,11 @@
+import django
+django.setup()
 from django import db
 from django.utils import timezone
 from scrapy import signals
 from scrapy.signalmanager import dispatcher
 from scrapy.utils.project import get_project_settings
 from scrapy.crawler import CrawlerProcess
-import multiprocessing
 from multiprocessing import  Queue, Process
 from datetime import datetime
 import os, signal
@@ -144,10 +145,12 @@ class SpiderProcess():
         write_in_a_file('SpiderProcess.crawl: process joined', {}, 'tasks.txt')
         write_in_a_file('SpiderProcess.crawl: process joined', {}, 'spider.txt')
         write_in_a_file(f'Crawler Process - before: qis_running.qsize: {qis_running.qsize()}', {}, 'tasks.txt')
-        try:
-            qis_running.get()
-        except Exception as e:
-            write_in_a_file(f'Crawler Process - error in qis_running.get: {e}', {}, 'tasks.txt')
+        while True:
+            try:
+                qis_running.get(block=False)
+            except Exception as e:
+                write_in_a_file(f'Crawler Process - error in qis_running.get: {e}', {}, 'tasks.txt')
+                break
         write_in_a_file(f'Crawler Process - after: qis_running.qsize: {qis_running.qsize()}', {}, 'tasks.txt')
         write_in_a_file('===========================================================================================', {}, 'tasks.txt')
 
@@ -185,6 +188,7 @@ class SpiderProcess():
         :return: None
         """
         self.init_datetime = timezone.now()  # Before create the task
+        self.qis_scrapping.put('YES')
         self.process.start()
         write_in_a_file('SpiderProcess._start_process: process started', {'pid': self.process.pid}, 'tasks.txt')
         data = {
