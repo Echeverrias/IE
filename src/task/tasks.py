@@ -80,7 +80,7 @@ class SpiderProcess():
 
     def _spider_closed(self, spider, reason):
         write_in_a_file('CrawlerProcess.signal.close', {'reason': reason}, 'task.txt')
-        now = datetime.now()
+        now = timezone.localtime(timezone.now())
         data = {
             'description': f'spider closed with count: {self._count} at {str(now)}',
             'result': self._count,
@@ -151,6 +151,14 @@ class SpiderProcess():
             except Exception as e:
                 write_in_a_file(f'Crawler Process - error in qis_running.get: {e}', {}, 'tasks.txt')
                 break
+        now = timezone.localtime(timezone.now())
+        data = {
+            'state': Task.STATE_FINISHED,
+            'description': f'CrawlerProcess finished with count: {self._count} at {str(now)}',
+            'result': self._count,
+            'finished_at': now
+        }
+        self._update_task(self._id_task, data)
         write_in_a_file(f'Crawler Process - after: qis_running.qsize: {qis_running.qsize()}', {}, 'tasks.txt')
         write_in_a_file('===========================================================================================', {}, 'tasks.txt')
 
@@ -187,7 +195,7 @@ class SpiderProcess():
 
         :return: None
         """
-        self.init_datetime = timezone.now()  # Before create the task
+        self.init_datetime = timezone.localtime(timezone.now())  # Before create the task
         self.qis_scrapping.put('YES')
         self.process.start()
         write_in_a_file('SpiderProcess._start_process: process started', {'pid': self.process.pid}, 'tasks.txt')
@@ -198,19 +206,13 @@ class SpiderProcess():
         }
         self._update_task(self._id_task, data)
 
-    def _reset_process(self, state=Task.STATE_FINISHED):
+    def _reset_process(self):
         self._is_resetting = True
         number_of_processed_items  = self.qitems.qsize()
         try:
             self._empty_and_close_queues()
             self.process.terminate()
             write_in_a_file('_reset_process terminated (from stop)', {'is_running': self.process.is_alive()}, 'tasks.txt')
-            data = {
-                'state': state,
-                'result': number_of_processed_items,
-                'finished_at': datetime.now(),
-            }
-            self._update_task(self._id_task, data)
             write_in_a_file('_reset_process before join (from stop)', {},'tasks.txt')
             self.process.join(120)  # ! IMPORTANT after .terminate -> .join
             try:
@@ -227,11 +229,11 @@ class SpiderProcess():
             self._id_task = None
             self._is_resetting = False
         self._count = 0
-
+    """
     def _update_process(self):
-        """
-        The process is reset if it is not alive and if it has'nt being reset
-        """
+        
+        #The process is reset if it is not alive and if it has'nt being reset
+        
         write_in_a_file(f'__update_process - process == {self.process.is_alive() if self.process else None}', {}, 'tasks.txt')
         # If the process has finished
         try:
@@ -239,7 +241,7 @@ class SpiderProcess():
                 self._reset_process()
         except:
             pass
-
+    """
     def start(self, spider, user=None, **kwargs):
         """
         Si el proceso no está vivo es que o no se ha iniciado aún o que ya ha terminado, así que
@@ -253,16 +255,25 @@ class SpiderProcess():
         if not self.is_scrapping():
             task = self._get_task(self._id_task)
             if task and (task.state == Task.STATE_RUNNING) and (not self._is_resetting): # The process has finished and we have to update the state
-                self._reset_process()
+                #self._reset_process()
+                self._stop()
             self._init_process(spider, user)
             self._start_process()
 
     def _stop(self, state=Task.STATE_INCOMPLETE):
         if not self._is_resetting:
+            now = timezone.localtime(timezone.now())
+            data = {
+                'state': state,
+                'description': f'process stopped with count: {self._count} at {str(now)}',
+                'result': self._count,
+                'finished_at': now
+            }
+            self._update_task(self._id_task, data)
             self._reset_process(state)
 
     def get_actual_task(self):
-        self._update_process()
+        #self._update_process()
         return self._get_task(self._id_task)
 
     def _update_last_db_task_if_is_incomplete(self, last_db_task, actual_task):
@@ -294,7 +305,8 @@ class SpiderProcess():
     def is_scrapping(self):
         # ñapa
         if self.qis_scrapping and self.process:
-            __d = {'qis_scrapping.qsize': self.qis_scrapping.qsize(), 'process.is_alive': self.process.is_alive()}
+            __d = {'qis_scrapping.qsize': self.qis_scrapping.qsize(),
+                   'process.is_alive': self.process.is_alive()}
         else:
             __d = {}
         write_in_a_file(f'SpiderProcess.is_scrapping', __d, 'tasks.txt')
@@ -307,7 +319,9 @@ class SpiderProcess():
                 return True
             else:
                 write_in_a_file(f'is_scraping - there is nothing in qis_scrapping -> False', __d, 'tasks.txt')
-                self._stop(state=Task.STATE_FINISHED)
+               # self._stop(state=Task.STATE_FINISHED)
+                if not self._is_resetting: #and not self.process.is_alive()
+                    self._reset_process()
                 return False
         else:
             write_in_a_file('is_scraping - process == None -> False', {}, 'tasks.txt')
