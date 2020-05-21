@@ -32,12 +32,12 @@ You need to install:
 
 You'll need to create an empty database.
 
-### Run the project
+### Running the project
 1. Download the [IE](xxx) project. You can download it as a zip or clone it.
 2. Yo have to set your database. Open de src/ie_django/settings.py file and configure the variable 'DATABASES'<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/db_settings.png" width="350"></div>
 <br><p align="center"><i>Figure 7</i></p><br>
-3. Open the terminal, go to the root folder project and install the virtual environmnet.<br>
+3. Open the terminal, go to the root folder project and install the virtual environment.<br>
 4. Activate the virtual environment.<br>
 5. Go to the 'src' folder and install all the requirements with <b>pip install -r requirements.txt</b><br>
 6. Execute <b>python manage.py makemigrations</b> to create the migrations.<br>
@@ -47,7 +47,10 @@ You'll need to create an empty database.
 10. Execute <b>python manage.py runserver</b> to run the app.<br>
 11. The application starts in the url <a href="http://localhost:8080/">http://localhost:8080/</a><br>
 
-
+## Running the tests
+ Open the terminal, go to the src project folder end execute <b>python manage.py test</b> to run all the tests.
+ You also can run a specific test with <b>python manage.py test <<i>app_name</i>.tests><.<i>test_name</i>></b>
+ 
 ## Development
 The app is developed in [Python](https://www.python.org) and uses the frameworks [Scrapy](https://scrapy.org/) for do the web scrapping of the site web and [Django](https://www.djangoproject.com/) for build the web app.<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/sytem_arquitecture.png" width="450"></div>
@@ -55,10 +58,16 @@ The app is developed in [Python](https://www.python.org) and uses the frameworks
 
 The entity relationship diagram (ERD) defined to shows the relationships of entity sets stored in a database is the following:<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/ER%20diagram.png" width="850"></div>
-<br><p align="center"><i>Figure 9*</p><br><br>
+<br><p align="center"><i>Figure 9</p><br><br>
 
-### Software versions
+## Built with
 * Python 3.7.5
 * MySQL 8.0.2.0
 * Django 3.0.5
 * Scrapy 2.0.1
+
+# Authors
+* Juan Antonio Echeverrías Aranda
+
+# License
+This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/Echeverrias/IE/blob/base/LICENSE.md) file for details
