@@ -12,15 +12,10 @@ yyy/
 *(copia)/
 *copia*/
 src/**/*.txt
+*.txt
+!requirements.txt
 *.sqlite3
 *.db
-*.csv
-*.pdf
-*.json
-*.png
-*.jpeg
-*.jpg
-*.txt
 *.pyc
 _*.*
 !__*.py
