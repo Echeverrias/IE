@@ -1,26 +1,26 @@
 # Web Scrapping App
 
-This is an app to do web scrapping on the site web 'IE', to get the data of the job offers and store it in a data base.
+This is an app to do web scrapping on the site web 'IE', to get the data of the job offers and store it in a data base.<br><br><br>
 
 You can register in it:<br><br>
 <img src="https://github.com/Echeverrias/IE/blob/base/screenshots/signup.png" width="500">
-*Figure 1*  <br><br>
+<br>*Figure 1*  <br><br>
 
 You can start a web scrapping process (the extracted data will be stored in a data base)<br><br>
 <img src="https://github.com/Echeverrias/IE/blob/base/screenshots/run_crawler.png" width="500">
-*Figure 2*  <br/><br/>
+<br>*Figure 2*  <br/><br/>
 
 You can access to the stored data through Django admin panel:<br><br>
 <img src="https://github.com/Echeverrias/IE/blob/base/screenshots/admin_panel1.png" width="500">
-*Figure 3*  <br>
+<br>*Figure 3*  <br>
 <img src="https://github.com/Echeverrias/IE/blob/base/screenshots/panel_admin2.png" width="500">
-*Figure 4*  <br>
+<br>*Figure 4*  <br>
 
 You can make searches ,using filters, of the available offer jobs:<br><br>
 <img src="https://github.com/Echeverrias/IE/blob/base/screenshots/offers_list.png" width="500">
-*Figure 5*  <br>
+<br>*Figure 5*  <br>
 <img src="https://github.com/Echeverrias/IE/blob/base/screenshots/offers_detail.png" width="500">
-*Figure 6*  <br><br>
+<br>*Figure 6*  <br><br>
 
 ## Getting Started
 ### Prerequisites
@@ -32,9 +32,9 @@ You need to install:
 
 ### Run the project
 1. Download the [IE](xxx) project. You can download it as a zip or clone it.
-2. Yo have to set your database. Open de src/ie_django/settings.py file and configure the variable 'DATABASES'
-<img src="https://github.com/Echeverrias/IE/blob/base/screenshots/db_settings.png" width="500">
-       *Figure 7*  <br /><br />
+2. Yo have to set your database. Open de src/ie_django/settings.py file and configure the variable 'DATABASES'<br><br>
+<img src="https://github.com/Echeverrias/IE/blob/base/screenshots/db_settings.png" width="500"><br>
+<br>*Figure 7*  <br><br>
 3. Open the terminal, go to the root folder project and install the virtual environmnet.
 4. Activate the virtual environment.
 5. Go to the 'src' folder and install all the requirements with **`pip install -r requirements.txt`**
@@ -47,13 +47,13 @@ You need to install:
 
 
 ## Development
-The app is developed in [Python](https://www.python.org) and uses the frameworks [Scrapy](https://scrapy.org/) for do the web scrapping of the site web and [Django](https://www.djangoproject.com/) for build the web app.
-![alt tag](https://github.com/Echeverrias/IE/blob/base/screenshots/sytem_arquitecture.png)
-       *Figure 8*  <br /><br />
+The app is developed in [Python](https://www.python.org) and uses the frameworks [Scrapy](https://scrapy.org/) for do the web scrapping of the site web and [Django](https://www.djangoproject.com/) for build the web app.<br><br>
+<img src="https://github.com/Echeverrias/IE/blob/base/screenshots/sytem_arquitecture.png" width="500"><br>
+<br>*Figure 8* <br><br>
 
-The entity relationship diagram (ERD) defined to shows the relationships of entity sets stored in a database is the following:
-![alt tag](https://github.com/Echeverrias/IE/blob/base/screenshots/ER%20diagram.png)
-       *Figure 9*  <br /><br />
+The entity relationship diagram (ERD) defined to shows the relationships of entity sets stored in a database is the following:<br><br>
+<img src="https://github.com/Echeverrias/IE/blob/base/screenshots/ER%20diagram.png" width="500"><br>
+<br>*Figure 9*<br><br>
 
 ### Software versions
 Python 3.7.5
