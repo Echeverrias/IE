@@ -4,10 +4,15 @@
    </h5>
     <div class="card-body">
         <hr>
-        <p class="card-text">Ciudad: {{ job.cities.all.first.name }}</p>
-        <p class="card-text">Funciones: {{ job.functions | linebreaks | truncatewords:30 }}</p>
-        <p class="card-text">Requisitos: {{ job.requirements | linebreaks | truncatewords:30 }}</p>
-        <p class="card-text">Se ofrece: {{ job.it_is_offered | linebreaks | truncatewords:30 }}</p>
+        <p class="card-text"><b>Area:</b> {{ job.area }}</p>
+        <p class="card-text"><b>Tipo de contrato:</b>  {{ job.contract }}</p>
+        <p class="card-text"><b>Jornada laboral:</b>  {{ job.working_day }}</p>
+        {% if job.maximum_salary %}
+            <p class="card-text"><b>Salario:</b>  {{ job.minimum_salary  }}€ - {{ job.maximum_salary  }}€ brutos anuales</p>
+        {%  endif %}
+        <p class="card-text">
+            <b>Ciudad:</b>  {{ job.cities.all.first.name }} {% if job.country.name != "España" %}({{ job.country.name }}){% endif %}
+        </p>
         <div class="row no-margin">
         {% if not detail %}
             <div class="col-6-lg">
@@ -16,9 +21,9 @@
          {% endif %}
          <div class="col-6-lg text-muted text-small text-right right-bottom">
             {% if job.last_update_date %}
-                {{ job.last_update_date }}
+                Fecha de publicación de la oferta: {{ job.last_update_date }}
             {% else %}
-                {{ job.first_publication_date }}
+                Fecha de actualización de la oferta:{{ job.first_publication_date }}
             {% endif %}
         </div>
         </div>
