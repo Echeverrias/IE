@@ -5,6 +5,7 @@ include
 lib/
 share/
 staticfiles/
+migrations/0*
 zzz/
 xxx/
 yyy/
@@ -21,6 +22,8 @@ src/**/*.txt
 *.jpg
 *.txt
 *.pyc
+_*.*
+!__*.py
 *_.py
 !*__.py
 *prueba*.py
