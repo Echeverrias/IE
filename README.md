@@ -4,23 +4,23 @@ This is an app to do web scrapping on the site web 'IE', to get the data of the 
 
 You can register in it:
 <img src="https://github.com/Echeverrias/IE/blob/base/screenshots/signup.png" width="500">
-![alt tag](https://github.com/Echeverrias/IE/blob/base/screenshots/signup.png)<!-- .element height="50%" width="50%" -->
+
        *Figure 1*  <br /><br />
 
 You can start a web scrapping process (the extracted data will be stored in a data base)
-![alt tag](https://github.com/Echeverrias/IE/blob/base/screenshots/run_crawler.png)
+<img src="https://github.com/Echeverrias/IE/blob/base/screenshots/run_crawler.png" width="500">
        *Figure 2*  <br /><br />
 
 You can access to the stored data through Django admin panel:
-![alt tag](https://github.com/Echeverrias/IE/blob/base/screenshots/admin_panel1.png)
+<img src="https://github.com/Echeverrias/IE/blob/base/screenshots/admin_panel1.png" width="500">
        *Figure 3*  <br />
-![alt tag](https://github.com/Echeverrias/IE/blob/base/screenshots/panel_admin2.png)
+<img src="https://github.com/Echeverrias/IE/blob/base/screenshots/panel_admin2.png" width="500">
        *Figure 4*  <br /><br />
 
 You can make searches ,using filters, of the available offer jobs:
-![alt tag](https://github.com/Echeverrias/IE/blob/base/screenshots/offers_list.png)
+<img src="https://github.com/Echeverrias/IE/blob/base/screenshots/offers_list.png" width="500">
        *Figure 5*  <br /><br />
-![alt tag](https://github.com/Echeverrias/IE/blob/base/screenshots/offers_detail.png)
+<img src="https://github.com/Echeverrias/IE/blob/base/screenshots/offers_detail.png" width="500">
        *Figure 6*  <br /><br />
 
 ## Getting Started
@@ -34,7 +34,7 @@ You need to install:
 ### Run the project
 1. Download the [IE](xxx) project. You can download it as a zip or clone it.
 2. Yo have to set your database. Open de src/ie_django/settings.py file and configure the variable 'DATABASES'
-![alt tag](https://github.com/Echeverrias/IE/blob/base/screenshots/db_settings.png)
+<img src="https://github.com/Echeverrias/IE/blob/base/screenshots/db_settings.png" width="500">
        *Figure 7*  <br /><br />
 3. Open the terminal, go to the root folder project and install the virtual environmnet.
 4. Activate the virtual environment.
