@@ -3,12 +3,9 @@
 This is an app to do web scrapping on the site web 'IE', to get the data of the job offers and store it in a data base.
 
 You can register in it:
-![alt tag](https://github.com/Echeverrias/IE/blob/base/screenshots/run_crawler.png =300x300)
-![alt tag](https://github.com/Echeverrias/IE/blob/base/screenshots/run_crawler.png=300x300)
-![signup](https://github.com/Echeverrias/IE/blob/base/screenshots/signup.pn.png =300x300)
 <img src="https://github.com/Echeverrias/IE/blob/base/screenshots/signup.png" width="500">
-*Figure 1*  <br/><br/>
-
+*Figure 1*  <br/><br/><br><br>
+<br>
 You can start a web scrapping process (the extracted data will be stored in a data base)
 <img src="https://github.com/Echeverrias/IE/blob/base/screenshots/run_crawler.png" width="500">
 *Figure 2*  <br/><br/>
