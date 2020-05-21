@@ -1,0 +1,18 @@
+,id,slug,name,capital_id,country
+0,1,andalucia,Andalucía,6152,6
+1,2,aragon,Aragón,8113,6
+2,5,canarias,Canarias,5252,6
+3,6,cantabria,Cantabria,5823,6
+4,8,castilla-la-mancha,Castilla - La Mancha,6934,6
+5,7,castilla-y-leon,Castilla y León,7415,6
+6,9,cataluna,Cataluña,881,6
+7,15,comunidad-foral-de-navarra,Comunidad Foral de Navarra,4815,6
+8,10,comunitat-valenciana,Comunidad Valenciana,7219,6
+9,13,comunidad-de-madrid,Comunidad de Madrid ,4356,6
+10,11,extremadura,Extremadura,712,6
+11,12,galicia,Galicia,2198,6
+12,4,illes-balears,Islas Baleares,836,6
+13,17,la-rioja,La Rioja,4124,6
+14,16,pais-vasco,País Vasco,46,6
+15,3,principado-de-asturias,Principado de Asturias,5009,6
+16,14,region-de-murcia,Región de Murcia,4588,6
