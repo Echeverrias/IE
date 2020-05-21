@@ -37,12 +37,12 @@ You need to install:
 <br><p align="center"><i>Figure 7</i></p><br><br>
 3. Open the terminal, go to the root folder project and install the virtual environmnet.
 4. Activate the virtual environment.
-5. Go to the 'src' folder and install all the requirements with **`pip install -r requirements.txt`**
-6. Execute **`python manage.py makemigrations`** to create the migrations.
-7. Execute **`python manage.py migrate`** to create the tables in the database.
-8. Execute **`python manage.py initdb`** to initialize language table and locations tables.
-9. Execute **`python manage.py createsuperuser`** to create a default user with administrator permission.
-10. Execute **`python manage.py runserver`** to run the app.
+5. Go to the 'src' folder and install all the requirements with <b>pip install -r requirements.txt</b>
+6. Execute <b>python manage.py makemigrations</b> to create the migrations.
+7. Execute <b>python manage.py migrate</b> to create the tables in the database.
+8. Execute <b>python manage.py initdb</b> to initialize language table and locations tables.
+9. Execute <b>python manage.py createsuperuser</b> to create a default user with administrator permission.
+10. Execute <b>python manage.py runserver</b> to run the app.
 11. The application starts in the url [http://localhost:8080/](http://localhost:8080/)
 
 
