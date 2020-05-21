@@ -49,7 +49,7 @@ You'll need to create an empty database.
 
 ## Running the tests
  Open the terminal, go to the src project folder end execute <b>python manage.py test</b> to run all the tests.
- You also can run a specific test with <b>python manage.py <<i>app_name</i>.tests><.<i>test_name<</i>></b>
+ You also can run a specific test with <b>python manage.py test <<i>app_name</i>.tests><.<i>test_name</i>></b>
  
 ## Development
 The app is developed in [Python](https://www.python.org) and uses the frameworks [Scrapy](https://scrapy.org/) for do the web scrapping of the site web and [Django](https://www.djangoproject.com/) for build the web app.<br><br>
@@ -58,7 +58,7 @@ The app is developed in [Python](https://www.python.org) and uses the frameworks
 
 The entity relationship diagram (ERD) defined to shows the relationships of entity sets stored in a database is the following:<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/ER%20diagram.png" width="850"></div>
-<br><p align="center"><i>Figure 9*</p><br><br>
+<br><p align="center"><i>Figure 9</p><br><br>
 
 ## Built with
 * Python 3.7.5
