@@ -7,7 +7,7 @@ You can register in it:<br><br>
 <br><p align="center">*Figure 1*</p><br><br>
 
 You can start a web scrapping process (the extracted data will be stored in a data base)<br><br>
-<img align="center" src="https://github.com/Echeverrias/IE/blob/base/screenshots/run_crawler.png" width="500">
+<div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/run_crawler.png" width="500"></div>
 <br><p align="center">*Figure 2*</p>  <br/><br/>
 
 You can access to the stored data through Django admin panel:<br><br>
