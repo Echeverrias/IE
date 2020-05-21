@@ -3,7 +3,7 @@
 This is an app to do web scrapping on the site web 'IE', to get the data of the job offers and store it in a data base.
 
 You can register in it:
-<img src="https://camo.githubusercontent.com/..." data-canonical-src="(https://github.com/Echeverrias/IE/blob/base/screenshots/signup.png" width="200" height="400" />
+<img src="https://github.com/Echeverrias/IE/blob/base/screenshots/signup.png" width="200">
 ![alt tag](https://github.com/Echeverrias/IE/blob/base/screenshots/signup.png)<!-- .element height="50%" width="50%" -->
        *Figure 1*  <br /><br />
 
