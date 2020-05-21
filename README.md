@@ -4,7 +4,7 @@ This is an app to do web scrapping on the site web 'IE', to get the data of the 
 
 You can register in it:<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/signup.png" width="500"></div>
-<br><p align="center">*Figure 1*</p><br><br>
+<br><p align="center" font-style="italic">Figure 1</p><br><br>
 
 You can start a web scrapping process (the extracted data will be stored in a data base)<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/run_crawler.png" width="500"></div>
@@ -12,9 +12,9 @@ You can start a web scrapping process (the extracted data will be stored in a da
 
 You can access to the stored data through Django admin panel:<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/admin_panel1.png" width="500"></div>
-<br><p align="center"*Figure 3*  <br>
+<br><p align="center">Figure 3</p><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/panel_admin2.png" width="500"></div>
-<br><p align="center">*Figure 4*</p><br>
+<br><p align="center">Figure 4</p><br>
 
 You can make searches ,using filters, of the available offer jobs:<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/offers_list.png" width="500"></div>
