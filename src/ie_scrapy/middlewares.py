@@ -287,6 +287,7 @@ class ERDownloaderMiddleware(object):
         return {
             'description': f'{title}',
             'exception': exception,
+            'url': request.url,
             'request': request,
             'meta': request.meta,
             'headers': request.headers,
@@ -295,26 +296,31 @@ class ERDownloaderMiddleware(object):
         }
 
     def _make_the_request_again(self, request):
-        if PUADownloaderMiddleware.proxy and request.meta.get('retry', 0) < 3:
+        n = 100
+        if request.meta.get('retry', 0) < n:
             retry = request.meta['retry'] + 1 if request.meta.get('retry') else 1
             meta = {**request.meta, 'retry': retry}
             request =  Request(url=request.url, meta=meta, headers=request.headers, callback=request.callback,
                            dont_filter=True)
-        elif not PUADownloaderMiddleware.proxy:
-            meta = {**request.meta}
-            try:
-                del meta['retry']
-            except:
-                pass
-            request =  Request(url=request.url, meta=meta, headers=request.headers, callback=request.callback,
-                           dont_filter=True)
         else:
-            print('retry: True')
+            d = self._print_data(request, title=f'retrying more tha {n} times')
+            write_in_a_file('retry > n', d, 'z_retry_many_times.txt')
+            raise IgnoreRequest(f'The request has been failed {n} times')
         return request
 
-    def _check_proxy_and_ua(self, request):
+    def _check_proxy_and_ua(self, request, response=None):
+        """
+        If there is a response and its status is 200, the proxy and the ua from the request are taken to do all the requests
+        with these values.
+        Else, the proxy and ua 'valid' values are set to None, because something has failed in the request.
+        :param request:
+        :param response:
+        """
         try:
-            if PUADownloaderMiddleware.proxy == request.meta.get('proxy_source'):
+            if response and (response.status == 200):
+                PUADownloaderMiddleware.proxy = request.meta.get('proxy_source')
+                PUADownloaderMiddleware.ua = request.headers.get(b'User-Agent')
+            elif PUADownloaderMiddleware.proxy == request.meta.get('proxy_source'):
                 d = self._print_data(request, title='VALID PROXY HAS FAILED', exception=exception)
                 write_in_a_file('EXCEPTION', d, 'z_exception_with_a_valida_proxy.txt')
                 print('** Valid proxy has failed')
@@ -340,11 +346,10 @@ class ERDownloaderMiddleware(object):
             return self._make_the_request_again(request)
 
     def process_response(self, request, response, spider):
+        self._check_proxy_and_ua(request, response)
         if response.status == 200:
             d = self._print_data(request, 'VALID RESPONSE')
             write_in_a_file('VAlID RESPONSE', d, 'z_valid_request.txt')
-            PUADownloaderMiddleware.proxy = request.meta.get('proxy_source')
-            PUADownloaderMiddleware.ua = request.headers.get(b'User-Agent')
             return response
         else:
             print(f'!!!! response.status: {response.status}');
@@ -355,6 +360,5 @@ class ERDownloaderMiddleware(object):
             # https://www.lightspeedsystems.com/
             d = self._print_data(request, f'NOT A VALID RESPONSE: {response.status}')
             write_in_a_file('NOT A VAlID RESPONSE', d, 'z_not_a_valid_request.txt')
-            self._check_proxy_and_ua(request)
             return self._make_the_request_again(request)
 
