@@ -14,6 +14,10 @@ You have to change the line "query = query.decode(errors='replace')" from the la
 The reason is Python3 Str only has the encode method
 """
 import pymysql
-
 pymysql.version_info = (1, 3, 13, "final", 0)
 pymysql.install_as_MySQLdb()
+
+import django
+django.setup()
+from core.management.commands.initdb import initialize_database
+initialize_database()
