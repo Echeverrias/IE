@@ -312,6 +312,17 @@ class ERDownloaderMiddleware(object):
             print('retry: True')
         return request
 
+    def _check_proxy_and_ua(self, request):
+        try:
+            if PUADownloaderMiddleware.proxy == request.meta.get('proxy_source'):
+                d = self._print_data(request, title='VALID PROXY HAS FAILED', exception=exception)
+                write_in_a_file('EXCEPTION', d, 'z_exception_with_a_valida_proxy.txt')
+                print('** Valid proxy has failed')
+                PUADownloaderMiddleware.proxy = None
+                PUADownloaderMiddleware.ua = None
+        except:
+            pass
+
     def process_request(self, request, spider):
         if request.meta.get('ignore'):
             print(f'!!ERDownloaderMiddleware ignore {request.url}')
@@ -325,15 +336,7 @@ class ERDownloaderMiddleware(object):
         else:
             d = self._print_data(request, title='EXCEPTION WITH', exception=exception)
             write_in_a_file('EXCEPTION', d, 'z_exception.txt')
-            try:
-                if PUADownloaderMiddleware.proxy == request.meta.get('proxy_source'):
-                    d = self._print_data(request, title='VALID PROXY HAS FAILED', exception=exception)
-                    write_in_a_file('EXCEPTION', d, 'z_exception_with_a_valida_proxy.txt')
-                    print('** Valid proxy has failed')
-                    PUADownloaderMiddleware.proxy = None
-                    PUADownloaderMiddleware.ua = None
-            except:
-                pass
+            self._check_proxy_and_ua(request)
             return self._make_the_request_again(request)
 
     def process_response(self, request, response, spider):
@@ -352,5 +355,6 @@ class ERDownloaderMiddleware(object):
             # https://www.lightspeedsystems.com/
             d = self._print_data(request, f'NOT A VALID RESPONSE: {response.status}')
             write_in_a_file('NOT A VAlID RESPONSE', d, 'z_not_a_valid_request.txt')
+            self._check_proxy_and_ua(request)
             return self._make_the_request_again(request)
 
