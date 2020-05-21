@@ -48,7 +48,7 @@ class JobFilter(django_filters.FilterSet):
     def qs(self):
         parent_qs = super().qs
         available_offers = parent_qs.exclude(state=Job.STATE_CLOSED).exclude(expiration_date__lt=date.today())
-        # available_offers = parent_qs.available_offers()
+        available_offers = available_offers.order_by('-first_publication_date', 'last_update_date')
         return available_offers
 
     def search_text(self, queryset, field_name, *args, **kwargs):
