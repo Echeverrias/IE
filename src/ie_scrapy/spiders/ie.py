@@ -31,7 +31,7 @@ class InfoempleoSpider(Spider):
 
     name = 'ie'
     allowed_domains = ['infoempleo.com']
-    start_urls_ = ["https://www.infoempleo.com/trabajo/area-de-empresa_educacion-formacion/",]
+    start_urls_ = ["https://www.infoempleo.com/trabajo/area-de-empresa_legal/"]
     start_urls = [
         "https://www.infoempleo.com/trabajo/area-de-empresa_sanidad-salud-y-servicios-sociales/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_educacion-formacion/",
@@ -93,6 +93,7 @@ class InfoempleoSpider(Spider):
             total_results =  self._get_the_total_number_of_results(response)
         except Exception as e:
             total_results = 0
+
         for job_url in job_urls:
             print('# Go to job_url: %s', job_url) #%
             yield response.follow(job_url, self.parse_item, meta={

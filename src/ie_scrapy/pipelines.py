@@ -449,7 +449,7 @@ class CleaningPipeline():
             if not name:
                 name = _get_company_name_in_description(company_item.get('description')) if company_item.get('description') else ''
         elif company_item.get('name'):
-            name = self.clean_string(company_item.get('name'))
+            name = company_item.get('name')
             translate_map = {
                 'Ã¡': 'á',
                 'Ã ': 'à',
@@ -466,7 +466,7 @@ class CleaningPipeline():
             }
             for k, v in translate_map.items():
                 name = name.replace(k, v)
-        return name
+        return self.clean_string(name)
 
     def _clean_company_description(self, description):
         """
@@ -602,7 +602,6 @@ class CleaningPipeline():
         item['functions'] = self.clean_string(item['functions'])
         item['requirements'] = self.clean_string(item['requirements'])
         item['it_is_offered'] = self._clean_it_is_offered(item)
-
         item['state']= self._clean_state(item['state'])
         item['type'] = self._clean_job_type(item['type'])
         item['area'] = self._clean_area(item['area'])
@@ -682,7 +681,6 @@ class StoragePipeline(object):
         return languages
 
     def _get_city(self, city_name, province=None, country=None):
-        breakpoint()
         write_in_a_file('StorePipeline._get_city', {'city_name': city_name + '.', 'province':province, 'country': country}, 'pipeline.txt')
         if not city_name:
             return None
@@ -773,7 +771,7 @@ class StoragePipeline(object):
         for city_name in city_names:
             cities.append(self._get_city(city_name, province, country))
         # Deleting the null cities:
-        cities = list(filter(lambda c: c, cities ))
+        cities = list(filter(lambda c: c, cities))
         return cities, province, country
 
     def _get_company_upgrade(self, company, item):
@@ -813,13 +811,15 @@ class StoragePipeline(object):
             company = qs[0]
         return company
 
-    def _store_company(self, item):
+    def _set_city_and_country_from_location(self, item):
         city = self._get_city(item.get('_location'))
         country = city.country if city else self._get_country(item.get('_location'))
+        item['city'] = city
+        item['country'] = country
+
+    def _store_company(self, item):
+        self._set_city_and_country_from_location(item)
         company_dict = self._get_item_without_temporal_fields(item)
-        #% # company_dict.setdefault('created_at', timezone.localtime(timezone.now())) #%
-        company_dict.setdefault('city', city)
-        company_dict.setdefault('country', country)
         company = None
         # Can be companies with different name and same link
         # A company can have different links but always the same reference

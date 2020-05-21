@@ -22,19 +22,18 @@ class BaseItem(DjangoItem):
     def get_model_name(self):
         return self.django_model.__name__
 
-
 class CompanyItem(BaseItem):
 
     django_model = Company
-    _location = Field()
+    _location = Field() # optional
 
 
 
-# Doesn't support ManyToManyFields
+# Items don't support ManyToMany Fields
 class JobItem(BaseItem):
 
     django_model = Job
-    _languages = Field()
+    _languages = Field() # ManyToMany field of the model
     """
     _summary = Field()
     _cities = Field()
