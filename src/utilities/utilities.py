@@ -339,7 +339,7 @@ def raise_function_exception(description, exception=Exception):
 
 
 @Lock()
-def save_error(e, dictionary={}, path='errors.txt'):
+def save_error(e, dictionary={}, path='_errors.txt'):
     """
     Write in a file the error raised in a function, the function which raises the error
     and an optional dictionary
@@ -349,6 +349,7 @@ def save_error(e, dictionary={}, path='errors.txt'):
     :param path: path to the file where the error will be stored
     :return:
     """
+    path = "_" + path if not path.startswith('_') else path
     tb = sys.exc_info()[-1]
     stk = traceback.extract_tb(tb, 1)
     fname = stk[0][2]
@@ -361,7 +362,7 @@ def save_error(e, dictionary={}, path='errors.txt'):
         f.write(f'\n\n\n')
 
 @Lock()
-def write_in_a_file(desc, dictionary={}, path='log.txt'):
+def write_in_a_file(desc, dictionary={}, path='_log.txt'):
     """
     Write in a file something.
     The caller function and the datetime are wtritten too in the file
@@ -370,6 +371,7 @@ def write_in_a_file(desc, dictionary={}, path='log.txt'):
     :param path: path to the file where the error will be stored
     :return:
     """
+    path = "_" + path if not path.startswith('_') else path
     try:
         process_name = multiprocessing.current_process().name
         process_pid = multiprocessing.current_process().pid
