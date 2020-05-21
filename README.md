@@ -1,6 +1,6 @@
 # Web Scrapping App
 
-This is an app to do web scrapping on the site web 'IE', to get the data of the job offers and store it in a data base.<br><br><br>
+This is an app to do web scrapping on the website 'IE', to get the data of the job offers and store it in a data base.<br><br><br>
 
 You can register in it:<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/signup.png" width="500"></div>
@@ -30,7 +30,7 @@ You need to install:
 - [VirtualEnv](https://virtualenv.pypa.io/en/latest/index.html)
 - [MySQL](http://maven.apache.org/install.html)
 
-You'll need to create an empty database.
+You need to create an empty database.
 
 ### Running the project
 1. Download the [IE](xxx) project. You can download it as a zip or clone it.
@@ -52,7 +52,7 @@ You'll need to create an empty database.
  You also can run a specific test with <b>python manage.py test <<i>app_name</i>.tests><.<i>test_name</i>></b>
  
 ## Development
-The app is developed in [Python](https://www.python.org) and uses the frameworks [Scrapy](https://scrapy.org/) for do the web scrapping of the site web and [Django](https://www.djangoproject.com/) for build the web app.<br><br>
+The app is developed in [Python](https://www.python.org) and uses the frameworks [Scrapy](https://scrapy.org/) for do the web scrapping of the website and [Django](https://www.djangoproject.com/) for build the web app.<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/sytem_arquitecture.png" width="450"></div>
 <br><p align="center"><i>Figure 8</i></p><br><br>
 
