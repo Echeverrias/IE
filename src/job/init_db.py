@@ -129,9 +129,6 @@ def initialize_database():
     """
 
     def initialization():
-        pass #%
-
-    def initialization_():
         print('Initializing database...')
         logging.info('Initializing database...')
         try:
