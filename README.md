@@ -26,9 +26,11 @@ You can make searches ,using filters, of the available offer jobs:<br><br>
 ### Prerequisites
 You need to install:
 
-- [Python](https://www.python.org/downloads/):
+- [Python](https://www.python.org/downloads/)
 - [VirtualEnv](https://virtualenv.pypa.io/en/latest/index.html)
-- [MySQL](http://maven.apache.org/install.html): You'll need to create an empty database.
+- [MySQL](http://maven.apache.org/install.html)
+
+You'll need to create an empty database.
 
 ### Run the project
 1. Download the [IE](xxx) project. You can download it as a zip or clone it.
