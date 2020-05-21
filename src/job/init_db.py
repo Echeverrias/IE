@@ -27,7 +27,7 @@ def _get_df(path):
         df.drop([BLANK_COLUMN], axis=1, inplace=True)
     except:
         pass
-        df.dropna(how='all', axis=1, inplace=True)
+    df.dropna(how='all', axis=1, inplace=True)
     return df
 
 def _get_model_df(smodel):
