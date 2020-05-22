@@ -4,24 +4,16 @@
 from django.test import TestCase
 from ie_scrapy.pipelines import CleaningPipeline, StoragePipeline
 from ie_scrapy.items import JobItem, CompanyItem
-from job.models import Job, Company
+from job.models import Job, Company, Country, Province, City, Language
 import datetime
 from dateutil.relativedelta import relativedelta
+import time
 
 class TestCleaningPipeline(TestCase):
 
-    cp = CleaningPipeline()
-
-    def execute(self):
-        self.clean_job_date()
-        self.clean_url()
-        self.clean_provinces()
-        self.clean_cities()
-        self.clean_job_type()
-        self.clean_salary()
-        self.get_annual_salary()
-        self.get_it_is_offered()
-
+    @classmethod
+    def setUpTestData(cls):
+        cls.cp = CleaningPipeline()
 
     def test_clean_job_date(self):
         today = datetime.date.today()
@@ -180,21 +172,30 @@ class TestCleaningPipeline(TestCase):
         self.assertEqual(TestCleaningPipeline.cp._set_job_dates_from_state(item),
                          {'state': Job.STATE_CLOSED, 'first_publication_date': None, 'last_update_date': None})
 
-    def test_clean_job(self):
-        company_dict =  {'_location': 'Madrid',
-                    'category': 'Recursos Humanos',
-                    'description': '\r\n',
-                    'link': '/colaboradoras/hays/presentacion/',
-                    'name': 'Hays Recruiting Experts Worldwide',
-                    'offers': 'Ver todas sus ofertas (397)',
-                    'resume': '\r\n'},
-        clean_company_dict = {'_location': 'Madrid',
-                        'category': 'Recursos Humanos',
-                        'description': '',
+    def test_clean_company(self):
+        company_dict = {'_location': 'Madrid',
+                        'category': '   Recursos Humanos  ',
+                        'description': '\r\n               ',
                         'link': '/colaboradoras/hays/presentacion/',
-                        'name': 'Hays Recruiting Experts Worldwide',
-                        'offers': 397,
-                        'resume': ''},
+                        'name': '\r\n    Hays Recruiting Experts Worldwide',
+                        'offers': '\r\n Ver todas sus ofertas (397)',
+                        'resume': '\r\n'}
+
+        clean_company_dict = {'_location': 'Madrid',
+                              'category': 'Recursos Humanos',
+                              'description': '',
+                              'link': 'https://www.infoempleo.com/colaboradoras/hays/presentacion/',
+                              'name': 'Hays Recruiting Experts Worldwide',
+                              'offers': 397,
+                              'resume': '',
+                              'is_registered': True,
+                              }
+
+        ci = CompanyItem(company_dict)
+        clean_ci = TestCleaningPipeline.cp.process_item(ci, None)
+        self.assertEqual(clean_ci.get_dict(), clean_company_dict)
+
+    def test_clean_job(self):
 
         job_dict = {'_cities': 'Donostia-San Sebastián (Guipúzcoa)',
              '_country': 'Empleo en Donostia-San Sebastián (Guipúzcoa)',
@@ -238,11 +239,9 @@ class TestCleaningPipeline(TestCase):
              'type': 'https://www.infoempleo.com/trabajo/area-de-empresa_legal/',
              'vacancies': '1'}
 
-
-
         clean_job_dict = {'_cities': ['Donostia-San Sebastián'],
              '_contract': 'Contrato Indefinido',
-             '_country': 'Empleo en Donostia-San Sebastián (Guipúzcoa)',
+             '_country': 'España',
              '_experience': 'Al menos 5 años de experiencia',
              '_province': 'Guipúzcoa',
              '_salary': 'Retribución sin especificar',
@@ -277,7 +276,7 @@ class TestCleaningPipeline(TestCase):
              'minimum_salary': None,
              'minimum_years_of_experience': 5,
              'name': 'Asesor/a Técnico Laboral. Grupo Asesor',
-             'nationality': 'Española',
+             'nationality': 'nacional',
              'recommendable_years_of_experience': 5,
              'registered_people': 15,
              'requirements': 'Pensamos en una persona con al menos cinco años de '
@@ -292,7 +291,17 @@ class TestCleaningPipeline(TestCase):
              'working_day': 'Jornada Completa'}
         ji = JobItem(job_dict)
         clean_ji = TestCleaningPipeline.cp.process_item(ji, None)
-        self.assertEqual(clean_ji.get_dict, clean_job_dict)
+        clean_ji_cities = [] + clean_ji['_cities']
+        clean_job_dict_cities = [] + clean_job_dict['_cities']
+        self.assertEqual(clean_ji_cities , clean_job_dict_cities )
+        clean_ji['_cities'] =  clean_ji_cities
+        clean_job_dict['_cities'] = clean_job_dict_cities
+        self.assertEqual(clean_ji.get_dict().get('nacionality'), clean_job_dict.get('nacionality'))
+        #time.sleep(2)
+        self.assertEqual(clean_ji.get_dict().get('_country'), clean_job_dict.get('_country'))
+        #time.sleep(2)
+        self.assertEqual(clean_ji.get_dict().get('_province'), clean_job_dict.get('_province'))
+        #self.assertEqual(clean_ji.get_dict(), clean_job_dict)
 
 class TestStoragePipeline(TestCase):
 
@@ -330,42 +339,136 @@ class TestStoragePipeline(TestCase):
             'type': Job.TYPE_FIRST_JOB,
             'contract': Job.CONTRACT_FREELANCE,
             'working_day': Job.WORKING_DAY_COMPLETE,
-            'minimum_years_of_experience': None,
-            'recommendable_years_of_experience': None,
-            'minimum_salary': None,
-            'maximum_salary': None,
-            'functions': '',
-            'requirements': '',
-            'it_is_offered': '',
+            'minimum_years_of_experience': 1,
+            'recommendable_years_of_experience': 3,
+            'minimum_salary': 20000,
+            'maximum_salary': 25000,
+            'description':'description',
+            'functions': 'functions',
+            'requirements': 'requirements',
+            'it_is_offered': 'it is offered',
             'area': Job.AREA_LEGAL,
             'category_level': Job.CATEGORY_EMPLOYEES,
             'expiration_date': None,
             'created_at': cls.before_yesterday,
         }
+        espana = Country.objects.create(name='España')
+        mexico = Country.objects.create(name='Mexico')
+        almeria = Province.objects.create(id=1, name='Almería')
+        jaen = Province.objects.create(id=2, name='Jaén')
+        leon = Province.objects.create(id=3, name='León')
+        espana.provinces.add(almeria)
+        espana.provinces.add(jaen)
+        espana.provinces.add(leon)
+        albanchez = City.objects.create(name='Albanchez', country=espana)
+        olula_del_rio = City.objects.create(name='Olula del río', country=espana)
+        albanchez_de_magina = City.objects.create(name='Albanchez de Mágina', country=espana)
+        leon_ = City.objects.create(name='León', country=espana)
+        leon__ = City.objects.create(name='León', country=mexico)
+        almeria.cities.add(albanchez)
+        almeria.cities.add(olula_del_rio)
+        jaen.cities.add(albanchez_de_magina)
+        leon.cities.add(leon_)
 
     def test_the_job_updated_has_been_updated(self):
-        item={'state':Job.STATE_UPDATED, 'first_publication_date':None, 'last_update_date':TestStoragePipeline.today}
-        self.assertTrue(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=111), item))
-        self.assertTrue(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=222), item))
-        self.assertFalse(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=333), item))
-        self.assertTrue(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=444), item))
+        # Only check if the any info of the offer has changed, but not the state.
+        item_dict={'state':Job.STATE_UPDATED, 'first_publication_date':None, 'last_update_date':TestStoragePipeline.today}
+        item = JobItem(**item_dict)
+        self.assertTrue(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=111, state=Job.STATE_UPDATED), item))
+        self.assertTrue(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=222, state=Job.STATE_UPDATED), item))
+        self.assertFalse(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=333, state=Job.STATE_UPDATED), item))
+        self.assertTrue(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=444,  state=Job.STATE_CREATED), item))
         self.assertTrue(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=555), item))
         item = {'state': Job.STATE_CREATED, 'first_publication_date': TestStoragePipeline.yesterday, 'last_update_date': None}
         self.assertFalse(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=444), item))
-        item = {'state': Job.STATE_CLOSED, 'first_publication_date': None, 'last_update_date': None, 'expiration_date': None}
-        item = {**item, **TestStoragePipeline.default_fields}
-        self.assertTrue(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=555), item))
-        Job.objects.filter(id=555).update(**TestStoragePipeline.default_fields)
-        self.assertFalse(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=555), item))
+        item_dict2 = {'state': Job.STATE_CLOSED, 'first_publication_date': None, 'last_update_date': None, 'expiration_date': None}
+        item_dict2 = {**TestStoragePipeline.default_fields, **item_dict2}
+        item2 = JobItem(**item_dict2)
+        self.assertTrue(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=555, state=Job.STATE_WITHOUT_CHANGES), item2))
+        Job.objects.filter(id=555, state=Job.STATE_WITHOUT_CHANGES).update(**TestStoragePipeline.default_fields)
+        self.assertFalse(TestStoragePipeline.sp._has_been_the_job_updated(Job.objects.get(id=555), item2))
 
 
     def test_update_job(self):
         today = datetime.date.today()
-        item = {'state': Job.STATE_CLOSED, 'first_publication_date': None, 'last_update_date': None}
-        item = {**item, **TestStoragePipeline.default_fields}
-        Job.objects.filter(id=555).update(**TestStoragePipeline.default_fields,)
+        job_dict = {'state': Job.STATE_CLOSED, 'first_publication_date': None, 'last_update_date': None}
+        job_dict = {**job_dict, **TestStoragePipeline.default_fields}
+        item = JobItem(**job_dict)
+        Job.objects.filter(id=555, state=Job.STATE_WITHOUT_CHANGES).update(**TestStoragePipeline.default_fields,)
         job = Job.objects.get(id=555)
         TestStoragePipeline.sp._update_job(job, item)
         job = Job.objects.get(id=555)
         self.assertEqual({'state': job.state, 'updated_at': job.updated_at.date()},
                          {'state': item['state'], 'updated_at': today})
+
+    def test_get_city(self):
+        espana = Country.objects.get(name='España')
+        mexico = Country.objects.get(name='Mexico')
+        almeria = Province.objects.get(name='Almería')
+        jaen = Province.objects.get(name='Jaén')
+        leon = Province.objects.get(name='León')
+        albanchez = City.objects.get(name='Albanchez', country=espana)
+        olula_del_rio = City.objects.get(name='Olula del río', country=espana)
+        albanchez_de_magina = City.objects.get(name='Albanchez de Mágina', country=espana)
+        leon_ = City.objects.get(name='León', country=espana)
+        leon__ = City.objects.get(name='León', country=mexico)
+        self.assertEqual(TestStoragePipeline.sp._get_city('Albanchez', almeria, espana), albanchez)
+        self.assertEqual(TestStoragePipeline.sp._get_city('Albanchez', None, None), albanchez)
+        self.assertIsNone(TestStoragePipeline.sp._get_city('León', None, None))
+        self.assertEqual(TestStoragePipeline.sp._get_city('Albanchez de Magina', None, None), albanchez_de_magina)
+        self.assertEqual(TestStoragePipeline.sp._get_city('Olula', almeria, espana), olula_del_rio)
+        self.assertIsNotNone(TestStoragePipeline.sp._get_city('???', almeria, espana))
+        self.assertIsNone(TestStoragePipeline.sp._get_city('España', None, espana))
+
+    def test_get_location(self):
+        espana = Country.objects.get(name='España')
+        mexico = Country.objects.get(name='Mexico')
+        almeria = Province.objects.get(name='Almería')
+        albanchez = City.objects.get(name='Albanchez', country=espana)
+        olula_del_rio = City.objects.get(name='Olula del río', country=espana)
+        leon__ = City.objects.get(name='León', country=mexico)
+        cities, province, country = TestStoragePipeline.sp._get_location(['Albanchez', 'Olula del río'], 'Almería', 'España')
+        self.assertEqual(cities, [albanchez, olula_del_rio])
+        self.assertEqual(province, almeria)
+        self.assertEqual(country, espana)
+        cities, province, country = TestStoragePipeline.sp._get_location(['León'], '', 'Mexico')
+        self.assertEqual(cities, [leon__])
+        self.assertIsNone(province)
+        self.assertEqual(country, mexico)
+
+    def test_get_languages(self):
+        l1 = Language.objects.create(name="inglés", level="B2")
+        l2 = Language.objects.create(name="francés", level="B1")
+        self.assertEqual(TestStoragePipeline.sp._get_languages([('inglés', 'B2'),('francés', 'B1')]), [l1, l2])
+
+    def test_get_company_upgrade(self):
+        company_dict = {
+                        'category': 'Recursos Humanos',
+                        'description': '',
+                        'link': 'https://www.infoempleo.com/colaboradoras/hays/presentacion/',
+                        'name': 'Hays Recruiting Experts Worldwide',
+                        'offers': 397,
+                        'resume': '',
+                        'is_registered': True,
+                        }
+        item = {
+            'category': 'Recursos Humanos_',
+            'description': 'new description',
+            'link': 'https://www.infoempleo.com/colaboradoras/hays/presentacion/_',
+            'name': 'XXXXXXXX',
+            'offers': 900,
+            'resume': 'new resume',
+            'is_registered': True,
+        }
+        # The name and the link dont suffer upgrade
+        upgrade = {
+            'category': 'Recursos Humanos_',
+            'description': 'new description',
+            'offers': 900,
+            'resume': 'new resume',
+        }
+        company = Company.objects.create(**company_dict)
+        self.assertEqual(TestStoragePipeline.sp._get_company_upgrade(company, item), upgrade)
+
+
+

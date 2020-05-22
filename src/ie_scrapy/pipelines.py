@@ -868,7 +868,7 @@ class StoragePipeline(object):
 
     def _has_been_the_job_updated(self, job, item):
         """
-        # Checks for any change in the offer
+        # Checks for any change in info of the offer, but not the state.
         :param job: Job
         :param item: JobItem
         :return: Boolean
@@ -888,6 +888,7 @@ class StoragePipeline(object):
                 job.recommendable_years_of_experience != item['recommendable_years_of_experience'] or
                 job.minimum_salary != item['minimum_salary'] or
                 job.maximum_salary != item['maximum_salary'] or
+                job.description != item['description'] or
                 job.functions != item['functions'] or
                 job.requirements != item['requirements'] or
                 job.it_is_offered != item['it_is_offered'] or
