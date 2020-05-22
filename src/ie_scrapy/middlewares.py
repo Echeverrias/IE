@@ -16,7 +16,7 @@ from time import time as now
 from dateutil.relativedelta import relativedelta
 from .keys import START_URL, TOTAL_RESULTS
 from utilities.utilities import write_in_a_file
-from job.models import Job
+from job.models import Job, Company
 from utilities.utilities import write_in_a_file
 
 
@@ -223,18 +223,19 @@ class CheckDownloaderMiddleware(object):
 
    def process_request(self, request, spider):
         url = request.url
-        if 'ofertasdetrabajo'in url:
-            ref = int(os.path.basename(os.path.dirname(url)))
+        if ('ofertasdetrabajo' in url) or ('ofertasempresa' in url):
+            #ref = int(os.path.basename(os.path.dirname(url)))
+            model = Job if 'ofertasdetrabajo' in url else Company
             try:
-                job = Job.objects.get(id=ref)
+                instance = model.objects.get(link=url)
             except:
                 return None
             print('**CheckDownloaderMiddleware')
-            print(job.checked_at.date())
+            print(instance.checked_at.date())
             print(timezone.localtime(timezone.now()).date())
-            print(job.checked_at.date() == timezone.localtime(timezone.now()).date())
-            if (job.checked_at.date() == timezone.localtime(timezone.now()).date() or
-                job.checked_at.date() == timezone.localtime(timezone.now()).date() - relativedelta(days=1)
+            print(instance.checked_at.date() == timezone.localtime(timezone.now()).date())
+            if (instance.checked_at.date() == timezone.localtime(timezone.now()).date() or
+                instance.checked_at.date() == timezone.localtime(timezone.now()).date() - relativedelta(days=1)
             ):
                 print(f'* {url} checked today')
                 print('')
@@ -269,6 +270,8 @@ class PUADownloaderMiddleware(object):
 
 class ERDownloaderMiddleware(object):
 
+    max_retry = 100
+
     def _print_data(self, request, title="INFO", exception=None):
         print(f'&&&&&&&&&&&&&  {title} &&&&&&&&&&&&&&&&&')
         print('meta:')
@@ -296,7 +299,7 @@ class ERDownloaderMiddleware(object):
         }
 
     def _make_the_request_again(self, request):
-        n = 100
+        n = ERDownloaderMiddleware.max_retry
         if request.meta.get('retry', 0) < n:
             retry = request.meta['retry'] + 1 if request.meta.get('retry') else 1
             meta = {**request.meta, 'retry': retry}
@@ -321,7 +324,7 @@ class ERDownloaderMiddleware(object):
                 PUADownloaderMiddleware.proxy = request.meta.get('proxy_source')
                 PUADownloaderMiddleware.ua = request.headers.get(b'User-Agent')
             elif PUADownloaderMiddleware.proxy == request.meta.get('proxy_source'):
-                d = self._print_data(request, title='VALID PROXY HAS FAILED', exception=exception)
+                d = self._print_data(request, title='VALID PROXY HAS FAILED', exception=None)
                 write_in_a_file('EXCEPTION', d, 'z_exception_with_a_valida_proxy.txt')
                 print('** Valid proxy has failed')
                 PUADownloaderMiddleware.proxy = None
@@ -360,5 +363,6 @@ class ERDownloaderMiddleware(object):
             # https://www.lightspeedsystems.com/
             d = self._print_data(request, f'NOT A VALID RESPONSE: {response.status}')
             write_in_a_file('NOT A VAlID RESPONSE', d, 'z_not_a_valid_request.txt')
-            return self._make_the_request_again(request)
+            result = self._make_the_request_again(request)
+            return result
 
