@@ -1,11 +1,6 @@
 from django.test import TestCase
-import datetime
-from django.utils import timezone
-from dateutil.relativedelta import relativedelta
 from django.urls import reverse
 from django.contrib.auth.models import User
-
-
 
 class TestAccountViews(TestCase):
 
@@ -25,8 +20,6 @@ class TestAccountViews(TestCase):
                                       password=cls.password,
                                       email=cls.email1)
       cls.user.save()
-
-
 
    def test_login_get_view(self):
       resp = self.client.get(reverse('login'))
@@ -51,30 +44,30 @@ class TestAccountViews(TestCase):
       self.assertEqual(resp.status_code, 200)
       self.assertTemplateUsed(resp, 'account/login.html')
 
-   def test_signup_get_view(self):
-      resp = self.client.get(reverse('signup'))
+   def test_register_get_view(self):
+      resp = self.client.get(reverse('register'))
       self.assertEqual(resp.status_code, 200)
-      self.assertTemplateUsed(resp, 'account/signup.html')
+      self.assertTemplateUsed(resp, 'account/register.html')
 
-   def test_signup_post_wrong(self):
+   def test_register_post_wrong(self):
       form_data = {
          'username': self.username,
          'password1': '1qw23er4',
          'password2': '1qw23er4',
          'email': self.email1,
       }
-      resp = self.client.post(reverse('signup'), data=form_data, follow=True)
+      resp = self.client.post(reverse('register'), data=form_data, follow=True)
       self.assertEqual(resp.status_code, 200)
-      self.assertTemplateUsed(resp, 'account/signup.html')
+      self.assertTemplateUsed(resp, 'account/register.html')
 
-   def test_signup_post_right(self):
+   def test_register_post_right(self):
       form_data = {
          'username': 'new_user',
          'password1': 'ABRAcadabra555',
          'password2': 'ABRAcadabra555',
          'email': 'new_email@test.com',
       }
-      resp = self.client.post(reverse('signup'), data=form_data, follow=True)
+      resp = self.client.post(reverse('register'), data=form_data, follow=True)
       self.assertEqual(resp.status_code, 200)
       self.assertRedirects(resp, '/home/', status_code=302, target_status_code=200)
       self.assertTemplateUsed(resp, 'index.html')
@@ -85,7 +78,7 @@ class TestAccountViews(TestCase):
       self.assertRedirects(resp, '/account/login/', status_code=302, target_status_code=200)
       self.assertTemplateUsed(resp, 'account/login.html')
 
-   def test_logut_user_view(self):
+   def test_logout_user_view(self):
       data = {'username': self.username, 'password': self.password}
       self.client.post(reverse('login'), data=data)
       resp = self.client.get(reverse('logout'), follow=True)

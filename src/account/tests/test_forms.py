@@ -1,12 +1,8 @@
 from django.test import TestCase
-from account.forms import SignUpForm
-from datetime import datetime
-from django.utils import timezone
-from dateutil.relativedelta import relativedelta
+from account.forms import RegisterForm
 from django.contrib.auth.models import User
 
-
-class TestSignUpForm(TestCase):
+class TestRegisterForm(TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -17,19 +13,19 @@ class TestSignUpForm(TestCase):
                      'username': 'new_user',
                      'password1': '1qw23er4',
                      'password2': '1qw23er4',
-                     'email': TestSignUpForm.user.email
+                     'email': self.user.email
         }
-        form = SignUpForm(form_data)
+        form = RegisterForm(form_data)
         self.assertFalse(form.is_valid())
 
     def test_register_an_existing_username(self):
         form_data = {
-            'username': TestSignUpForm.user.username,
+            'username': self.user.username,
             'password1': '1qw23er4',
             'password2': '1qw23er4',
             'email': 'new_email@test.com'
         }
-        form = SignUpForm(form_data)
+        form = RegisterForm(form_data)
         self.assertFalse(form.is_valid())
 
     def test_register_an_invalid_email(self):
@@ -39,7 +35,7 @@ class TestSignUpForm(TestCase):
             'password2': '1qw23er4',
             'email': 'new_email.test.com'
         }
-        form = SignUpForm(form_data)
+        form = RegisterForm(form_data)
         self.assertFalse(form.is_valid())
 
     def test_register_an_invalid_password(self):
@@ -49,9 +45,8 @@ class TestSignUpForm(TestCase):
             'password2': 'qwe',
             'email': 'new_email@test.com'
         }
-        form = SignUpForm(form_data)
+        form = RegisterForm(form_data)
         self.assertFalse(form.is_valid())
-    
 
     def test_register_a_valid_new_user(self):
         form_data = {
@@ -60,7 +55,7 @@ class TestSignUpForm(TestCase):
             'password2': 'ABRAcadabra555',
             'email': 'new_email@test.com'
         }
-        form = SignUpForm(form_data)
+        form = RegisterForm(form_data)
         self.assertTrue(form.is_valid())
 
 

@@ -1,13 +1,13 @@
 {% extends 'account/base.html' %}
 {% block title %}Registro{% endblock %}
 {% block app %}
-<div class="signup view">
+<div class="register view">
   <div class="row justify-content-center">
       <div class="col-lg-6 col-md-8 col-sm-10">
         <div class="card">
             <div class="card-body">
                 <h2 class="card-title text-center">Registro</h2>
-                <form method="POST" action="/account/signup/" novalidate>
+                <form method="POST" action="/account/register/" novalidate>
                     {% csrf_token %}
                     {% include 'form.html' %}
                     <button type="submit" class="btn btn-primary">Registrarse</button>
