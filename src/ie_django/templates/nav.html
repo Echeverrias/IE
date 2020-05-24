@@ -23,20 +23,13 @@
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
         <div class="dropdown-menu" aria-labelledby="dropdown01">
-          <a class="dropdown-item" href='/admin/job/job/'>Ir a las ofertas</a>
+          <a class="dropdown-item" href='/admin/job/job/'>Ir a las ofertas de empleo</a>
           <a class="dropdown-item" href='/admin/job/company/'>Ir a las compañías</a>
-          <a class="dropdown-item" href='/admin/job/city/'>Ir a las ciudades</a>
         </div>
       </li>
       {% endif %}
     </ul>
 
-    <!--
-    <form class="form-inline my-2 my-lg-0">
-      <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-      <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
-    </form>
-    -->
     <div class="debug">
 
     </div>
@@ -44,19 +37,8 @@
       {% if request.user.is_authenticated %}
         <p class="center">Hola {{ request.user.username }}  | <a href="{% url 'logout' %}">Logout</a></p>
       {% else %}
-      <p class="center"><a href="{% url 'signup' %}">Registro</a>  | <a href="{% url 'login' %}">Login</a></p>
+      <p class="center"><a href="{% url 'register' %}">Registro</a>  | <a href="{% url 'login' %}">Login</a></p>
       {% endif %}
     </div>
   </div>
 </nav>
-<!--
-    <a href ='/admin/'>Go to Admin</a><br>
-    <a href ='/crawl/'>Run crawler</a><br>
-    <a href ='/admin/job/job/'>Go to Job</a><br>
-    <a href ='/admin/job/company/'>Go to Company</a><br>
-    <a href ='/reset'>Delete all the companies and job</a><br>
-    <a href ='/insert_locations'>Insert Locations</a><br>
-    <a href ='/job/query'>Show query</a><br>
-    <a href ='/job/do'>Execute query</a><br>
-    <a href ='/chart'>Show chart</a><br>
--->
