@@ -31,6 +31,7 @@ class Task(models.Model):
         blank=True, verbose_name='estado',
     )
     type = models.CharField(
+        null=True,
         max_length=23,
         choices=TYPE_CHOICES,
         default='', verbose_name='tipo',
@@ -56,7 +57,8 @@ class Task(models.Model):
     def save(self, *args, **kwargs):
         if not self.id:
             self.created_at = timezone.localtime(timezone.now())
-        self.updated_at = timezone.localtime(timezone.now())
+        else:
+            self.updated_at = timezone.localtime(timezone.now())
         return super(Task, self).save(*args, **kwargs)
 
     @property
