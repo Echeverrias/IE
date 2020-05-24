@@ -1,10 +1,9 @@
+from django.core.management.base import BaseCommand, CommandError
 import pandas as pd
 import math
 import os
 import threading
-import logging
-from django.core.management.base import BaseCommand, CommandError
-from job.models import City, Province, Community, Country, Language, Job
+from job.models import City, Province, Community, Country, Language
 
 class InitializingDataInTablesException(Exception):
     pass
@@ -125,7 +124,6 @@ def insert_languages():
                 print(f"name={l}, level={l_}")
                 print(e)
     print('The language table has been initializing')
-
 
 def is_language_table_empty():
     try:

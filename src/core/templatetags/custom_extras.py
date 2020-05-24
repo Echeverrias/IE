@@ -28,7 +28,6 @@ def get_attributes(dict_list, key):
 def join(list_, character):
     return character.join(list_)
 
-
 @register.filter(name='percentage')
 def percentage(value):
     return format(value, ".2%")

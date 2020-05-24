@@ -2,7 +2,6 @@ from django import template
 
 register = template.Library()
 
-
 @register.filter(name='field_type')
 def field_type(bound_field):
     return bound_field.field.widget.__class__.__name__
