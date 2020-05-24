@@ -6,8 +6,6 @@ from django.http import HttpResponse
 import time
 from .models import Job
 from .filters import JobFilter
-from .init_db import initialize_database
-
 
 @method_decorator(login_required, name='dispatch')
 class JobListView(ListView):
