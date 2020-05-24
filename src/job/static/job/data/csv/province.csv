@@ -1,0 +1,51 @@
+capital_id,community_id,community_number,country_id,id,name,slug
+2150,,,6,15,A Coruña,a-coruna
+46,,,6,1,Álava,alava
+54,,,6,2,Albacete,albacete
+152,,,6,3,Alicante,alicante
+292,,,6,4,Almería,almeria
+5009,,,6,33,Asturias,asturias
+395,,,6,5,Ávila,avila
+644,,,6,6,Badajoz,badajoz
+881,,,6,8,Barcelona,barcelona
+1220,,,6,9,Burgos,burgos
+1580,,,6,10,Cáceres,caceres
+1776,,,6,11,Cádiz,cadiz
+5823,,,6,39,Cantabria,cantabria
+1844,,,6,12,Castellón,castellon
+1978,,,6,13,Ciudad Real,ciudad-real
+2065,,,6,14,Córdoba,cordoba
+2285,,,6,16,Cuenca,cuenca
+2526,,,6,17,Girona,girona
+2747,,,6,18,Granada,granada
+2947,,,6,19,Guadalajara,guadalajara
+3159,,,6,20,Guipúzcoa,guipuzcoa
+3257,,,6,21,Huelva,huelva
+3396,,,6,22,Huesca,huesca
+836,,,6,7,Islas Baleares,illes-balears
+3545,,,6,23,Jaén,jaen
+4124,,,6,26,La Rioja,la-rioja
+5252,,,6,35,Las Palmas,las-palmas
+3676,,,6,24,León,leon
+3918,,,6,25,Lleida,lleida
+4238,,,6,27,Lugo,lugo
+4356,,,6,28,Madrid,madrid
+4523,,,6,29,Málaga,malaga
+4588,,,6,30,Murcia,murcia
+4815,,,6,31,Navarra,navarra
+4925,,,6,32,Ourense,ourense
+5137,,,6,34,Palencia,palencia
+5312,,,6,36,Pontevedra,pontevedra
+5588,,,6,37,Salamanca,salamanca
+5732,,,6,38,Santa Cruz de Tenerife,santa-cruz-de-tenerife
+6024,,,6,40,Segovia,segovia
+6152,,,6,41,Sevilla,sevilla
+6307,,,6,42,Soria,soria
+6499,,,6,43,Tarragona,tarragona
+6721,,,6,44,Teruel,teruel
+6934,,,6,45,Toledo,toledo
+7219,,,6,46,Valencia,valencia
+7415,,,6,47,Valladolid,valladolid
+7489,,,6,48,Vizcaya,vizcaya
+7821,,,6,49,Zamora,zamora
+8113,,,6,50,Zaragoza,zaragoza

@@ -121,8 +121,6 @@ class City (models.Model):
             pass
         super(City, self).save(*args, **kwargs)
 
-    def default_slug(self):
-        return slugify(self.name)
 
     def __str__(self):
         if self.province:
@@ -176,12 +174,8 @@ class Company(models.Model):
         try:
             if self.name:
                 self.slug = slugify(self.name)
-            elif self.link:
-                if self.link.endswith('/'):
-                    slug = self.link.split('/')[-3]
-                else:
-                    slug = self.link.split('/')[-2]
-                self.slug = slug
+            else:
+                self.slug = self._get_slug_from_link()
         except:
             pass
         super(Company, self).save(*args, **kwargs)
@@ -192,10 +186,10 @@ class Company(models.Model):
     def __str__(self):
         return self.name or ''
 
-    def get_slug_from_link(self):
+    def _get_slug_from_link(self):
         link = self.link
-        link = link[:-1] if self.link.endswith('/') else link
         try:
+            link = link[:-1] if self.link.endswith('/') else link
             slug = link.split('/')[-2]
         except Exception as e:
             slug = ''
@@ -496,10 +490,10 @@ class Job(models.Model):
     display_cities.short_description = 'Cities (Country)'
 
 
-    @classmethod
-    def add_city(cls, job, city):
+    @staticmethod
+    def add_city(job, city):
         try:
-            job_ = cls.objects.get(id=job.id)
+            job_ = Job.objects.get(id=job.id)
             job_.cities.add(city)
         except Exception as e:
             print(f'Error in Job.add_city: {e}')

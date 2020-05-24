@@ -30,15 +30,9 @@ class JobListViewTest(TestCase):
       self.assertEqual(resp.status_code, 302)
       self.assertRedirects(resp, '/account/login/?next=' + reverse('job_list'))
 
-   def test_view_url_exists_at_desired_location(self):
+   def test_job_list(self):
       self.client.login(username='root', password='1qw23er45t')
       #resp = self.client.get(reverse('job_list'))
-      resp = self.client.get('/job/list/')
-      self.assertEqual(resp.status_code, 200)
-
-   def test_view_uses_correct_template(self):
-      self.client.login(username=JobListViewTest.admin_username, password=JobListViewTest.password)
-     # resp = self.client.get(reverse('job_list'))
       resp = self.client.get('/job/list/')
       self.assertEqual(resp.status_code, 200)
       self.assertTemplateUsed(resp, 'job/query_form.html')
@@ -63,5 +57,6 @@ class JobListViewTest(TestCase):
       self.client.login(username=JobListViewTest.admin_username, password=JobListViewTest.password)
       resp = self.client.get('/job/detail/1/')
       self.assertEqual(resp.status_code, 200)
+      self.assertTemplateUsed(resp, 'job/job_detail.html')
       job = Job.objects.get(id=1)
       self.assertEqual(resp.context['job'], job)

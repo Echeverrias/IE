@@ -9,17 +9,6 @@ from .filters import JobFilter
 from .init_db import initialize_database
 
 
-# Scrapy
-from scrapy import signals
-from scrapy.signalmanager import dispatcher
-from scrapy.crawler import CrawlerRunner, CrawlerProcess
-from scrapy.utils.project import get_project_settings
-from twisted.internet import reactor
-from multiprocessing import Process, Queue
-from ie_scrapy.spiders.ie import InfoempleoSpider
-from ie_scrapy.spiders.companies import InfoempleoCompaniesSpider
-
-
 @method_decorator(login_required, name='dispatch')
 class JobListView(ListView):
     model = Job
@@ -41,9 +30,3 @@ class JobListView(ListView):
         context['form'] = self.job_filtered_list.form
         return context
 
-
-if __name__ != '__main__':
-    try:
-        initialize_database()
-    except Exception as e:
-        print(e)
