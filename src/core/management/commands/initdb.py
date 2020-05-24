@@ -18,6 +18,11 @@ CITIES_CSV = os.path.join(CSV_PATH, f'city{SUFFIX}.csv')
 
 BLANK_COLUMN = 'Unnamed: 0'
 
+ERROR_HELP_MSG = """
+    1. Have you done the migrations to your database with python manage.py makemigrations and python manage.py migrate?'
+    2. Have you configured your database in settings.py?
+"""
+
 def _get_df(path):
     try:
         df = pd.read_csv(path)
@@ -129,15 +134,21 @@ def is_language_table_empty():
     try:
         return Language.objects.all().count() == 0
     except Exception as e:
-        message = 'Have you done the migrations to your database with python manage.py makemigrations and python manage.py migrate?'
-        raise InitializingDataInTablesException(f'{e}. InitializingDataInTablesException: {message}')
+        message = f"""
+               Error: {e}
+               {ERROR_HELP_MSG}
+               """
+        raise InitializingDataInTablesException(f'{message}')
 
 def are_location_tables_empty():
     try:
         return Province.objects.all().count() == 0
     except Exception as e:
-        message = 'Have you done the migrations to your database with python manage.py makemigrations and python manage.py migrate?'
-        raise InitializingDataInTablesException(f'{e}. InitializingDataInTablesException: {message}')
+        message = f"""
+        Error: {e}
+        {ERROR_HELP_MSG}
+        """
+        raise InitializingDataInTablesException(f'{message}')
 
 def initialize_language_table():
     if is_language_table_empty():
