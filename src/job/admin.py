@@ -84,6 +84,10 @@ class JobAdmin(ImportExportModelAdmin):
     ]
 
     def _location(self, obj):
+        """
+        For display the cities and the country of an offer in the admin section
+        :return: The cities and the country
+        """
         cities = obj.cities.all()[0:3]
         if cities:
             city_names = [city.name for city in cities]

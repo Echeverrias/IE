@@ -28,23 +28,13 @@ class CompanyItem(BaseItem):
     _location = Field() # optional
 
 
-
 # Items don't support ManyToMany Fields
 class JobItem(BaseItem):
 
     django_model = Job
     _languages = Field() # ManyToMany field of the model
-    """
     _summary = Field()
-    _cities = Field()
+    _tags = Field()
+    _cities = Field() # ManyToMany field of the model
     _province = Field()
     _country = Field()
-"""
-    """
-    # % Remove from the model:
-    _experience = Field()
-    _salary = Field()
-    _working_day = Field()
-    _contract = Field()
-    """
-

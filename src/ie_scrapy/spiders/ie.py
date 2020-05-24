@@ -238,7 +238,7 @@ class InfoempleoSpider(Spider):
                                                 "//div[@class='offer']//h3[contains(text(), 'Se ofrece')]//following-sibling::pre[1]/text()") or
                              self._extract_info(response,
                                                 "//h3[contains(., 'OFFER') or contains(., 'offer')]//following-sibling::pre[1]/pre[1]/text()"),
-            'tags': self._extract_info(response,
+            '_tags': self._extract_info(response,
                                        "//div[@class='offer']//h3[contains(text(), 'Etiquetas')]//following-sibling::ul[@class='tags']/li/text()"),
             'area': self._extract_info(response,
                                        "//div[@class='offer']//h3[contains(text(), 'Área')]//following-sibling::p[1]/text()") or

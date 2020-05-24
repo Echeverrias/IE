@@ -212,12 +212,18 @@ class CleaningPipeline():
         return self._get_specify_info_from_summary_list('jornada', summary_list)
 
     def _clean_working_day(self, working_day):
+        """
+        Deprecated
+        """
         return get_text_after_key('jornada', working_day)
 
     def _get_contract(self, summary_list):
         return self._get_specify_info_from_summary_list('contrato', summary_list)
 
     def _clean_contract(self, contract):
+        """
+        Deprecated
+        """
         return get_text_after_key('contrato', contract)
 
     def _clean_area(self, area):
@@ -339,14 +345,8 @@ class CleaningPipeline():
         item['minimum_years_of_experience'], item['recommendable_years_of_experience'] = self._clean_experience(experience)
         salary = self._get_salary(summary_list)
         item['minimum_salary'], item['maximum_salary'] = self._clean_salary(salary)
-        working_day = self._get_working_day(summary_list)
-        item['working_day'] = self._get_working_day(summary_list)# self._clean_working_day(working_day)
-        contract = self._get_contract(summary_list)
-        item['contract'] = self._get_contract(summary_list)# self._clean_contract(contract)
-        item['_experience'] = experience
-        item['_salary'] = salary
-        item['_working_day'] = working_day
-        item['_contract'] = contract
+        item['working_day'] = self._get_working_day(summary_list)
+        item['contract'] = self._get_contract(summary_list)
         return summary_list
 
     def _get_it_is_offered(self, text):
@@ -581,8 +581,6 @@ class CleaningPipeline():
         item['name'] = self._clean_company_name(item)
         if item.get('is_registered'):
             item['is_registered'] = True
-        else:
-            item['is_registered'] = True if item.get('link') else False
         item['link'] = self._clean_url(item.get('link'))
         item['resume'] = self.clean_string(item.get('resume'))
         item['description'] = self._clean_company_description(item.get('description'))

@@ -138,7 +138,6 @@ class Company(models.Model):
     is_registered = models.BooleanField(null=True, blank=True, verbose_name="empresa colaboradora")
     description = models.TextField(null=True, verbose_name="descripción")
     resume = models.CharField(max_length=300, null=True, blank=True, verbose_name="resumen")
-    location_name = models.CharField(max_length=50, null=True)
     city = models.ForeignKey(City,
                             on_delete=models.CASCADE,
                             related_name='companies',
@@ -359,10 +358,6 @@ class Job(models.Model):
     _summary = ListCharField(base_field=models.CharField(max_length=100),
         size=6,
         max_length=(6 * 101), null=True)
-    _experience = models.CharField(max_length=40, null=True, blank=True)
-    _salary = models.CharField(max_length=40, null=True, blank=True)
-    _contract = models.CharField(max_length=40, null=True, blank=True)
-    _working_day = models.CharField(max_length=40, null=True, blank=True)
     minimum_years_of_experience = models.PositiveIntegerField(null=True, blank=True, default=0, verbose_name="experiencia mínima")
     recommendable_years_of_experience = models.PositiveIntegerField(null=True, blank=True, default=0, verbose_name="experiencia recomendable")
     minimum_salary = models.PositiveIntegerField(null=True, blank=True, verbose_name="salario míminimo")
@@ -398,11 +393,6 @@ class Job(models.Model):
                             related_name='jobs',
                             null = True, blank = True,
                             verbose_name="idiomas",)
-    _cities = ListCharField(base_field=models.CharField(max_length=100),
-                             size=6,
-                             max_length=(6 * 101), null=True, blank=True)
-    _province = models.CharField(null=True, max_length=100, blank=True)  # Model
-    _country = models.CharField(null=True, max_length=30) #Model
     nationality = models.CharField(max_length=30, verbose_name="nacionalidad")
     first_publication_date = models.DateField(null=True, blank=True, default=None, verbose_name="fecha de publicación de la oferta")
     last_update_date = models.DateField(null=True, blank=True, default=None, verbose_name="fecha de actualización de la oferta")
@@ -475,21 +465,6 @@ class Job(models.Model):
     def fields(self):
         return [field['name'] for field in self._meta.fields]
 
-    def display_cities(self):
-        """
-        For display the cities and the country of an offer in the admin section
-        :return: The cities and the country
-        """
-        cities = self.cities.all()[0:3]
-        if cities:
-            names = [city.name for city in cities]
-            return f'{", ".join(names)} ({cities[0].country.name})'
-        else:
-            return None
-
-    display_cities.short_description = 'Cities (Country)'
-
-
     @staticmethod
     def add_city(job, city):
         try:
@@ -497,9 +472,3 @@ class Job(models.Model):
             job_.cities.add(city)
         except Exception as e:
             print(f'Error in Job.add_city: {e}')
-
-
-
-
-
-
