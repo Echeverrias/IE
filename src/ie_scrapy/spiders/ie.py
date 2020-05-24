@@ -6,8 +6,9 @@ import re
 from ..items import JobItem, CompanyItem
 from ..pipelines import CleaningPipeline, StoragePipeline
 import ie_scrapy.keys as key
-from job.init_db import initialize_database
+from core.management.commands.initdb import initialize_database
 import time
+import pickle
 
 # INFO: 197 scraped offers in 20 minutes
 # INFO: 67 scraped offers in 1 minute
@@ -20,10 +21,10 @@ class BaseException(Exception):
 class PageNotFoundError(BaseException):
     pass
 
-class NonExistentPageError(BaseException):
+class NoExistentPageError(BaseException):
     pass
 
-class NonElementFoundError(BaseException):
+class NoElementFoundError(BaseException):
     pass
 
 
@@ -31,7 +32,8 @@ class InfoempleoSpider(Spider):
 
     name = 'ie'
     allowed_domains = ['infoempleo.com']
-    start_urls_ = ["https://www.infoempleo.com/trabajo/area-de-empresa_legal/"]
+    start_urls__ = ["https://www.infoempleo.com/trabajo/area-de-empresa_legal/"]
+    start_urls_ = ["https://www.infoempleo.com/trabajo/area-de-empresa_educacion-formacion/"]
     start_urls = [
         "https://www.infoempleo.com/trabajo/area-de-empresa_sanidad-salud-y-servicios-sociales/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_educacion-formacion/",
@@ -93,7 +95,7 @@ class InfoempleoSpider(Spider):
             total_results =  self._get_the_total_number_of_results(response)
         except Exception as e:
             total_results = 0
-
+        #job_urls = ['https://www.infoempleo.com/ofertasdetrabajo/operarioa-metal/mostoles/2459763/']
         for job_url in job_urls:
             print('# Go to job_url: %s', job_url) #%
             yield response.follow(job_url, self.parse_item, meta={
@@ -112,7 +114,7 @@ class InfoempleoSpider(Spider):
                     print(f'* {next_url} has been parsed')
             else:
                 print('All the pages have been requested')
-        except NonExistentPageError as e:
+        except NoExistentPageError as e:
             print(f'The url {response.url} has not jobs: {e}')
 
     def _get_info_of_number_of_results(self, response):
@@ -128,23 +130,23 @@ class InfoempleoSpider(Spider):
             InfoResults = namedtuple('ResultsNumberInfo',['first_result_showed', 'last_result_showed', key.TOTAL_RESULTS])
             return InfoResults(numbers[0], numbers[1], numbers[2])
         except Exception as e:
-            raise NonElementFoundError()
+            raise NoElementFoundError()
 
 
     def _get_the_total_number_of_results(self, response):
         try:
             info_results =  self._get_info_of_number_of_results(response)
             return info_results.total_results
-        except NonElementFoundError as e:
-            raise NonElementFoundError()
+        except NoElementFoundError as e:
+            raise NoElementFoundError()
 
     def _is_there_next_page(self, response):
         try:
             info_results = self._get_info_of_number_of_results(response)
             print(info_results)
             return info_results.last_result_showed < info_results.total_results
-        except NonElementFoundError as e:
-            raise NonExistentPageError()
+        except NoElementFoundError as e:
+            raise NoExistentPageError()
 
     def _clean_url(self, url):
         """
@@ -176,6 +178,8 @@ class InfoempleoSpider(Spider):
         company_item = CompanyItem(company_dict)
         job_item = JobItem(job_dict)
         job_item['company'] = company_item
+        _save(company_item, 'company_item.item')
+        _save(job_item, 'job_item.item')
         yield job_item
 
     def _get_company_info(self, response):
@@ -193,6 +197,7 @@ class InfoempleoSpider(Spider):
             'offers': self._extract_info(response,
                                          "//div[@class='company']//*[contains(@class,'details')]/li[child::a]/a/text()")
         }
+        _save(company_dict, 'company_info.dict')
         return company_dict
 
     def _get_job_info(self, response):
@@ -243,6 +248,7 @@ class InfoempleoSpider(Spider):
             'vacancies': self._extract_info(response,
                                             "//div[@class='offer']//h3[contains(text(), 'Vacantes')]//following-sibling::p[1]/text()"),
         }
+        _save(job_dict, 'job_info.dict')
         return job_dict
 
     def _extract_info(self, response, xpath):
@@ -305,34 +311,7 @@ class InfoempleoSpider(Spider):
             country = self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[1]/text()")
         return country
 
-
-    def parse_fake(self, response):
-        print('PARSE')
-        print(response.url)
-        i = self.get_fake_job_item()
-        yield i
-
-
-
-    def get_fake_job_item(self):
-        print('yield_job_item')
-        ie_dict = {
-            'link': "https://medium.com/dreamcatcher-its-blog/making-an-stand-alone-executable-from-a-python-script-using-pyinstaller-d1df9170e263",
-            'registered_people': 0,
-            'id': 324 ,
-            'company': 323,
-            'first_publication_date': None,
-            'requisites': 'leer',
-            'nationality': 'nacional',
-            'area': 'rrhh',
-            'city': 'Móstoles',
-            'country': 'España',
-            'name': 'trabajo prueba'
-        }
-        #
-        # 'company': response.xpath("//div[@class='main-title']//ul[@class='details inline'][1]//li/a/text()").extract_first(),
-        # El orden en el que se asignan los valores será su  orden
-        ie = JobItem(ie_dict)
-        return ie
-
+def _save(object, file_name):
+    with open(file_name, 'wb') as f:
+        pickle.dump(object, f)
 

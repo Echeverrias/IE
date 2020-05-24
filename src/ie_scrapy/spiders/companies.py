@@ -4,7 +4,7 @@ from scrapy import signals
 import re
 import os
 from ..items import CompanyItem
-from job.init_db import initialize_database
+from core.management.commands.initdb import initialize_database
 import json #%
 
 class InfoempleoCompaniesSpider(scrapy.Spider):
