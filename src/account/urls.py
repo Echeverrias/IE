@@ -10,12 +10,12 @@ from django.contrib.auth.views import (
     PasswordChangeDoneView,
 )
 from .views import (
-    signin_view,
+    signup_view,
     login_view,
 )
 
 urlpatterns = [
-    path('signin/', signin_view, name='signin'),
+    path('signup/', signup_view, name='signup'),
     path('login/',  login_view , name='login'),
     path('login/', LoginView.as_view(
         template_name='account/login.html',
