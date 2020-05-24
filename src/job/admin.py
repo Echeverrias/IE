@@ -1,85 +1,41 @@
-import copy
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models import ForeignKey
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 from simple_history.admin import SimpleHistoryAdmin
+import copy
 from .models import Job, Company, Province, City, Community, Country, Language
-from .resources import JobResource
 
+admin.site.site_header = "Infoempleo";
+admin.site.site_title = "Infoempleo";
 
-print(dir(admin))
-#admin.site.register(Job)
-
-admin.site.site_header = "InfoempleoH";
-admin.site.site_title = "InfoempleoT";
-
-
-def custom_titled_filter(title):
-    """
-    Usage: list_filter = (('some_field_name', custom_titled_filter('My custom field name') ),)
-
-    :param title: a string with the custom filter field name
-    :return: RelatedFieldListFilter
-    """
-    print(dir(admin))
-    print()
-    class Wrapper(admin.RelatedFieldListFilter):
-        def __new__(cls, *args, **kwargs):
-            print(args)
-            instance = admin.RelatedFieldListFilter.create(*args, **kwargs)
-            instance.title = title
-            return instance
-    return Wrapper
-
-
-def apply_upper_to_author(modelAdmin, request, queryset):
-    for item in queryset:
-        item.author = item.author.upper()
-        item.save()
-
-apply_upper_to_author.short_description = 'Apply upper to the author field'
-
-
-@admin.register(Job) #admin.site.register(Quote, QuoteAdmin)
+@admin.register(Job)
 class JobAdmin(ImportExportModelAdmin):
-    resource_class = JobResource
-    # Si no se declara 'list_display' mostrará por defecto su conversión a string
     list_display = ['name', 'state', 'type', 'contract', 'working_day', 'category_level', 'area', 'company', '_location']
     list_filter =  ['type','contract','working_day', 'nationality', 'area']
-    #search_fields = ['name', 'id', 'functions', 'requirements', 'it_is_offered']
     search_fields = ['name', 'id', 'functions', 'requirements', 'it_is_offered']
-
-    # Para mostrar campos no editables
-    readonly_fields = ['created_at', 'updated_at']
-    #fields = ['author', 'quote'] # fields = [('author', 'quote')]
+    readonly_fields = ['created_at', 'updated_at', 'checked_at']
     fieldsets = [
         ('Estado', {
             'fields': [('state'), ('first_publication_date', 'last_update_date', 'expiration_date')]
         }),
         ('Principal', {
-            'fields': [('name'), ('id', 'link', 'type'),('_summary'),('cities', 'province', 'country'),('_cities', '_province','_country')]
+            'fields': [('name'), ('id', 'link', 'type'),('cities', 'province', 'country')]
         }),
-        ('Summary1', {
-            'fields': [('_experience', '_salary', '_working_day', '_contract')]
-        }),
-        ('Summary2', {
+        ('Características', {
             'fields': [('minimum_years_of_experience', 'recommendable_years_of_experience'), ('minimum_salary', 'maximum_salary'), ('working_day', 'contract')]
         }),
-        ('Offer', {
+        ('Descripción', {
             'fields': ['area','description', 'functions', 'requirements', 'it_is_offered', 'category_level', 'languages']
         }),
         ('Compañía', {
             'fields': ['company']
         }),
         ('Vacantes', {
-            'fields': [('vacancies', 'vacancies_update','registered_people')]
-        }),
-        ('Tags', {
-            'fields': ['tags']
+            'fields': [('vacancies', 'registered_people')]
         }),
         ('Info', {
-            'fields': [('created_at', 'updated_at')]
+            'fields': [('created_at', 'updated_at', 'checked_at')]
         })
     ]
 
@@ -99,25 +55,20 @@ class JobAdmin(ImportExportModelAdmin):
             else:
                 None
 
-    # Field name of '_location' in list_display
-    _location.short_description = 'Location'
+    _location.short_description = 'Localización'
 
 
-    #actions = [apply_upper_to_author]
 
 class JobInLine(admin.TabularInline):
     model = Job
     extra = 0
 
-#@admin.register(Company) #admin.site.register(Quote, QuoteAdmin) #admin.site.register(Company)
 
 @admin.register(Company)
-class CompanyAdmin(ImportExportModelAdmin): #class CompanyAdmin(admin.ModelAdmin): #ImportExportModelAdmin
-
+class CompanyAdmin(ImportExportModelAdmin):
     list_display = ['name', 'area', 'city', 'country']
     list_filter = ('area', 'country',)
     search_fields = ['name', 'city__name', 'description']
-
     readonly_fields = ['_location']
     fieldsets = [
         ('Datos generales', {
@@ -134,11 +85,10 @@ class CompanyAdmin(ImportExportModelAdmin): #class CompanyAdmin(admin.ModelAdmin
     inlines = [JobInLine]
 
     def _jobs_count(self, obj):
-        #return obj.quotes.all().count()
         return obj.jobs.all().count()
 
     _jobs_count.allow_tags = False
-    _jobs_count.short_description = 'nº de ofertas' # 'Count of jobs'
+    _jobs_count.short_description = 'nº de ofertas'
     _jobs_count.admin_order_field = 'job'
 
     def _location(self, obj):
@@ -174,29 +124,21 @@ class CompanyAdmin(ImportExportModelAdmin): #class CompanyAdmin(admin.ModelAdmin
         raise FieldDoesNotExist('%s has no field named %r' % (self.object_name, name))
 
 
-
-
-
 @admin.register(City)
 class CityAdmin(ImportExportModelAdmin):
     list_display = ['name', 'province', 'country', '_jobs_count']
     list_filter = ['province', 'country']
     search_fields = ['name']
-   # inlines = ['_jos']
 
     def _jobs_count(self, obj):
         return obj.jobs.all().count()
     _jobs_count.allow_tags = False
     _jobs_count.short_description = 'nº de ofertas'  # 'Count of jobs'
-    
-    def _jobs(self, obj):
-        return obj.jobs.all()
+
 
 class CityInLine(admin.TabularInline):
-
     model = City
     extra = 0
-
 
 
 @admin.register(Province)
@@ -227,11 +169,10 @@ class CommunityAdmin(ImportExportModelAdmin):
         return obj.provinces.all().count()
 
     _provinces_count.allow_tags = False
-    _provinces_count.short_description = 'nº de provincias'  # 'Count of jobs'
-
-
+    _provinces_count.short_description = 'nº de provincias'
 
     inlines = [ProvinceInLine]
+
 
 class CommunityInLine(admin.TabularInline):
     model = Community

@@ -21,9 +21,11 @@
          {% endif %}
          <div class="col-6-lg text-muted text-small text-right right-bottom">
             {% if job.last_update_date %}
-                Fecha de publicación de la oferta: {{ job.last_update_date }}
-            {% else %}
-                Fecha de actualización de la oferta:{{ job.first_publication_date }}
+                Fecha de actualización de la oferta: {{ job.last_update_date }}
+            {% elif job.first_publication_date %}
+                Fecha de publicación de la oferta: {{ job.first_publication_date }}
+             {% else %}
+                 Fecha de la última comprobación de la oferta: {{ job.checked_at }}
             {% endif %}
         </div>
         </div>

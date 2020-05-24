@@ -15,8 +15,8 @@ class Country(models.Model):
     slug = models.CharField(max_length=30)
 
     class Meta:
-        verbose_name = "País" #"Country"
-        verbose_name_plural = "Países" #"Countries"
+        verbose_name = "País"
+        verbose_name_plural = "Países"
         ordering = ['name']
 
     def save(self, *args, **kwargs):
@@ -42,8 +42,8 @@ class Community(models.Model):
                                 verbose_name="país")
 
     class Meta:
-        verbose_name = "Comunidad" #"Community"
-        verbose_name_plural = "Comunidades" #"Communities"
+        verbose_name = "Comunidad"
+        verbose_name_plural = "Comunidades"
         ordering = ['name']
 
     def save(self, *args, **kwargs):
@@ -74,8 +74,8 @@ class Province(models.Model):
     capital_id = models.IntegerField(null=True)
 
     class Meta:
-        verbose_name = "Provincia" #"Province"
-        verbose_name_plural = "Provincias"  # "Provinces"
+        verbose_name = "Provincia"
+        verbose_name_plural = "Provincias"
         ordering = ['name']
 
     def save(self, *args, **kwargs):
@@ -85,10 +85,8 @@ class Province(models.Model):
             pass
         super(Province, self).save(*args, **kwargs)
 
-
     def __str__(self):
         return "%s" % (self.name)
-
 
 
 class City (models.Model):
@@ -109,8 +107,8 @@ class City (models.Model):
     longitude = models.FloatField(null=True, blank = True, verbose_name="longitud")
 
     class Meta:
-        verbose_name = "Ciudad" #"City"
-        verbose_name_plural = "Ciudades" #"Cities"
+        verbose_name = "Ciudad"
+        verbose_name_plural = "Ciudades"
         ordering = ['name']
 
     def save(self, *args, **kwargs):
@@ -121,13 +119,11 @@ class City (models.Model):
             pass
         super(City, self).save(*args, **kwargs)
 
-
     def __str__(self):
         if self.province:
             return "%s (%s) (%s)" % (self.name, self.province, self.country)
         else:
             return "%s (%s)" % (self.name, self.country)
-
 
 
 class Company(models.Model):
@@ -152,15 +148,15 @@ class Company(models.Model):
     category = models.CharField(null=True, blank=True, max_length=100, verbose_name="categoría")
     offers = models.IntegerField(null=True, blank=True,  verbose_name="nº de ofertas")
     slug = models.CharField(max_length=300, null=True, blank = True)
-    created_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de creción del registro")  # models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de actualización del registro")  # models.DateTimeField(auto_now=True)
-    checked_at = models.DateTimeField(editable=False, null=True, blank=True, verbose_name="fecha de comprobación del registro")  # models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de creción del registro")
+    updated_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de actualización del registro")
+    checked_at = models.DateTimeField(editable=False, null=True, blank=True, verbose_name="fecha de comprobación del registro")
     history = HistoricalRecords()
     objects = CompanyManager()
 
     class Meta:
-        verbose_name = "Compañía" #"Company"
-        verbose_name_plural = "Compañías" #"Companies"
+        verbose_name = "Compañía"
+        verbose_name_plural = "Compañías"
         ordering = ['name']
 
     def save(self, *args, **kwargs):
@@ -217,8 +213,8 @@ class Language(models.Model):
     )
 
     class Meta:
-        verbose_name = "Idioma" #"Language"
-        verbose_name_plural = "Idiomas" #"Languages"
+        verbose_name = "Idioma"
+        verbose_name_plural = "Idiomas"
         ordering = ['name', 'level']
 
     def __str__(self):
@@ -396,12 +392,12 @@ class Job(models.Model):
     nationality = models.CharField(max_length=30, verbose_name="nacionalidad")
     first_publication_date = models.DateField(null=True, blank=True, default=None, verbose_name="fecha de publicación de la oferta")
     last_update_date = models.DateField(null=True, blank=True, default=None, verbose_name="fecha de actualización de la oferta")
-    expiration_date = models.DateField(null=True, blank=True, default=None, verbose_name="fecha de caducidad de la oferta")  # models.DateTimeField(auto_now_add=True)
+    expiration_date = models.DateField(null=True, blank=True, default=None, verbose_name="fecha de caducidad de la oferta")
     description = models.TextField(null=True, blank=True, verbose_name="descripción")
     functions = models.TextField(null=True, blank=True, verbose_name="funciones")
     requirements = models.TextField(null=True, blank=True, verbose_name="requisitos")
-    it_is_offered = models.TextField(null=True, blank=True,verbose_name="se ofrece") #NULL constraint
-    tags = models.TextField(null=True, blank=True,verbose_name="etiquetas") #Model
+    it_is_offered = models.TextField(null=True, blank=True,verbose_name="se ofrece")
+    tags = models.TextField(null=True, blank=True,verbose_name="etiquetas")
     area = models.CharField(
         max_length=40,
         choices=AREA_CHOICES,
@@ -423,9 +419,9 @@ class Job(models.Model):
         default=None,
         on_delete=models.CASCADE,
         related_name='jobs', verbose_name="compañía")
-    created_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de creación del registro")  # models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(editable=False, null=True, blank=True, verbose_name="fecha de actualización del registro")  # models.DateTimeField(auto_now=True)
-    checked_at = models.DateTimeField(editable=False, null=True, blank=True, verbose_name="fecha de comprobación del registro")  # models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(editable=False, null=True, verbose_name="fecha de creación del registro")
+    updated_at = models.DateTimeField(editable=False, null=True, blank=True, verbose_name="fecha de actualización del registro")
+    checked_at = models.DateTimeField(editable=False, null=True, blank=True, verbose_name="fecha de comprobación del registro")
     history = HistoricalRecords()
     objects = JobManager()
 
@@ -433,7 +429,6 @@ class Job(models.Model):
         verbose_name = "Oferta de empleo"
         verbose_name_plural = "Ofertas de empleo"
         ordering = ['-created_at', 'name']
-        #unique_together = (('id'),)
 
     def __str__(self):
         city = ""

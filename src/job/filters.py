@@ -1,4 +1,3 @@
-
 from django.utils.translation import ugettext_lazy as _
 import django_filters
 from .models import Job
@@ -15,13 +14,15 @@ MONTHS = {
 
 def _get_offers_years_range():
     try:
-        early_offer_year = Job.objects.exclude(first_publication_Date=None).earliest('first_pubication_date').first_publication_date.year
-        latest_offer_year = Job.objects.latest('first_pubication_date').first_publication_date.year
+        early_offer_year = Job.objects.exclude(first_publication_Date=None).earliest(
+            'first_publication_date').first_publication_date.year
+        latest_offer_year = Job.objects.latest('first_publication_date').first_publication_date.year
     except:
         year = date.today().year
         return range(year, year + 1)
     else:
-        return range(early_offer_year,  latest_offer_year)
+        return range(early_offer_year, latest_offer_year)
+
 
 class JobFilter(django_filters.FilterSet):
 
@@ -34,7 +35,7 @@ class JobFilter(django_filters.FilterSet):
     free_vacancies = django_filters.BooleanFilter(method='search_free_vacancies', label='Vacantes libres')
     cities = django_filters.CharFilter(field_name="cities", lookup_expr='name__icontains', label='Ciudad')
     province = django_filters.CharFilter(field_name="cities", lookup_expr='province__name__icontains', label='Provincia')
-    #country = django_filters.CharFilter(field_name="cities", lookup_expr='country__name__icontains', label='País')
+    country = django_filters.CharFilter(field_name="cities", lookup_expr='country__name__icontains', label='País')
     datepicker = django_filters.DateFilter(method='after_date',
                                            label="Fecha posterior",
                                            widget=forms.SelectDateWidget(
@@ -98,6 +99,9 @@ class JobFilter(django_filters.FilterSet):
         except:
             pass
         return queryset
+
+
+
 
 
 

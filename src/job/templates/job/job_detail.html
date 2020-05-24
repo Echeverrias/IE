@@ -131,7 +131,13 @@
             </div>
         </div>
     </div>
-    <a href="{{job.link}}" target="_blank">Ir a página de la oferta</a>
+    <div class="row no-margin">
+        <div class="col-6-lg">
+            <a href="{{job.link}}" target="_blank">Ir a página de la oferta</a>
+        </div>
+        <div class="col-6-lg text-muted text-small text-right right-bottom">
+            <a href= "Javascript:history.go ( -1)" >Volver a la página de resultados</a>
+        </div>
+    </div>
 </div>
-
 {% endblock %}

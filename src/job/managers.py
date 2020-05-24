@@ -1,29 +1,18 @@
 from django.db import models
 from django.db.models import F
-from .queries import JobQuerySet, CompanyQuerySet
 from datetime import date
 from django import db
+from .queries import JobQuerySet, CompanyQuerySet
 
-
-"""
-https://medium.com/@jairvercosa/manger-vs-query-sets-in-django-e9af7ed744e0
-https://docs.djangoproject.com/en/2.2/topics/db/managers/
-"""
 class JobManager(models.Manager):
-
 
     def get_queryset(self):
         # Don't apply filters here, don't return a modified queryset
-        qs = JobQuerySet(
+        return JobQuerySet(
             model=self.model,
             using=self._db,
             hints=self._hints
         )
-        try:
-            return qs
-        except:
-           # db.connection.close()
-            return qs
 
     def nationals(self):
         return self.get_queryset().nationals()
