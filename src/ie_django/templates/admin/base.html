@@ -14,8 +14,8 @@
 {% endblock %}
 {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
      {% include 'css.html' %}
-     {% include 'admin/base_css.html' %}
      {% include 'js.html' %}
+     {% block extra_css%} {% include 'admin/css.html' %}{% endblock %}
 </head>
 {% load i18n %}
 
@@ -72,7 +72,7 @@
     {% block messages %}
         {% if messages %}
         <ul class="messagelist">{% for message in messages %}
-          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+          <li>{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
         {% endfor %}</ul>
         {% endif %}
     {% endblock messages %}
