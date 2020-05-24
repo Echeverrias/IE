@@ -76,9 +76,8 @@ class FakeResponse():
 
 class TestERDownloaderMiddleware(TestCase):
 
-    erdm = ERDownloaderMiddleware()
     @classmethod
-    def setUpData(cls):
+    def setUpTestData(cls):
         cls.erdm = ERDownloaderMiddleware()
 
     def test_process_request(self):
