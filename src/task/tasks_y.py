@@ -9,6 +9,7 @@ from scrapy.crawler import CrawlerProcess
 from multiprocessing import  Queue, Process
 from datetime import datetime
 import os, signal
+from django.db.utils import InterfaceError
 from .models import Task
 from job.models import Job
 from utilities.utilities import save_error, write_in_a_file

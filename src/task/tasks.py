@@ -2,6 +2,7 @@ import django
 django.setup()
 from django import db
 from django.utils import timezone
+from django.db.utils import InterfaceError
 from scrapy import signals
 from scrapy.signalmanager import dispatcher
 from scrapy.utils.project import get_project_settings
