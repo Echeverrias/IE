@@ -1,21 +1,16 @@
 # -*- coding: utf-8 -*-
 
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-import functools
-import re
-import sqlite3
-import time
-import datetime
+from django import db
 from django.utils import timezone
 from django.utils.text import slugify
 from django.db.utils import InterfaceError
-from django import db
 from django.db.models.functions import Length
-import copy
 from dateutil.relativedelta import relativedelta
+import copy
+import functools
+import re
+import time
+import datetime
 from job.models import Job, Company, Country, City, Province, Language
 from utilities.languages_utilities import get_languages_and_levels_pairs
 from utilities.utilities import (
@@ -23,7 +18,6 @@ from utilities.utilities import (
     get_text_before_sub,
     get_text_after_key,
     replace_multiple,
-
     get_coincidences,
     get_acronym,
     get_string_number_from_string,
@@ -32,19 +26,14 @@ from utilities.utilities import (
     get_text_between_parenthesis,
     get_text_before_parenthesis,
     get_int_list_from_string,
-
     get_date_from_string,
     get_end_index_of_a_paragraph_from_string,
     get_slice_from_sub_to_end_of_the_paragraph,
     get_a_list_of_enumerates_from_string,
-    raise_function_exception,
-    trace,
-    write_in_a_file,
-    save_error,
 
 )
-
-debug={'location':None, 'value':None, 'value_in': None, 'value_out':None}
+import logging
+logging.getLogger().setLevel(logging.INFO)
 
 
 def check_spider_pipeline(process_item_method):
@@ -61,7 +50,6 @@ def check_spider_pipeline(process_item_method):
             return item
 
     return wrapper
-
 
 
 class CleaningPipeline():
@@ -102,7 +90,7 @@ class CleaningPipeline():
             elif pathname_or_href and not ('http' in pathname_or_href):
                 href = origin + pathname_or_href
         except Exception as e:
-            print('Error in CleanupPipeline._clean_url(%s): %s'%(href,e))
+            logging.exception(f'Error: _clean_url({pathname_or_href})')
             href = ''
         return href
 
@@ -134,11 +122,9 @@ class CleaningPipeline():
 
     def _clean_location(self, string):
         try:
-            write_in_a_file(f'CleanPipeline._clean_location({string})', {}, 'pipeline.txt')
             city = get_text_before_parenthesis(string) or string
             parenthesis = get_text_between_parenthesis(string)
             if parenthesis and len(parenthesis[0]) < 4:
-                # Bercial (el) -> el Bercial
                 city = parenthesis[0].capitalize() + " " + city
             if city and city.isupper():
                 city = city.title()
@@ -159,10 +145,13 @@ class CleaningPipeline():
                 clean_cities.append(clean_city)
         return  clean_cities
 
-    def _clean_job_type(self, url):
+    def _clean_job_type_(self, url):
+        """
+                Deprecated
+        """
         try:
             return re.findall('ofertas-internacionales|primer-empleo|trabajo', url)[0]
-        except Exception as e:
+        except Exception:
             return ''
 
     def _clean_state(self, string):
@@ -175,7 +164,7 @@ class CleaningPipeline():
 
     def _clean_nationality(self, string):
         """
-        Comprueba la url de la oferta:
+        Comprueba la cadena de caracteres que recibe:
         - Si es una oferta internacional (/ofertas-internacionales/) devuelve 'internacional'
         - Si es no una oferta inernacional devuelve 'nacional'
         :param string:
@@ -259,7 +248,6 @@ class CleaningPipeline():
         :return: two integers (minimum and maximum salary)
         """
         money = get_int_list_from_string(salary)
-        # check that the salaries have the same unit time
         if len(money) > 1 and check:
             ii = [salary.find(' a '), salary.find(' o '), salary.find(' y ')]
             ii = [i for i in ii if i > -1]
@@ -411,7 +399,6 @@ class CleaningPipeline():
                 else:
                     return ""
 
-            # Comprobamos si hay algun indicio de que aparezca el nombre de la empresa
             to_search = [' es una empresa', ' es una compañía', ', empresa ', ', Empresa ', ', compañía ',
                          ', Compañía ']
             index = 0
@@ -423,11 +410,9 @@ class CleaningPipeline():
                     index = 0
             result = ''
             if index:
-                if result.startswith('Para '):  # Para Cantabria, Empresa dedicada al sector...
+                if result.startswith('Para '):  # 'Para Cantabria, Empresa dedicada al sector...'
                     return ''
-                # Nos quedamos com la parte inicial de la descripción donde puede estar el nombre de la empresa
                 result = description[0:index]
-                # Hacemos una limpieza del final de la cadena resultante
                 result = result[0:-1] if result.endswith(',') else result
                 to_search = ['\n', '\t', '\r']
                 for i in to_search:
@@ -439,7 +424,6 @@ class CleaningPipeline():
                 if index:
                     result = result[0:index]
                 result = result.strip()
-                # Obtenemos el nombre buscando las palabras que empiecen por mayúscula
                 result = _get_company_name_from_description_start(result)
             return result
 
@@ -601,7 +585,7 @@ class CleaningPipeline():
         item['requirements'] = self.clean_string(item['requirements'])
         item['it_is_offered'] = self._clean_it_is_offered(item)
         item['state']= self._clean_state(item['state'])
-        item['type'] = self._clean_job_type(item['type'])
+        # item['type'] doesn't need cleaning
         item['area'] = self._clean_area(item['area'])
         item['id'] = get_int_from_string(item['id'])
         item['vacancies'] = get_int_from_string(item['vacancies'])
@@ -620,8 +604,7 @@ class CleaningPipeline():
             company = item['company']
             item['company'] = self._cleaning[company.get_model_name()](company)
         except Exception as e:
-            print(f'!!! ERROR cleaning the company: {e}!!!!')
-            save_error(e, { 'pipeline': 'CleanPipeline.clean_job: cleaning the company', 'id':item.get('id'), 'link': item.get('link'), 'item': item}, 'errors.txt')
+            logging.exception(f'Error: {e}')
         return item
 
     #@check_spider_pipeline
@@ -630,7 +613,7 @@ class CleaningPipeline():
             clean_item = self._cleaning[item.get_model_name()](item)
             return clean_item
         except Exception as e:
-            save_error(e, { 'pipeline':'CleanPipeline', 'id':item.get('id'), 'link':item.get('link'), 'item':item })
+            logging-exception()
             return item
 
 
@@ -656,12 +639,6 @@ class StoragePipeline(object):
         return item
 
     def _get_item_without_temporal_fields(self, item):
-        """
-        try:
-            del item['_languages']
-        except: pass
-        return item #%
-        """
         def drop_keys_that_starts_with(character, dictionary):
             keys_to_delete = [key for key in dictionary.keys() if key.startswith(character)]
             for key in keys_to_delete:
@@ -679,7 +656,6 @@ class StoragePipeline(object):
         return languages
 
     def _get_city(self, city_name, province=None, country=None):
-        write_in_a_file('StorePipeline._get_city', {'city_name': city_name + '.', 'province':province, 'country': country}, 'pipeline.txt')
         if not city_name:
             return None
         city = None
@@ -719,18 +695,11 @@ class StoragePipeline(object):
             else:
                 city, is_a_new_city = City.objects.get_or_create(name=city_name, country=country)
         else:
-            write_in_a_file('StorePipeline._get_city',
-                            {'if':'not country'}, 'pipeline.txt')
             try:
                 cities_qs = City.objects.filter(name__iexact=city_name)
             except Exception as e:
-                write_in_a_file('StorePipeline._get_city',
-                                {'city_name': city_name + '.', 'error': e}, 'pipeline.txt')
-            write_in_a_file('StorePipeline._get_city',
-                            {'cities_qs': str(cities_qs)}, 'pipeline.txt')
+                logging.exception(f'Error: {e}')
             if not cities_qs:
-                write_in_a_file('StorePipeline._get_city',
-                                {'if': 'not cities_qs'}, 'pipeline.txt')
                 cities_qs = City.objects.filter(name__contains=city_name) # contains to avoid coincidence in the middle of the string
                 if cities_qs and cities_qs.count() > 1:
                     cities_qs = cities_qs.filter(name__icontains='/')
@@ -741,11 +710,7 @@ class StoragePipeline(object):
                 if cities_qs:
                     city = cities_qs[0]
             elif  cities_qs.count() == 1:
-                write_in_a_file('StorePipeline._get_city',
-                                {'if': 'cities_qs.count() == 1'}, 'pipeline.txt')
                 city = cities_qs[0]
-        write_in_a_file('StorePipeline._get_city',
-                        {'city': city}, 'pipeline.txt')
         return city
 
     def _get_country (self, country_name):
@@ -816,11 +781,11 @@ class StoragePipeline(object):
         item['country'] = country
 
     def _store_company(self, item):
+        # INFO: Can be companies with different name and same link
+        # INFO: A company can have different links but always the same reference
         self._set_city_and_country_from_location(item)
         company_dict = self._get_item_without_temporal_fields(item)
         company = None
-        # Can be companies with different name and same link
-        # A company can have different links but always the same reference
         try:
             if company_dict['name']:
                 company_name = company_dict['name']
@@ -846,8 +811,7 @@ class StoragePipeline(object):
                 Company.objects.filter(id=company.id).update(checked_at=timezone.localtime(timezone.now()))
                 company = self._update_company(company, item)
         except Exception as e:
-            print(f'ERROR in _store_company {e}')
-            save_error(e, { 'pipeline':'StorePipeline._store_company','company_id': item['name'], 'company_link': item.get('link')})
+            logging.exception(f'Error: {e}')
         return company
 
     def _set_location(self, job, item):
@@ -925,7 +889,7 @@ class StoragePipeline(object):
             company = item['company']
             item['company'] = self._storage[company.get_model_name()](company)
         except Exception as e:
-            save_error(e, { 'pipeline':'StorePipeline', 'company_id': item['name'], 'company_link': item.get('link'), 'item': item})
+            logging.exception(f'Error: {e}')
         job_dict = copy.deepcopy(self._get_item_without_temporal_fields(item))
         job_id = job_dict.pop('id', None)
         job, is_new_item_created = Job.objects.get_or_create(id=job_id, defaults=job_dict)
@@ -945,6 +909,5 @@ class StoragePipeline(object):
             self._storage[item.get_model_name()](item)
             return item
         except Exception as e:
-            print(f'Error in StoragePipeline.process_item: {e}')
-            save_error(e, { 'pipeline':'StoragePipeline', 'model':item.get_model_name() , 'line':723, 'id':item.get('id'), 'link':item.get('link'), 'item': item}, 'errors.txt')
+            logging.exception(f'Error: {e}')
             return item

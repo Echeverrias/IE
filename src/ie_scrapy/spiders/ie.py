@@ -9,11 +9,8 @@ import ie_scrapy.keys as key
 from core.management.commands.initdb import initialize_database
 import time
 import pickle
-
-# INFO: 197 scraped offers in 20 minutes
-# INFO: 67 scraped offers in 1 minute
-# INFO: 15000 scraped offers in 4 hours
-# INFO: 6 scraped offers in 1 minute
+import logging
+logging.getLogger().setLevel(logging.INFO)
 
 class BaseException(Exception):
     pass
@@ -27,14 +24,12 @@ class NoExistentPageError(BaseException):
 class NoElementFoundError(BaseException):
     pass
 
-
 class InfoempleoSpider(Spider):
 
     name = 'ie'
     allowed_domains = ['infoempleo.com']
-    start_urls__ = ["https://www.infoempleo.com/trabajo/area-de-empresa_legal/"]
-    start_urls_ = ["https://www.infoempleo.com/trabajo/area-de-empresa_educacion-formacion/"]
-    start_urls = [
+    start_urls = ["https://www.infoempleo.com/trabajo/area-de-empresa_legal/"]
+    start_urls_ = [
         "https://www.infoempleo.com/trabajo/area-de-empresa_sanidad-salud-y-servicios-sociales/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_educacion-formacion/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_tecnologia-e-informatica/",
@@ -59,13 +54,6 @@ class InfoempleoSpider(Spider):
         "https://www.infoempleo.com/primer-empleo/",
     ]
 
-    #% Esta variable ya no hace falta
-    allowed_hrefs = [
-        "https://www.infoempleo.com/ofertas-internacionales/",
-        "https://www.infoempleo.com/trabajo/",
-        "https://www.infoempleo.com/primer-empleo/",
-    ]
-
     pipelines = set([
         CleaningPipeline,
         StoragePipeline,
@@ -83,10 +71,11 @@ class InfoempleoSpider(Spider):
         try:
             initialize_database()
         except Exception as e:
-            print(e)
+            logging.exception('Error with initialize_database')
 
     def spider_closed(self, spider):
         spider.logger.info('Spider closed: %s', spider.name)
+        spider.logger.info(f'Spider {spider.name} closed with {self.count} items parsed')
 
     def parse(self, response):
         start_url = self._clean_url(response.url)
@@ -95,35 +84,28 @@ class InfoempleoSpider(Spider):
             total_results =  self._get_the_total_number_of_results(response)
         except Exception as e:
             total_results = 0
-        #job_urls = ['https://www.infoempleo.com/ofertasdetrabajo/operarioa-metal/mostoles/2459763/']
+        job_urls = ['https://www.infoempleo.com/ofertasdetrabajo/operarioa-metal/mostoles/2459763/']
         for job_url in job_urls:
-            print('# Go to job_url: %s', job_url) #%
             yield response.follow(job_url, self.parse_item, meta={
                 key.START_URL: start_url,
                 key.TOTAL_RESULTS: total_results,
             })
         try:
-            if self._is_there_next_page(response):
+            if 1==0: #self._is_there_next_page(response):
                 next_url = self._get_next_page_url(response.url)
-                print('');
-                print('**');
-                print(f'* Next page: {next_url}')
-                if next_url:
-                    yield response.follow(next_url, self.parse)
-                else:
-                    print(f'* {next_url} has been parsed')
+                yield response.follow(next_url, self.parse)
             else:
-                print('All the pages have been requested')
+                logging.info('All the pages have been requested')
         except NoExistentPageError as e:
-            print(f'The url {response.url} has not jobs: {e}')
+            logging.exception(f'The url {response.url} has not job offers')
 
     def _get_info_of_number_of_results(self, response):
         """
         Return from a results page a tuple with the numbers of the first result showed, the last result showed
-        and the total of results. 
+        and the total of results.
+        The extracted text will have the shape 'Mostrando 1-20 de 1028 ofertas'.
         """
         try:
-            # results_showed == 'Mostrando 1-20 de 1028 ofertas'
             results_showed = response.xpath("//p[contains(text(),'Mostrando')]/text()").extract_first()
             text = results_showed.replace('-', ' ')
             numbers = [int(s) for s in text.split() if s.isdigit()]
@@ -131,7 +113,6 @@ class InfoempleoSpider(Spider):
             return InfoResults(numbers[0], numbers[1], numbers[2])
         except Exception as e:
             raise NoElementFoundError()
-
 
     def _get_the_total_number_of_results(self, response):
         try:
@@ -143,7 +124,6 @@ class InfoempleoSpider(Spider):
     def _is_there_next_page(self, response):
         try:
             info_results = self._get_info_of_number_of_results(response)
-            print(info_results)
             return info_results.last_result_showed < info_results.total_results
         except NoElementFoundError as e:
             raise NoExistentPageError()
@@ -201,7 +181,6 @@ class InfoempleoSpider(Spider):
         return company_dict
 
     def _get_job_info(self, response):
-        # doesn't support ManyToManyFields
         job_dict = {
             'link': response.url,
             'registered_people': self._extract_info(response,
@@ -215,7 +194,7 @@ class InfoempleoSpider(Spider):
             'last_update_date': self._extract_info(response,
                                                    "//div[@class='main-title']//ul[@class='details inline'][2]//li[2]/text()"),
             '_summary': self._extract_info(response, "//div[@class='main-title']//p/text()"),
-            'type': response.meta[key.START_URL],
+            'type': self._extract_info(response, "//nav[@class='breadcrumbs']//li[2]/a/text()"),
             'nationality': self._extract_info(response, "//nav[@class='breadcrumbs']//li[2]/a/text()"),
             '_cities': self._extract_info(response,
                                            "//div[@class='main-title']//ul[contains(@class,'details')][2]/li[1]/text()"),
@@ -259,14 +238,11 @@ class InfoempleoSpider(Spider):
         return info
 
     def _get_company_category(self, response):
-        # Intentamos obtener la categoría que se muestra de una compañía registrada en infoempleo
         company_category = self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[@class='category']/text()")
-        # Si la compañía no esta registrada tomamos la breve descripción
         if not company_category:
             company_category = self._extract_info(response, "//div[@class='main-title']//ul[@class='details inline'][1]//li[2]/text()")
             company_category = company_category.strip()
             company_category = company_category.replace('.', "") if company_category.endswith('.') else company_category
-            # Si la breve descripción es escueta tomamos la descripción completa
             if (
                 (company_category.lower() == "importante empresa") or
                 (company_category.lower() == "importante empresa en expansión") or
@@ -279,7 +255,6 @@ class InfoempleoSpider(Spider):
         return company_category
 
     def _get_company_description(self, response):
-        # Si no existe descripción se tomará la breve descripción
         company_description = (
             self._extract_info(response, "//div[contains(@class,'company')]//pre/text()") or
             self._extract_info(response, "//div[contains(@class,'company')]//p/text()") or
@@ -314,4 +289,3 @@ class InfoempleoSpider(Spider):
 def _save(object, file_name):
     with open(file_name, 'wb') as f:
         pickle.dump(object, f)
-

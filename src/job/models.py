@@ -233,9 +233,10 @@ class Job(models.Model):
         (STATE_UPDATED, 'Actualizada'),
         (STATE_CLOSED, 'Inscripción cerrada')
     )
-    TYPE_INTERNATIONAL = 'ofertas-internacionales'
-    TYPE_NATIONAL = 'trabajo'
-    TYPE_FIRST_JOB = 'primer-empleo'
+
+    TYPE_NATIONAL = 'Trabajo'
+    TYPE_INTERNATIONAL = 'Trabajo en el extranjero'
+    TYPE_FIRST_JOB = 'Primer trabajo y practicas'
     TYPE_CHOICES = (
         (TYPE_INTERNATIONAL, 'Empleo internacional'),
         (TYPE_NATIONAL, 'Empleo nacional'),
@@ -344,7 +345,6 @@ class Job(models.Model):
         blank=True,
         verbose_name = "estado"
     )
-
     type = models.CharField(
         max_length=30,
         choices=TYPE_CHOICES,
