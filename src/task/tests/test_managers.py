@@ -5,7 +5,7 @@ class TestTask(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        # The fake tasks have been created by order of the field name
+        # The fake tasks will be create by field name order
         ct1 = Task.objects.create(type=Task.TYPE_CRAWLER, state=Task.STATE_FINISHED, name='company')
         ct2 = Task.objects.create(type=Task.TYPE_CRAWLER, state=Task.STATE_FINISHED, name='job')
         ct3 = Task.objects.create(type=Task.TYPE_CRAWLER, state=Task.STATE_RUNNING, name='job')
@@ -51,4 +51,3 @@ class TestTask(TestCase):
         self.assertEqual(len(l), len(l_))
         for task, task_ in zip(l, l_):
             self.assertEqual(task, task_)
-

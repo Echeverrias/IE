@@ -8,7 +8,7 @@ def is_running(task):
     if not task or not task.pid:
         return False
     else:
-        return  task.state == Task.STATE_RUNNING\
+        return  task.state == Task.STATE_RUNNING
 
 @register.filter(name='get_action_form')
 def get_action_form(model, model_response):

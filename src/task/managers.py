@@ -4,12 +4,7 @@ from .queries import TaskQuerySet
 from datetime import date
 
 
-"""
-https://medium.com/@jairvercosa/manger-vs-query-sets-in-django-e9af7ed744e0
-https://docs.djangoproject.com/en/2.2/topics/db/managers/
-"""
 class TaskManager(models.Manager):
-
 
     def get_queryset(self):
 
@@ -37,4 +32,3 @@ class TaskManager(models.Manager):
 
     def get_latest_finished_crawler_tasks(self):
         return self.get_queryset().get_latest_finished_crawler_tasks()
-

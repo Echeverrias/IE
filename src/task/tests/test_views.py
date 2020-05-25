@@ -1,17 +1,11 @@
 from django.test import TestCase
-from task.models import Task
-from job.models import Job, Company
-import datetime
-from django.utils import timezone
-from dateutil.relativedelta import relativedelta
 from django.urls import reverse
 from django.contrib.auth.models import User
 from multiprocessing import  Queue, Process
+from task.models import Task
+from job.models import Job, Company
 from task.tasks import SpiderProcess
 from .fake_tasks import FakeSpiderProcess
-
-
-
 
 class TestRunCrawlerView(TestCase):
 
@@ -83,5 +77,3 @@ class TestRunCrawlerView(TestCase):
       self.assertEqual(resp.context['scraped_items_number'], data['scraped_items_number'])
       self.assertTemplateUsed(resp, 'task/info_crawler_task.html')
       self.assertTrue(resp.context['is_running'])
-
-

@@ -6,8 +6,6 @@ from ie_scrapy.spiders.ie import InfoempleoSpider
 from ie_scrapy.spiders.companies import InfoempleoCompaniesSpider
 from .models import Task
 from .tasks import SpiderProcess
-from utilities.utilities import write_in_a_file #%
-from django.utils.decorators import method_decorator
 
 
 @staff_member_required
@@ -15,18 +13,15 @@ def run_crawler_view(request, model=None):
     sp = SpiderProcess.get_instance()
     is_running = sp.is_scraping()
     req = ''
-    write_in_a_file('view request - start', {}, 'tasks_view.txt')
     try:
         spider = InfoempleoCompaniesSpider if 'company' in model.lower() else InfoempleoSpider
     except:
         spider = None
     if request.GET.get('crawl', None):
-        write_in_a_file('view request - start get request', {}, 'tasks_view.txt')
         if not is_running:
             user = User.objects.get(username=request.user)
             sp.start(spider, user)
             is_running = True
-        write_in_a_file('view request - end get request', {}, 'tasks_view.txt')
         req = 'crawl'
     if request.GET.get('crawl', None) or 'AJAX' in request.GET: # get a task at most
         last_task = sp.get_actual_task() or sp.get_latest_task()
@@ -35,9 +30,6 @@ def run_crawler_view(request, model=None):
         actual_task = sp.get_actual_task()
         last_tasks = (actual_task and [actual_task]) or sp.get_latest_tasks()
         last_tasks = [task  for task in last_tasks if task.name == spider.name] if spider else last_tasks
-    write_in_a_file('view request - continue', {}, 'tasks_view.txt')
-    write_in_a_file('view request - continue after call is_scraping', {}, 'tasks_view.txt')
-    write_in_a_file('view request - continue after call get_actual_task and get_latest_task', {}, 'tasks_view.txt')
     context = {
         'model': model,
         'tasks': last_tasks,
@@ -48,15 +40,12 @@ def run_crawler_view(request, model=None):
         'req': req,
         'scraped_items_number': -100,
     }
-    write_in_a_file('view request - continue2', {'is_running': is_running, 'context': context}, 'tasks_view.txt')
     if is_running:
         context = { **context, **{
             'scraped_items_number': sp.get_scraped_items_number(),
             }
         }
-    write_in_a_file('view request - continue3', {'is_running': is_running, 'context': context}, 'tasks_view.txt')
     if 'AJAX' in request.GET: #request.is_ajax():
-        write_in_a_file('view request - ajax request', {'is_running': is_running, 'context': context}, 'tasks_view.txt')
         context['ajax'] = True
         if (last_task.state == Task.STATE_RUNNING):
             template_name = 'task/info_crawler_task.html'
@@ -69,6 +58,5 @@ def run_crawler_view(request, model=None):
         else:
             return HttpResponse('not running')
     else:
-        write_in_a_file('view request - not ajax request end', {'is_running': is_running, 'context': context}, 'tasks_view.txt')
         template_name = 'task/main.html'
         return render(request, template_name, context)

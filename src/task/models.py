@@ -49,7 +49,6 @@ class Task(models.Model):
         verbose_name = "Task"
         verbose_name_plural = "Tasks"
         ordering = ['-created_at', 'state']
-        # unique_together = (('id'),)
 
     def __str__(self):
         return f'Task {self.type} {self.name} ({self.pid}) - {self.state} - creada el: {self.created_at} - actualizada el: {self.updated_at}'

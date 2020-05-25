@@ -1,11 +1,9 @@
-##from .models import Job
 from django.db import models
 from django.db.models import Q, F, Count
 from datetime import date
 
 TYPE_CRAWLER = 'Crawler'
 STATE_FINISHED = 'Terminada'
-
 
 class TaskQuerySet(models.QuerySet):
 
@@ -46,4 +44,3 @@ class TaskQuerySet(models.QuerySet):
         except Exception as e:
             print(e)
             return []
-

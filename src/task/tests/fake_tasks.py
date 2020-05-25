@@ -23,15 +23,12 @@ class FakeSpiderProcess(SpiderProcess):
             self._id_task = None
             self._process = None
             self._q = None
-            self._qitems = None
             self._qis_scraping = None
             self._count = 0
-            self._items = []
             self._is_resetting = False
 
     def _execute_crawler_process(self, spider=None):
-        print('Hola')
-        pass#time.sleep()
+        pass
 
     def tearDown(self):
         Task.objects.filter(name='fake').delete()

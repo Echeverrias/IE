@@ -3,7 +3,6 @@ $(document).ready(function(){
     console.log("LOADING JQUERY")
     var ajax_request;
 
-
     function start_ajax_request() {
         console.log('start ajax request')
         return setInterval(get_info_running_crawler, 10000);
