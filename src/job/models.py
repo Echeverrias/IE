@@ -412,7 +412,6 @@ class Job(models.Model):
     )
     vacancies = models.PositiveIntegerField(null=True, blank=True, verbose_name="nº de vacantes")
     registered_people = models.PositiveIntegerField(default=0, verbose_name="inscritos")
-    vacancies_update = models.PositiveIntegerField(null=True, blank=True)
     company = models.ForeignKey(
         Company,
         null=True,
