@@ -187,7 +187,6 @@ class SpiderProcess():
         self.init_datetime = timezone.localtime(timezone.now())  # Before create the task
         self._qis_scraping.put('YES')
         self._process.start()
-        write_in_a_file('SpiderProcess._start_process: process started', {'pid': self._process.pid}, 'tasks.txt')
         data = {
             'pid': self._process.pid,
             'state': Task.STATE_RUNNING,
