@@ -22,7 +22,7 @@ class FakeSpiderProcess(SpiderProcess):
             FakeSpiderProcess.__instance = self
             self._id_task = None
             self._process = None
-            self._q = None
+            self._qitems_number = None
             self._qis_scraping = None
             self._count = 0
             self._is_resetting = False
@@ -34,13 +34,12 @@ class FakeSpiderProcess(SpiderProcess):
         Task.objects.filter(name='fake').delete()
         self._id_task = None
         self._process = None
-        self._q = None
+        self._qitems_number = None
         self._qis_scraping = None
         self._count = 0
         self._is_resetting = False
-        FakeSpiderProcess._sp._id_task = None
         FakeSpiderProcess._sp._process = None
-        FakeSpiderProcess._sp._q = None
+        FakeSpiderProcess._sp._qitems_number = None
         FakeSpiderProcess._sp._qis_scraping = None
         FakeSpiderProcess._sp._count = 0
         FakeSpiderProcess._sp._is_resetting = False
@@ -54,8 +53,8 @@ class FakeSpiderProcess(SpiderProcess):
         q_items = Queue()
         scraped_items_number = 20
         q_items.put(scraped_items_number)
-        self._q = q_items
-        FakeSpiderProcess._sp._q = q_items
+        self._qitems_number = q_items
+        FakeSpiderProcess._sp._qitems_number = q_items
         qis_scraping = Queue()
         qis_scraping.put(True)
         self._qis_scraping = qis_scraping
@@ -64,8 +63,8 @@ class FakeSpiderProcess(SpiderProcess):
 
     def simulate_finished_process(self):
         task = Task.objects.create(pid=555, name='fake', state=Task.STATE_FINISHED, result=120, type=Task.TYPE_CRAWLER)
-        self._q = Queue()
-        FakeSpiderProcess._sp._q = Queue()
+        self._qitems_number = Queue()
+        FakeSpiderProcess._sp._qitems_number = Queue()
         self._qis_scraping = Queue()
         FakeSpiderProcess._sp._qis_scraping = Queue()
         return {'task': task}
