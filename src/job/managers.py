@@ -90,6 +90,3 @@ class CompanyManager(models.Manager):
             using=self._db,
             hints=self._hints
         )
-
-    def registered_companies(self):
-        return self.get_queryset().registered_companies()

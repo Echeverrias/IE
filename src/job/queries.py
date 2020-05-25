@@ -36,7 +36,6 @@ class JobQuerySet(models.QuerySet):
         return self.filter(state=STATE_CLOSED_JOB, expiration_date__lt=date.today())
 
     def available_offers(self):
-        print('qs.available_offers')
         return self.exclude(state=STATE_CLOSED_JOB).exclude(expiration_date__lt=date.today())
 
     def new_offers(self):
@@ -132,7 +131,6 @@ class JobQuerySet(models.QuerySet):
 
 class CompanyQuerySet(models.QuerySet):
 
-    def registered_companies(self):
-        return self.exclude(link=None).exclude(link='')
+    pass
 
 
