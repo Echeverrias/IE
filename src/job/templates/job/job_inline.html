@@ -1,6 +1,6 @@
 <div class="job-inline remnant clickeable"  id="{{ job.id }}">
-    <h5 class="card-title">
-     <a href="{{ job.get_absolute_url }}">{{job.name}} - {% for city in job.cities.all %}{{ city.name }} - {% endfor %}   ({{ job.cities.all.first.country.name }})</a>
+    <h5 class="card-title job-title">
+     <a href="{{ job.get_absolute_url }}">{{job.name}}</a>
    </h5>
     <div class="card-body">
         <hr>

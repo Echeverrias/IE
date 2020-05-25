@@ -5,7 +5,7 @@
         <h2>Búsquedas de ofertas de empleo disponibles</h2>
     </div>
     <div class="row">
-        <div class="col-lg-6 text-center">
+        <div class="col-lg-12 text-center">
             {% if job_list %}
                 <!-- <h3 class="title">Resultados encontrados</h3><br> -->
                 <p>Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} resultados</p>
@@ -13,28 +13,26 @@
                 <h3 class="title">No se han encontrado resultados {{ city_name }}</h3>
             {% endif %}
         </div>
-        <div class="col-lg-6 text-center">
-            <div id='btn-filters' class="btn dropdown-toggle ie-btn">
-                Filtros
+    </div>
+    {% if job_list %}
+    <div class="row">
+        <div class="col-lg-8 card-list block">
+            <div class="card-list block"><!-- class="col-lg-12 card-list block" -->
+                {% include 'job/job_list.html' with job_list=job_list %}
             </div>
-            <div id="filters" class="hidden">
+            <div class="block"><!-- class="col-lg-12 card-list block" -->
+                {% include 'job/pagination.html' with is_paginated=is_paginated  page_obj=page_obj  paginate_by=paginate_by %}
+            </div>
+        </div>
+        <div class="col-lg-2 text-center">
+            <div id="filters">
                 <form method="GET" action="." enctype="multipart/form-data">{% csrf_token %}
                      {{ form.as_p }}
                     <button type="submit" class="btn btn-primary">Aplicar filtros</button>
                 </form>
             </div>
-
         </div>
     </div>
-    {% if job_list %}
-        <div class="row">
-            <div class="col-lg-12 card-list block">
-                {% include 'job/job_list.html' with job_list=job_list %}
-            </div>
-            <div class="col-lg-12 block">
-                {% include 'job/pagination.html' with is_paginated=is_paginated  page_obj=page_obj  paginate_by=paginate_by %}
-            </div>
-        </div>
     {% endif %}
 </div>
 {% endblock %}

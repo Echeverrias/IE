@@ -11,7 +11,7 @@ class JobListView(ListView):
     model = Job
     context_object_name = 'job_list'
     template_name = 'job/query_form.html'
-    paginate_by = 10
+    paginate_by = 20
 
     def get_queryset(self, *args, **kwargs):
         print(f'JobListView.get_queryset')
