@@ -27,9 +27,6 @@ def _get_offers_years_range():
 
 class JobFilter(django_filters.FilterSet):
 
-    def __init__(self, *args, **kwargs):
-        super(JobFilter, self).__init__(*args, **kwargs)
-
     class Meta:
         model = Job
         fields = ['type', 'working_day', 'contract', 'area']
