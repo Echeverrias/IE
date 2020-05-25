@@ -4,7 +4,8 @@ from .models import Job
 from django.db.models import Q, F
 from datetime import date
 from django import forms
-
+import logging
+logging.getLogger().setLevel(logging.INFO)
 
 MONTHS = {
     1:_('Enero'), 2:_('Febrero'), 3:_('Marzo'), 4:_('Abril'),
@@ -26,13 +27,16 @@ def _get_offers_years_range():
 
 class JobFilter(django_filters.FilterSet):
 
+    def __init__(self, *args, **kwargs):
+        super(JobFilter, self).__init__(*args, **kwargs)
+
     class Meta:
         model = Job
         fields = ['type', 'working_day', 'contract', 'area']
 
+    free_vacancies = django_filters.BooleanFilter(method='search_free_vacancies', label='Vacantes libres')
     text = django_filters.CharFilter(method='search_text', label='Texto')
     minimum_salary = django_filters.NumberFilter(lookup_expr='gte', label='Salario mínimo')
-    free_vacancies = django_filters.BooleanFilter(method='search_free_vacancies', label='Vacantes libres')
     cities = django_filters.CharFilter(field_name="cities", lookup_expr='name__icontains', label='Ciudad')
     province = django_filters.CharFilter(field_name="cities", lookup_expr='province__name__icontains', label='Provincia')
     country = django_filters.CharFilter(field_name="cities", lookup_expr='country__name__icontains', label='País')
@@ -47,23 +51,8 @@ class JobFilter(django_filters.FilterSet):
 
     @property
     def qs(self):
-        parent_qs = super().qs
-        available_offers = parent_qs.exclude(state=Job.STATE_CLOSED).exclude(expiration_date__lt=date.today())
-        available_offers = available_offers.order_by('-first_publication_date', 'last_update_date')
-        return available_offers
-
-    def search_text(self, queryset, field_name, *args, **kwargs):
-        try:
-            if args:
-                return queryset.filter(Q(name__icontains=args[0])
-                                       | Q(requirements__icontains=args[0])
-                                       | Q(functions__icontains=args[0])
-                                       | Q(it_is_offered__icontains=args[0])
-                                       | Q(company__company_name=args[0])).distinct()
-        except Exception as e:
-            print(f'search_text error: {e}')
-            return Job.objects.none()
-        return queryset
+        parent_qs = super(JobFilter, self).qs
+        return parent_qs
 
     def search_free_vacancies(self, queryset, field_name, *args, **kwargs):
         try:
@@ -71,8 +60,23 @@ class JobFilter(django_filters.FilterSet):
                return queryset.free_vacancies()
             if args and not args[0]:
                 return queryset.not_free_vacancies()
-        except:
-            pass
+        except Exception:
+            logging.exception("Error in search_text")
+        return queryset
+
+    def search_text(self, queryset, field_name, *args, **kwargs):
+        try:
+            if args:
+                qs = queryset.filter(Q(name__icontains=args[0])
+                                       | Q(requirements__icontains=args[0])
+                                       | Q(functions__icontains=args[0])
+                                       | Q(it_is_offered__icontains=args[0])
+                                       | Q(company__name=args[0]))
+                qs = qs.distinct()
+                return qs
+        except Exception as e:
+            logging.exception("Error in search_text")
+            return Job.objects.none()
         return queryset
 
     def after_date(self, queryset, field_name, *args, **kwargs):
@@ -82,8 +86,8 @@ class JobFilter(django_filters.FilterSet):
             if args:
                 return queryset.filter(Q(last_update_date__gte=args[0]) |
                                        Q(first_publication_date__gte=args[0])).distinct()
-        except:
-            pass
+        except Exception:
+            logging.exception("Error in search_text")
         return queryset
 
     def between_dates(self, queryset, field_name, *args, **kwargs):
@@ -96,8 +100,8 @@ class JobFilter(django_filters.FilterSet):
                                        | Q(last_update_date__gte=slice.start)).distinct()
                 return qs_start.filter(Q(first_publication_date__lte=slice.stop)
                                            | Q(last_update_date__lte=slice.stop)).distinct()
-        except:
-            pass
+        except Exception:
+            logging.exception("Error in search_text")
         return queryset
 
 

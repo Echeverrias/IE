@@ -14,9 +14,8 @@ class JobListView(ListView):
     paginate_by = 20
 
     def get_queryset(self, *args, **kwargs):
-        print(f'JobListView.get_queryset')
         qs = super(JobListView, self).get_queryset()
-        qs = qs.prefetch_related('cities')
+        qs = qs.available_offers().prefetch_related('cities').order_by('-first_publication_date', 'last_update_date')
         self.job_filtered_list = JobFilter(self.request.GET, qs)
         return self.job_filtered_list.qs
 
