@@ -12,12 +12,14 @@ from time import time as now
 from dateutil.relativedelta import relativedelta
 from .keys import START_URL, TOTAL_RESULTS
 from job.models import Job, Company
+from utilities.debug_ import write_in_a_file #%
+
 
 class CheckDownloaderMiddleware(object):
 
    def process_request(self, request, spider):
         url = request.url
-        if ('ofertasdetrabajo' in url) or ('ofertasempresa' in url):
+        if ('ofertasdetrabajo' in url) or ('ofertasempresa' in url) or ('colaboradoras' in url):
             model = Job if 'ofertasdetrabajo' in url else Company
             try:
                 instance = model.objects.get(link=url)
@@ -38,34 +40,25 @@ class CheckDownloaderMiddleware(object):
 
 
 class PUADownloaderMiddleware(object):
-    
+
+    max_retry = 100
     proxy = None
     ua = None
 
-    def process_request(self, request, spider):
-        """
-        Set the last valid proxy and user agent in the request
-        """
-        if PUADownloaderMiddleware.proxy:
-            request.meta.update({'proxy_source': PUADownloaderMiddleware.proxy})
-            request.meta.update({'proxy':
-                                f'{PUADownloaderMiddleware.proxy.type}://{PUADownloaderMiddleware.proxy.host}:{PUADownloaderMiddleware.proxy.port}'})
-            request.headers.update({b'User-Agent':[PUADownloaderMiddleware.ua]})
-
-
-class ERDownloaderMiddleware(object):
-
-    max_retry = 100
-
-    def _make_the_request_again(self, request):
-        n = ERDownloaderMiddleware.max_retry
-        if request.meta.get('retry', 0) < n:
+    def _make_the_request_again(self, request, response=None):
+        write_in_a_file('Process exception', {'url': request.url, 'retry': request.meta.get('retry', 0)}, 'exception_.txt')
+        n = PUADownloaderMiddleware.max_retry
+        if ('robots' in request.url) and request.meta.get('retry', 0) > 5:
+            raise IgnoreRequest(f'The request {request.url} has been failed {n} times')
+        elif (response and response.status == 404) and (request.meta.get('retry', 0) > 5):
+            raise IgnoreRequest(f'The request {request.url} has been failed {n} times with status {response.status}')
+        elif request.meta.get('retry', 0) < n:
             retry = request.meta['retry'] + 1 if request.meta.get('retry') else 1
             meta = {**request.meta, 'retry': retry}
             request =  Request(url=request.url, meta=meta, headers=request.headers, callback=request.callback,
                            dont_filter=True)
         else:
-            raise IgnoreRequest(f'The request has been failed {n} times')
+            raise IgnoreRequest(f'The request {request.url} has been failed {n} times')
         return request
 
     def _check_proxy_and_ua(self, request, spider, response=None):
@@ -87,14 +80,22 @@ class ERDownloaderMiddleware(object):
             spider.logger.warning(f'_check_proxy_and_ua exception: {e}')
 
     def process_request(self, request, spider):
-        if request.meta.get('ignore'):
-            raise IgnoreRequest(f'Ignore request: {request.url}')
+        """
+        Set the last valid proxy and user agent in the request
+        """
+        if PUADownloaderMiddleware.proxy:
+            request.meta.update({'proxy_source': PUADownloaderMiddleware.proxy})
+            request.meta.update({'proxy':
+                                     f'{PUADownloaderMiddleware.proxy.type}://{PUADownloaderMiddleware.proxy.host}:{PUADownloaderMiddleware.proxy.port}'})
+            request.headers.update({b'User-Agent': [PUADownloaderMiddleware.ua]})
 
     def process_exception(self, request, exception, spider):
         if type(exception) == IgnoreRequest or request.meta.get('ignore'):
-            spider.logger.info(f'The request {request.url } will be ignored')
+            write_in_a_file('Process exception', {'url': request.url, 'exception': exception}, 'ignored_.txt')
+            request.meta.get('retry', 0)
             return None
         else:
+            write_in_a_file('Process exception', {'url': request.url, 'exception': exception}, 'exception_.txt')
             self._check_proxy_and_ua(request, spider)
             result = self._make_the_request_again(request)
             return result
@@ -102,7 +103,9 @@ class ERDownloaderMiddleware(object):
     def process_response(self, request, response, spider):
         self._check_proxy_and_ua(request, spider, response)
         if response.status == 200:
+            write_in_a_file('Process response', {'url': request.url}, 'ok.txt')
             return response
         else:
-            result = self._make_the_request_again(request)
+            write_in_a_file('Process response', {'url': request.url, 'status': response.status}, 'not ok.txt')
+            result = self._make_the_request_again(request, response)
             return result
