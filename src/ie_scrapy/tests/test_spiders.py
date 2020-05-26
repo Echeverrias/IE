@@ -90,6 +90,13 @@ class FakeResponse():
         return FakeResponse._fake_response_from_file(filename, url, meta=meta, data=data)
 
     @staticmethod
+    def get_collaborating_companies_results_response():
+        url = 'https://www.infoempleo.com/empresas-colaboradoras/'
+        filename = "collaborating_companies.html"
+        data = {'_companies': 520}
+        return FakeResponse._fake_response_from_file(filename, url), data
+
+    @staticmethod
     def get_company_response():
         url = 'https://www.infoempleo.com/ofertasempresa/iman-temporing-ett-s-l/7347/'
         filename = "company.html"
@@ -113,7 +120,7 @@ class TestInfoempleoSpider(TestCase):
     def setUpTestData(cls):
         cls.ie = InfoempleoSpider()
 
-    def _test_parse(self):
+    def test_parse(self):
         # Getting the last page
         response, data = FakeResponse.get_offers_results_last_page_response()
         for offer_req in self.ie.parse(response):
@@ -131,7 +138,7 @@ class TestInfoempleoSpider(TestCase):
                 self.assertIn(url, offer_req.url)
                 self.assertEqual(offer_req.callback, self.ie.parse)
 
-    def _test_get_info_of_number_of_results(self):
+    def test_get_info_of_number_of_results(self):
         response, data = FakeResponse.get_offers_results_last_page_response()
         self.assertEqual(self.ie._get_info_of_number_of_results(response),
                          data.get('_info_results'))
@@ -144,7 +151,7 @@ class TestInfoempleoSpider(TestCase):
         finally:
             self.assertIsInstance(exception, NoElementFoundError)
 
-    def _test_get_the_total_number_of_results(self):
+    def test_get_the_total_number_of_results(self):
         response, data = FakeResponse.get_offers_results_last_page_response()
         self.assertEqual(self.ie._get_the_total_number_of_results(response),
                          data.get('_info_results').total_results)
@@ -157,7 +164,7 @@ class TestInfoempleoSpider(TestCase):
         finally:
             self.assertIsInstance(exception, NoElementFoundError)
 
-    def _test_is_there_next_page(self):
+    def test_is_there_next_page(self):
         response, data = FakeResponse.get_offers_results_response()
         self.assertTrue(self.ie._is_there_next_page(response))
         response, data = FakeResponse.get_offers_results_last_page_response()
@@ -171,12 +178,12 @@ class TestInfoempleoSpider(TestCase):
         finally:
             self.assertIsInstance(exception, NoExistentPageError)
 
-    def _test_clean_url(self):
+    def test_clean_url(self):
         response, data = FakeResponse.get_offers_results_response()
         isep = response.url.rfind('/')
         self.assertEqual(self.ie._clean_url(response.url), response.url[0:isep+1])
 
-    def _test_get_next_page_url(self):
+    def test_get_next_page_url(self):
         response, data = FakeResponse.get_offers_results_response()
         response_page = data.get('_page')
         next_page = response.url.replace(str(response_page), str(response_page + 1))
@@ -188,17 +195,17 @@ class TestInfoempleoSpider(TestCase):
         next_page = f'{response.url}?pagina={page}'
         self.assertEqual(self.ie._get_next_page_url(response.url, next_page=page), next_page)
         
-    def _test_extract_company_info(self):
+    def test_extract_company_info(self):
         response, data = FakeResponse.get_offer_response()
         company_dict = self.ie._get_company_info(response)
         self.assertEqual(company_dict, data.get('company_dict'))
 
-    def _test_extract_job_info(self):
+    def test_extract_job_info(self):
         response, data = FakeResponse.get_offer_response()
         job_info = self.ie._get_job_info(response)
         self.assertEqual(job_info, data.get('job_dict'))
 
-    def _test_parse_item(self):
+    def test_parse_item(self):
         response, data = FakeResponse.get_offer_response()
         gen = self.ie.parse_item(response)
         for ji in gen:
@@ -211,8 +218,39 @@ class TestInfoempleoCompaniesSpider(TestCase):
     def setUpTestData(cls):
         cls.spider = InfoempleoCompaniesSpider()
 
+    def test_parse(self):
+        response, data = FakeResponse.get_collaborating_companies_results_response()
+        count = 0
+        for yielded in self.spider.parse(response):
+            self.assertTrue(type(yielded) == Request or type(yielded) == CompanyItem)
+            if type(yielded) == CompanyItem:
+                self.assertFalse(yielded.get('link'))
+                self.assertTrue(yielded.get('is_registered'))
+                self.assertTrue(yielded.get('name'))
+                self.assertTrue(yielded.get('is_registered'))
+            else:
+                if not(('ofertasempresa' in yielded.url or 'colaboradoras' in yielded.url)):
+                    breakpoint()
+                self.assertTrue('ofertasempresa' in yielded.url or 'colaboradoras' in yielded.url)
+                self.assertTrue(yielded.meta.get('area'))
+                self.assertTrue(yielded.meta.get('name'))
+                self.assertTrue(yielded.meta.get('link'))
+                self.assertTrue(yielded.meta.get('is_registered'))
+            count = count + 1
+        self.assertEqual(count, data.get('_companies'))
+
     def test_get_company_reference(self):
         reference = 181984
         url = f'https://www.infoempleo.com/ofertasempresa/sens-iberica/{reference}/'
         response = FakeResponse.get_basic_response(url)
         self.assertEqual(self.spider._get_company_reference(response), reference)
+        url = f"https://www.infoempleo.com/colaboradoras/adecco/presentacion/"
+        response = FakeResponse.get_basic_response(url)
+        self.assertIsNone(self.spider._get_company_reference(response))
+
+    def test_clean_company_url(self):
+        self.assertIsNone(self.spider._clean_company_url('/'))
+        self.assertEqual(self.spider._clean_company_url('/ofertasempresa/fundacion-sepi/23099/'), "https://www.infoempleo.com/ofertasempresa/fundacion-sepi/23099/")
+        self.assertEqual(self.spider._clean_company_url('/colaboradoras/adecco/presentacion/'), "https://www.infoempleo.com/colaboradoras/adecco/presentacion/")
+        self.assertEqual(self.spider._clean_company_url("https://www.infoempleo.com/ofertasempresa/fundacion-sepi/23099/"), "https://www.infoempleo.com/ofertasempresa/fundacion-sepi/23099/")
+        self.assertEqual(self.spider._clean_company_url("https://www.infoempleo.com/ofertasempresa/fundacion-sepi/23099/"), "https://www.infoempleo.com/ofertasempresa/fundacion-sepi/23099/")

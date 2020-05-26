@@ -40,20 +40,20 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
                 link = company_selector.xpath(".//a/@href").extract_first()
                 link = self._clean_company_url(link)
                 if link:
-                    yield response.follow(link, self.parse_item, meta={'name': name, 'area': area, 'link': link})
+                    yield response.follow(link, self.parse_item, meta={'name': name, 'area': area, 'link': link, 'is_registered': True})
                 else:
                     company_item = CompanyItem(name=name, area=area, is_registered=True)
                     yield company_item
 
     def _clean_company_url(self, link):
         domain = "https://www.infoempleo.com"
-        if domain not in link:
+        if link == '/' or link == f'{domain}/':
+            return None
+        elif 'https' not in link:
             return domain + link
+        elif "https://www.infoempleo.com" not in link:
+            return None
         else:
-            if ("https://www.infoempleo.com" not in link):
-                with open('company warning', 'a') as f:
-                    f.write(link)
-                    f.write('')
             return link
 
     def parse_item(self, response):
