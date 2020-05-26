@@ -22,3 +22,4 @@ import django
 django.setup()
 from core.management.commands.initdb import initialize_database
 initialize_database()
+

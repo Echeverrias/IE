@@ -81,7 +81,6 @@ def get_languages_and_levels_pairs(text):
     :param text: a string
     :return: a list of language-level tuples
     """
-    print() ##
     text = fix_languages(text)
     pairs = []
     languages = get_languages(text)

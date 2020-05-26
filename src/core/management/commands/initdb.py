@@ -4,6 +4,8 @@ import math
 import os
 import threading
 from job.models import City, Province, Community, Country, Language
+import logging
+logging.getLogger().setLevel(logging.INFO)
 
 class InitializingDataInTablesException(Exception):
     pass
@@ -40,7 +42,7 @@ def _get_model_df(smodel):
         path = f'{CSV_PATH}{smodel.lower()}{SUFFIX}.csv'
         return _get_df(path)
     except Exception as e:
-        print(f'Error: {e}')
+        logging.exception(f"Error getting {path}")
 
 def _insert_countries(countries_csv=COUNTRIES_CSV):
     Country.objects.all().delete()
@@ -84,7 +86,7 @@ def _insert_cities(cities_csv=CITIES_CSV):
                 country = Country.objects.get(id=int(country_id))
                 e['country'] = country
             except Exception as e:
-                print(f'Error "{e}"  in country_id:{country_id}')
+                logging.exception(f'Error "{e}"  in country_id:{country_id}')
                 continue
         else:
             continue
@@ -94,7 +96,7 @@ def _insert_cities(cities_csv=CITIES_CSV):
                 province = Province.objects.get(id=int(province_id))
                 e['province'] = province
             except Exception as e:
-                print(f'Error "{e}" in province_id:{province_id}')
+                logging.exception(f'Error "{e}" in province_id:{province_id}')
                 e['province'] = None
         else:
             e['province'] = None
@@ -116,7 +118,7 @@ def insert_locations():
     _insert_communities()
     _insert_provinces()
     _insert_cities()
-    print('The locations tables have been initializing')
+    logging.info('The locations tables have been initializing')
 
 def insert_languages():
     Language.objects.all().delete()
@@ -128,7 +130,7 @@ def insert_languages():
                 print('Error:')
                 print(f"name={l}, level={l_}")
                 print(e)
-    print('The language table has been initializing')
+    logging.info('The language table has been initializing')
 
 def is_language_table_empty():
     try:
@@ -171,7 +173,7 @@ def initialize_database():
         initialize_language_table()
         initialize_location_tables()
     else:
-        print('The database has been initializing')
+        logging.info('The database has been initializing')
 
 class Command(BaseCommand):
     help = "Initializing language and locations tables"

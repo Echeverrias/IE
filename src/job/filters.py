@@ -77,8 +77,6 @@ class JobFilter(django_filters.FilterSet):
         return queryset
 
     def after_date(self, queryset, field_name, *args, **kwargs):
-        print('after_date')
-        print(args)
         try:
             if args:
                 return queryset.filter(Q(last_update_date__gte=args[0]) |
@@ -100,9 +98,3 @@ class JobFilter(django_filters.FilterSet):
         except Exception:
             logging.exception("Error in search_text")
         return queryset
-
-
-
-
-
-
