@@ -5,17 +5,13 @@ import re
 import os
 from ..items import CompanyItem
 from core.management.commands.initdb import initialize_database
-import json #%
+import logging
+logging.getLogger().setLevel(logging.INFO)
 
 class InfoempleoCompaniesSpider(scrapy.Spider):
     name = 'companies'
     allowed_domains = ['infoempleo.com']
     start_urls = ['https://www.infoempleo.com/empresas-colaboradoras/']
-
-    custom_settings = {
-        'FEED_URI': 'companies_.json',
-        'FEED_FORMAT': "json",
-    }
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
@@ -29,13 +25,12 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
         try:
             initialize_database()
         except Exception as e:
-            print(e)
+            logging.exception('Error with initialize_database')
 
     def spider_closed(self, spider):
         spider.logger.info('Spider closed: %s', spider.name)
 
     def parse(self, response):
-        print('PARSE')
         categories_selectors = response.xpath("//div[contains(@id, 'lightbox-subarea')]")
         for company_selector in categories_selectors:
             area = company_selector.xpath(".//header/text()").extract_first()
@@ -45,7 +40,6 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
                 link = company_selector.xpath(".//a/@href").extract_first()
                 link = self._clean_company_url(link)
                 if link:
-                    print(f'YIELDING: {link}')
                     yield response.follow(link, self.parse_item, meta={'name': name, 'area': area, 'link': link})
                 else:
                     company_item = CompanyItem(name=name, area=area, is_registered=True)
@@ -61,22 +55,14 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
             return link
 
     def parse_item(self, response):
-        print(f'PARSE_ITEM: {response.url}')
         if not response.url.startswith("https://www.infoempleo.com"):
             if not response.meta.get('second_request'):
-                breakpoint()
                 name = response.meta.get('name')
                 area = response.meta.get('area')
                 link = response.meta.get('redirect_urls')[0]
-                print(f'redirect_urls: {response.meta.get("redirect_urls")}')
-                with open('redirections.json', 'a') as f:
-                    json.dump({'name': name, 'area': area, 'link':link, 'url': response.url}, f)
                 yield response.follow(link, self.parse_item, meta={'name': name, 'area': area, 'second_request': True})
             else:
-                with open('redirections.json', 'a') as f:
-                    json.dump({'name': response.meta.get('name'), 'area': response.meta.get('area'), 'link': response.meta.get('redirect_urls')[0], 'url': response.url}, f)
-                breakpoint()
-                print(f'redirect_urls: {response.meta.get("redirect_urls")}')
+                logging.info(f'redirect_urls: {response.meta.get("redirect_urls")}')
         else:
             company_dict = self._get_company_info(response)
             company_item = CompanyItem(company_dict)
@@ -111,7 +97,6 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
         return company_dict
 
     def _get_company_description(self, response):
-        # Si no existe descripción se tomará la breve descripción
         company_description = (
                 self._extract_info(response, "//div[contains(@class,'company')]//pre/text()") or
                 self._extract_info(response, "//div[contains(@class,'company')]//p/text()") or

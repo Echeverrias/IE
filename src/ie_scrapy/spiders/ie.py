@@ -8,7 +8,6 @@ from ..pipelines import CleaningPipeline, StoragePipeline
 import ie_scrapy.keys as key
 from core.management.commands.initdb import initialize_database
 import time
-import pickle
 import logging
 logging.getLogger().setLevel(logging.INFO)
 
@@ -75,7 +74,6 @@ class InfoempleoSpider(Spider):
 
     def spider_closed(self, spider):
         spider.logger.info('Spider closed: %s', spider.name)
-        spider.logger.info(f'Spider {spider.name} closed with {self.count} items parsed')
 
     def parse(self, response):
         start_url = self._clean_url(response.url)
@@ -91,7 +89,7 @@ class InfoempleoSpider(Spider):
                 key.TOTAL_RESULTS: total_results,
             })
         try:
-            if 1==0: #self._is_there_next_page(response):
+            if self._is_there_next_page(response):
                 next_url = self._get_next_page_url(response.url)
                 yield response.follow(next_url, self.parse)
             else:
@@ -158,8 +156,6 @@ class InfoempleoSpider(Spider):
         company_item = CompanyItem(company_dict)
         job_item = JobItem(job_dict)
         job_item['company'] = company_item
-        _save(company_item, 'company_item.item')
-        _save(job_item, 'job_item.item')
         yield job_item
 
     def _get_company_info(self, response):
@@ -177,7 +173,6 @@ class InfoempleoSpider(Spider):
             'offers': self._extract_info(response,
                                          "//div[@class='company']//*[contains(@class,'details')]/li[child::a]/a/text()")
         }
-        _save(company_dict, 'company_info.dict')
         return company_dict
 
     def _get_job_info(self, response):
@@ -227,7 +222,6 @@ class InfoempleoSpider(Spider):
             'vacancies': self._extract_info(response,
                                             "//div[@class='offer']//h3[contains(text(), 'Vacantes')]//following-sibling::p[1]/text()"),
         }
-        _save(job_dict, 'job_info.dict')
         return job_dict
 
     def _extract_info(self, response, xpath):
@@ -285,7 +279,3 @@ class InfoempleoSpider(Spider):
         if 'Otros Paises' in country:
             country = self._extract_info(response, "//div[@class='company']//*[contains(@class,'details')]/li[1]/text()")
         return country
-
-def _save(object, file_name):
-    with open(file_name, 'wb') as f:
-        pickle.dump(object, f)
