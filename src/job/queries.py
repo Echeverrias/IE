@@ -21,7 +21,7 @@ class JobQuerySet(models.QuerySet):
         return self.exclude(type='primer empleo')
 
     def exclude_not_salary(self):
-        return self.exclude(minimum_salary=0)
+        return self.exclude(minimum_salary=0).exclude(minimum_salary=None)
 
     def exclude_expirated_offers(self):
         return self.exclude(state=STATE_CLOSED_JOB).exclude(expiration_date__lt=date.today())
