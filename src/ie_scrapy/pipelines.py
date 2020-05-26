@@ -376,24 +376,49 @@ class CleaningPipeline():
 
     def _clean_company_name(self, company_item):
 
+        def _get_important_words(string):
+            string = string.replace('Empresa', "").replace('Compañ', "").replace('En', "").replace('Desde', "").replace('Somos', "")
+            lsub = string.split(" ")
+            lsub = lsub[1:] if lsub[0].istitle() and not lsub[1].istitle() else lsub
+            important_words = [x for x in lsub if x.istitle() or x.isupper()]
+            sub= (" ").join(important_words)
+            return sub
+
         def _get_company_name_in_resume(resume):
             try:
-                match = re.search(r'S.(L|A)|S.l.u| slu| S(L|A)', resume)
-                result = resume if (match or resume.isupper()) else ''
+                if resume.isupper() or resume.startswith('Grupo'):
+                    return resume
+                else:
+                    try:
+                        match = re.search(r'S.(L|A)|S.l.u| slu| S(L|A)', resume)[0]
+                        i = resume.find(match)
+                        sub = resume[0:i]
+                        sub_ = _get_important_words(sub)
+                        match = match + '.' if '.' in match and not match.endswith('.') else match
+                        result = f'{sub_} {match}'
+                        return result
+                    except:
+                        result = ""
             except:
                 result = ""
             return result
 
         def _get_company_name_in_description(description):
 
-            def _get_company_name_from_description_start(string):
+            def _get_company_name_from_description_start(string_titled):
+
+                words = string_titled.split(" ")
+                words = words[1:] if words[0].istitle() and not words[1].istitle() else words
+                string = (" ").join(words)
+                i = string.find('Para') # Para Madrid
+                string = string[0:i] if i > -1 else string
                 words = string.split(" ")
                 result = []
                 for word in words:
-                    if word.islower() or word == "Para":
+                    if len(result) > 1 and word.islower():
                         break
-                    elif (word.istitle() and word not in ["En", 'Desde', 'Somos']) or word.isupper():
-                        result.append(word)
+                    elif (word.istitle() and word not in ["En", 'Desde', 'Somos', 'Empresa', 'Compañía']) or word.isupper():
+                        result.append(word[0:-1] if word.endswith(',') else word)
                 if result and len(result) > 1:
                     return " ".join(result)
                 else:
@@ -468,9 +493,11 @@ class CleaningPipeline():
 
         def _get_company_category_in_resume(resume):
             result = ""
+            if resume.isupper() or resume.istitle():
+                return resume
             try:
-                result = re.sub(
-                    r"(((Importante|Destacada|Reconocida|Gran) )?empresa (l(i|í)der )?(dedicada )?((en|de|a) (el|la|los|las)|del|de|al) )", "", resume, flags=re.I)
+                rexp=r"(((Importante|Destacada|Reconocida|Gran) )?(empresa |asesoría |consultoría |consultora )(multinacional |nacional )?(l(i|í)der )?(dedicada |dedicada y especializada |especializada )?((en|de|a|al) (el|la|los|las)|del|de|al|en) )"
+                result = re.sub(rexp, "", resume, flags=re.I)
                 if result != resume:
                     result = result.replace('.', '').strip()
                     result_lower = result.lower()
