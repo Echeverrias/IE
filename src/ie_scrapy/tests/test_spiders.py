@@ -6,6 +6,7 @@ from collections import namedtuple
 from job.models import Job, Company
 from ie_scrapy.items import JobItem, CompanyItem
 from ie_scrapy.spiders.ie import InfoempleoSpider, PageNotFoundError, NoExistentPageError, NoElementFoundError
+from ie_scrapy.spiders.companies import InfoempleoCompaniesSpider
 import pickle
 
 BASE_DIR = os.path.dirname(__file__)
@@ -100,6 +101,11 @@ class FakeResponse():
         filename = "error_404.html"
         return FakeResponse._fake_response_from_file(filename, url)
 
+    @staticmethod
+    def get_basic_response(url):
+        return HtmlResponse(url=url)
+
+
 class TestInfoempleoSpider(TestCase):
 
     ie = InfoempleoSpider()
@@ -107,7 +113,7 @@ class TestInfoempleoSpider(TestCase):
     def setUpTestData(cls):
         cls.ie = InfoempleoSpider()
 
-    def test_parse(self):
+    def _test_parse(self):
         # Getting the last page
         response, data = FakeResponse.get_offers_results_last_page_response()
         for offer_req in self.ie.parse(response):
@@ -125,7 +131,7 @@ class TestInfoempleoSpider(TestCase):
                 self.assertIn(url, offer_req.url)
                 self.assertEqual(offer_req.callback, self.ie.parse)
 
-    def test_get_info_of_number_of_results(self):
+    def _test_get_info_of_number_of_results(self):
         response, data = FakeResponse.get_offers_results_last_page_response()
         self.assertEqual(self.ie._get_info_of_number_of_results(response),
                          data.get('_info_results'))
@@ -138,7 +144,7 @@ class TestInfoempleoSpider(TestCase):
         finally:
             self.assertIsInstance(exception, NoElementFoundError)
 
-    def test_get_the_total_number_of_results(self):
+    def _test_get_the_total_number_of_results(self):
         response, data = FakeResponse.get_offers_results_last_page_response()
         self.assertEqual(self.ie._get_the_total_number_of_results(response),
                          data.get('_info_results').total_results)
@@ -151,7 +157,7 @@ class TestInfoempleoSpider(TestCase):
         finally:
             self.assertIsInstance(exception, NoElementFoundError)
 
-    def test_is_there_next_page(self):
+    def _test_is_there_next_page(self):
         response, data = FakeResponse.get_offers_results_response()
         self.assertTrue(self.ie._is_there_next_page(response))
         response, data = FakeResponse.get_offers_results_last_page_response()
@@ -165,12 +171,12 @@ class TestInfoempleoSpider(TestCase):
         finally:
             self.assertIsInstance(exception, NoExistentPageError)
 
-    def test_clean_url(self):
+    def _test_clean_url(self):
         response, data = FakeResponse.get_offers_results_response()
         isep = response.url.rfind('/')
         self.assertEqual(self.ie._clean_url(response.url), response.url[0:isep+1])
 
-    def test_get_next_page_url(self):
+    def _test_get_next_page_url(self):
         response, data = FakeResponse.get_offers_results_response()
         response_page = data.get('_page')
         next_page = response.url.replace(str(response_page), str(response_page + 1))
@@ -182,18 +188,31 @@ class TestInfoempleoSpider(TestCase):
         next_page = f'{response.url}?pagina={page}'
         self.assertEqual(self.ie._get_next_page_url(response.url, next_page=page), next_page)
         
-    def test_extract_company_info(self):
+    def _test_extract_company_info(self):
         response, data = FakeResponse.get_offer_response()
         company_dict = self.ie._get_company_info(response)
         self.assertEqual(company_dict, data.get('company_dict'))
 
-    def test_extract_job_info(self):
+    def _test_extract_job_info(self):
         response, data = FakeResponse.get_offer_response()
         job_info = self.ie._get_job_info(response)
         self.assertEqual(job_info, data.get('job_dict'))
 
-    def test_parse_item(self):
+    def _test_parse_item(self):
         response, data = FakeResponse.get_offer_response()
         gen = self.ie.parse_item(response)
         for ji in gen:
             self.assertEqual(ji, data.get('job_item'))
+
+
+class TestInfoempleoCompaniesSpider(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.spider = InfoempleoCompaniesSpider()
+
+    def test_get_company_reference(self):
+        reference = 181984
+        url = f'https://www.infoempleo.com/ofertasempresa/sens-iberica/{reference}/'
+        response = FakeResponse.get_basic_response(url)
+        self.assertEqual(self.spider._get_company_reference(response), reference)

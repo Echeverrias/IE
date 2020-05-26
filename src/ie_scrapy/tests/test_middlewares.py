@@ -3,7 +3,7 @@ from scrapy.http import Request, Response
 from scrapy.exceptions import IgnoreRequest
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
-from ie_scrapy.middlewares import CheckDownloaderMiddleware, PUADownloaderMiddleware, ERDownloaderMiddleware
+from ie_scrapy.middlewares import CheckDownloaderMiddleware, PUADownloaderMiddleware
 from job.models import Job, Company
 from django.test import TestCase
 from scrapy.spiders import Spider
@@ -55,38 +55,44 @@ class FakeResponse():
         invalid_status = [404]
         return Response(url, status=invalid_status[0])
 
-class TestERDownloaderMiddleware(TestCase):
+class TestPUADownloaderMiddleware(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.erdm = ERDownloaderMiddleware()
+        cls.puadm = PUADownloaderMiddleware()
         cls.fake_spider = Spider(name="fake")
 
     def test_process_request(self):
-        request = FakeRequest.get_valid_request('http://test', meta={'ignore': True})
-        try:
-            exception = None
-            self.erdm.process_request(request, None)
-        except IgnoreRequest as e:
-            exception = e
-        finally:
-            self.assertIsInstance(exception, IgnoreRequest)
-        request = FakeRequest.get_valid_request('http://test')
-        self.assertIsNone(self.erdm.process_request(request, None))
+        PUADownloaderMiddleware.proxy = FakeRequest.valid_proxy
+        PUADownloaderMiddleware.ua = FakeRequest.valid_ua
+        request = FakeRequest.get_request("https://Test", FakeRequest.invalid_proxy, FakeRequest.invalid_ua)
+        self.assertIsNone(self.puadm.process_request(request, None))
+        self.assertEqual(request.meta.get('proxy_source'), PUADownloaderMiddleware.proxy)
+        self.assertEqual(request.headers.get(b'User-Agent'), PUADownloaderMiddleware.ua)
+        request = FakeRequest.get_request("https://Test", FakeRequest.valid_proxy, FakeRequest.valid_ua)
+        self.assertIsNone(self.puadm.process_request(request, None))
+        self.assertEqual(request.meta.get('proxy_source'), PUADownloaderMiddleware.proxy)
+        self.assertEqual(request.headers.get(b'User-Agent'), PUADownloaderMiddleware.ua)
+        PUADownloaderMiddleware.proxy = None
+        PUADownloaderMiddleware.ua = None
+        request = FakeRequest.get_request("https://Test", FakeRequest.invalid_proxy, FakeRequest.invalid_ua)
+        self.assertIsNone(self.puadm.process_request(request, None))
+        self.assertEqual(request.meta.get('proxy_source'), FakeRequest.invalid_proxy)
+        self.assertEqual(request.headers.get(b'User-Agent'), FakeRequest.invalid_ua)
 
     def test_make_the_request_again(self):
         request = FakeRequest.get_valid_request('http://test')
-        request_ = self.erdm._make_the_request_again(request)
+        request_ = self.puadm._make_the_request_again(request)
         self.assertIsInstance(request_, Request)
         self.assertEqual(request_.meta.get('retry'), 1)
         request = FakeRequest.get_valid_request('http://test', meta={'retry': 3})
-        request_ = self.erdm._make_the_request_again(request)
+        request_ = self.puadm._make_the_request_again(request)
         self.assertIsInstance(request_, Request)
         self.assertEqual(request_.meta.get('retry'), 4)
-        request = FakeRequest.get_valid_request('http://test', meta={'retry': ERDownloaderMiddleware.max_retry + 1})
+        request = FakeRequest.get_valid_request('http://test', meta={'retry': PUADownloaderMiddleware.max_retry + 1})
         try:
             exception = None
-            self.erdm._make_the_request_again(request)
+            self.puadm._make_the_request_again(request)
         except IgnoreRequest as e:
             exception = e
         finally:
@@ -96,19 +102,19 @@ class TestERDownloaderMiddleware(TestCase):
         # 1. Valid response (gets the valid proxy, ua pair)
         request = FakeRequest.get_valid_request('http://test')
         response = FakeResponse.get_valid_response('http://test')
-        self.erdm._check_proxy_and_ua(request, self.fake_spider, response)
+        self.puadm._check_proxy_and_ua(request, self.fake_spider, response)
         self.assertEqual(PUADownloaderMiddleware.proxy, request.meta.get('proxy_source'))
         self.assertEqual(PUADownloaderMiddleware.ua, request.headers.get(b'User-Agent'))
         # 2. Not a valid response from an invalid request (invalid proxy)
         request = FakeRequest.get_invalid_request('http://test')
         response = FakeResponse.get_invalid_response('http://test')
-        self.erdm._check_proxy_and_ua(request, self.fake_spider, response)
+        self.puadm._check_proxy_and_ua(request, self.fake_spider, response)
         self.assertEqual(PUADownloaderMiddleware.proxy, FakeRequest.valid_proxy)
         self.assertEqual(PUADownloaderMiddleware.ua, FakeRequest.valid_ua)
         # 3. Not a valid response from a valid request (sets the valid proxy, ua pair) to None)
         request = FakeRequest.get_valid_request('http://test')
         response = FakeResponse.get_invalid_response('http://test')
-        self.erdm._check_proxy_and_ua(request, self.fake_spider, response)
+        self.puadm._check_proxy_and_ua(request, self.fake_spider, response)
         self.assertIsNone(PUADownloaderMiddleware.proxy)
         self.assertIsNone(PUADownloaderMiddleware.ua,)
 
@@ -117,24 +123,24 @@ class TestERDownloaderMiddleware(TestCase):
         PUADownloaderMiddleware.ua =FakeRequest.valid_ua
         # IgnoreRequest Exception
         request = FakeRequest.get_valid_request(meta={'ignore':True})
-        self.assertIsNone(self.erdm.process_exception(request, Exception('fake'), self.fake_spider))
+        self.assertIsNone(self.puadm.process_exception(request, Exception('fake'), self.fake_spider))
         self.assertEqual(PUADownloaderMiddleware.proxy, request.meta.get('proxy_source'))
         self.assertEqual(PUADownloaderMiddleware.ua, request.headers.get(b'User-Agent'))
         request = FakeRequest.get_valid_request('http://test')
-        self.assertIsNone(self.erdm.process_exception(request, IgnoreRequest(), self.fake_spider))
+        self.assertIsNone(self.puadm.process_exception(request, IgnoreRequest(), self.fake_spider))
         self.assertEqual(PUADownloaderMiddleware.proxy, request.meta.get('proxy_source'))
         self.assertEqual(PUADownloaderMiddleware.ua, request.headers.get(b'User-Agent'))
         # Other Exception
         request = FakeRequest.get_valid_request('http://test')
-        request_ = self.erdm.process_exception(request, Exception('fake'), self.fake_spider)
+        request_ = self.puadm.process_exception(request, Exception('fake'), self.fake_spider)
         self.assertIsInstance(request_, Request)
         self.assertEqual(request_.meta.get('retry'), 1)
         self.assertIsNone(PUADownloaderMiddleware.proxy)
         self.assertIsNone(PUADownloaderMiddleware.ua)
-        request = FakeRequest.get_valid_request('http://test', meta={'retry': ERDownloaderMiddleware.max_retry + 1})
+        request = FakeRequest.get_valid_request('http://test', meta={'retry': PUADownloaderMiddleware.max_retry + 1})
         try:
             exception = None
-            self.erdm.process_exception(request, Exception('fake'), self.fake_spider)
+            self.puadm.process_exception(request, Exception('fake'), self.fake_spider)
         except IgnoreRequest as e:
             exception = e
         finally:
@@ -148,49 +154,24 @@ class TestERDownloaderMiddleware(TestCase):
         # Valid response
         request = FakeRequest.get_valid_request()
         response = FakeResponse.get_valid_response()
-        self.assertIsInstance(self.erdm.process_response(request, response, self.fake_spider), Response)
+        self.assertIsInstance(self.puadm.process_response(request, response, self.fake_spider), Response)
         self.assertEqual(PUADownloaderMiddleware.proxy, request.meta.get('proxy_source'))
         self.assertEqual(PUADownloaderMiddleware.ua, request.headers.get(b'User-Agent'))
         # Invalid response
         response = FakeResponse.get_invalid_response()
-        self.assertIsInstance(self.erdm.process_response(request, response, self.fake_spider), Request)
+        self.assertIsInstance(self.puadm.process_response(request, response, self.fake_spider), Request)
         self.assertIsNone(PUADownloaderMiddleware.proxy)
         self.assertIsNone(PUADownloaderMiddleware.ua)
-        request = FakeRequest.get_valid_request(meta={'retry':  ERDownloaderMiddleware.max_retry + 1})
+        request = FakeRequest.get_valid_request(meta={'retry':  PUADownloaderMiddleware.max_retry + 1})
         try:
             exception = None
-            self.erdm.process_response(request, response, self.fake_spider)
+            self.puadm.process_response(request, response, self.fake_spider)
         except IgnoreRequest as e:
             exception = e
         finally:
             self.assertIsInstance(exception, IgnoreRequest)
         self.assertIsNone(PUADownloaderMiddleware.proxy)
         self.assertIsNone(PUADownloaderMiddleware.ua)
-
-
-class TestPUADownloaderMiddleware(TestCase):
-
-    @classmethod
-    def setUpTestData(cls):
-        cls.puadm = PUADownloaderMiddleware()
-
-    def test_process_request(self):
-        PUADownloaderMiddleware.proxy = FakeRequest.valid_proxy
-        PUADownloaderMiddleware.ua = FakeRequest.valid_ua
-        request = FakeRequest.get_request("https://Test", FakeRequest.invalid_proxy, FakeRequest.invalid_ua)
-        self.assertIsNone(self.puadm.process_request(request, None))
-        self.assertEqual(request.meta.get('proxy_source'), PUADownloaderMiddleware.proxy)
-        self.assertEqual(request.headers.get(b'User-Agent'), PUADownloaderMiddleware.ua)
-        request = FakeRequest.get_request("https://Test", FakeRequest.valid_proxy, FakeRequest.valid_ua)
-        self.assertIsNone(TestPUADownloaderMiddleware.puadm.process_request(request, None))
-        self.assertEqual(request.meta.get('proxy_source'), PUADownloaderMiddleware.proxy)
-        self.assertEqual(request.headers.get(b'User-Agent'), PUADownloaderMiddleware.ua)
-        PUADownloaderMiddleware.proxy = None
-        PUADownloaderMiddleware.ua = None
-        request = FakeRequest.get_request("https://Test", FakeRequest.invalid_proxy, FakeRequest.invalid_ua)
-        self.assertIsNone(TestPUADownloaderMiddleware.puadm.process_request(request, None))
-        self.assertEqual(request.meta.get('proxy_source'), FakeRequest.invalid_proxy)
-        self.assertEqual(request.headers.get(b'User-Agent'), FakeRequest.invalid_ua)
 
 
 class TestCheckDownloaderMiddleware(TestCase):

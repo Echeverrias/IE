@@ -44,25 +44,23 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
                 else:
                     company_item = CompanyItem(name=name, area=area, is_registered=True)
                     yield company_item
-                break
-            break
 
     def _clean_company_url(self, link):
-        if "http" not in link:
-            return "https://www.infoempleo.com" + link
+        domain = "https://www.infoempleo.com"
+        if domain not in link:
+            return domain + link
         else:
-            breakpoint() if ("https://www.infoempleo.com" not in link) else 2+2 #%
+            if ("https://www.infoempleo.com" not in link):
+                with open('company warning', 'a') as f:
+                    f.write(link)
+                    f.write('')
             return link
 
     def parse_item(self, response):
         if not response.url.startswith("https://www.infoempleo.com"):
-            if not response.meta.get('second_request'):
-                name = response.meta.get('name')
-                area = response.meta.get('area')
-                link = response.meta.get('redirect_urls')[0]
-                yield response.follow(link, self.parse_item, meta={'name': name, 'area': area, 'second_request': True})
-            else:
-                logging.info(f'redirect_urls: {response.meta.get("redirect_urls")}')
+            with open('company warning', 'a') as f:
+                f.write('* ' + link)
+                f.write('')
         else:
             company_dict = self._get_company_info(response)
             company_item = CompanyItem(company_dict)
@@ -72,7 +70,7 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
         try:
             info = response.xpath(xpath).extract_first() or ''
         except Exception as e:
-            print('__extract_info error: %s'%e)
+            logging.error(f'Error: __extract_info error: {e}')
             info = ''#None
         return info
 
@@ -128,5 +126,5 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
     def _get_company_reference(self, response):
         link = response.url
         reference = os.path.basename(os.path.dirname(link))
-        reference = reference if reference.isnumeric() else None
+        reference = int(reference) if reference.isnumeric() else None
         return reference
