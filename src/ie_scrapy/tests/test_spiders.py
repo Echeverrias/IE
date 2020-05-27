@@ -93,7 +93,8 @@ class FakeResponse():
     def get_collaborating_companies_results_response():
         url = 'https://www.infoempleo.com/empresas-colaboradoras/'
         filename = "collaborating_companies.html"
-        data = {'_companies': 520}
+        companies_list = FakeResponse._get_object_from_a_file('company_links.list')
+        data = {'_companies': len(companies_list)}
         return FakeResponse._fake_response_from_file(filename, url, data=data)
 
     @staticmethod
