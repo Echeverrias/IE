@@ -130,7 +130,7 @@ class CleaningPipeline():
                 city = city.title()
             alrededores = re.compile(r'(a|A)ldedores( de )?|(a|A)lredores( de )?|(a|A)lredor( de )?|(a|A)lrededores( de )?|(a|A)ldedor( de )?|(a|A)lrededor( de )?')
             city = alrededores.sub('', city)
-            city = city.replace('etc.', "").replace('etc', "").strip()
+            city = city.replace('etc.', "").replace('etc', "").replace("Extranjero", "").replace("extranjero", "").strip()
             city = '' if len(city) == 1 else city # city.replace('.', "").replace('-', "")
             return city
         except Exception as e:
@@ -692,14 +692,17 @@ class StoragePipeline(object):
                 cities_qs = City.objects.filter(country=country, province=province, name__iexact=city_name)
             else:
                 cities_qs = City.objects.filter(country=country, name__iexact=city_name)
-            # second search with icontains
             if cities_qs:
                 city = cities_qs[0]
-            else: # not iexact city found
+            else: # not iexact city found so second search with icontains
                 if province:
                     cities_qs = City.objects.filter(country=country, province=province, name__icontains=city_name)
                 else:
                     cities_qs = City.objects.filter(country=country, name__icontains=city_name)
+                    try:
+                        province = Province.objects.get(name=city_name)
+                    except:
+                        pass
                 if cities_qs.count() > 1:
                     cities_qs = cities_qs.filter(name__icontains='/')
                     cities = []
@@ -708,9 +711,8 @@ class StoragePipeline(object):
                     cities_qs = cities
                 if cities_qs:
                     city = cities_qs[0]
-                    if province:
-                        city.province = province
-                        city.save()
+                    if province and (city_name == province.name):
+                        city = None
                 elif province and (city_name != province.name):
                     city = City.objects.create(name=city_name, province=province, country=country)
         elif country and (city_name.lower() == country.name.lower() or city_name.lower() == get_acronym(country.name).lower()):
@@ -739,6 +741,16 @@ class StoragePipeline(object):
             elif  cities_qs.count() == 1:
                 city = cities_qs[0]
         return city
+
+    def _get_province (self, province_name):
+        if province_name:
+            try:
+                return Province.objects.get(name=province_name)
+            except:
+                try:
+                    return Province.objects.get(slug=slugify(province_name))
+                except:
+                    return None
 
     def _get_country (self, country_name):
         if country_name:
@@ -801,22 +813,41 @@ class StoragePipeline(object):
             company = qs[0]
         return company
 
-    def _set_city_and_country_from_location(self, item):
-        city = self._get_city(item.get('_location'))
-        country = city.country if city else self._get_country(item.get('_location'))
+    def _set_locations_from_location(self, item):
+        location = item.get('_location')
+        city = self._get_city(location)
+        country = self._get_country(location)
+        province = self._get_province(location)
+        if province:
+            city = city if city and province.name == city.name else None
+            country = province.country
+        elif city:
+            country = city.country
+            province = city.province
         item['city'] = city
+        item['province'] = province
         item['country'] = country
 
     def _store_company(self, item):
         # INFO: Can be companies with different name and same link
         # INFO: A company can have different links but always the same reference
-        self._set_city_and_country_from_location(item)
+        self._set_locations_from_location(item)
         company_dict = self._get_item_without_temporal_fields(item)
         company = None
         try:
-            if company_dict['name']:
-                company_name = company_dict['name']
-                company, is_a_new_company_created = Company.objects.get_or_create(slug=slugify(company_name), defaults=company_dict)
+            if company_dict.get('name'):
+                if company_dict.get('reference'):
+                    reference = company_dict.get('reference')
+                    qs = Company.objects.filter(reference=reference)
+                elif company_dict.get('link'):
+                    link = company_dict.get('link')
+                    qs = Company.objects.filter(link=link)
+                if qs:
+                    company = qs[0]
+                    is_a_new_company_created = False
+                else:
+                    company_name = company_dict['name']
+                    company, is_a_new_company_created = Company.objects.get_or_create(slug=slugify(company_name), defaults=company_dict)
             else:
                 is_a_new_company_created = False
                 qs =  Company.objects.filter(name="").annotate(desc_len=Length('description'))
