@@ -836,6 +836,7 @@ class StoragePipeline(object):
         company = None
         try:
             if company_dict.get('name'):
+                qs = None
                 if company_dict.get('reference'):
                     reference = company_dict.get('reference')
                     qs = Company.objects.filter(reference=reference)
