@@ -94,13 +94,24 @@ class FakeResponse():
         url = 'https://www.infoempleo.com/empresas-colaboradoras/'
         filename = "collaborating_companies.html"
         data = {'_companies': 520}
-        return FakeResponse._fake_response_from_file(filename, url), data
+        return FakeResponse._fake_response_from_file(filename, url, data=data)
 
     @staticmethod
     def get_company_response():
-        url = 'https://www.infoempleo.com/ofertasempresa/iman-temporing-ett-s-l/7347/'
+        url = 'https://www.infoempleo.com/ofertasempresa/acs-informaticos/29700/'
         filename = "company.html"
-        return FakeResponse._fake_response_from_file(filename, url)
+        meta = {
+            "link": 'https://www.infoempleo.com/ofertasempresa/acs-informaticos/29700/',
+            "area": 'Informática y Telecomunicaciones',
+            'name': 'A.C.S. InformÃ¡ticos,'
+        }
+        company_item = FakeResponse._get_object_from_a_file('company_item.item')
+        company_dict = FakeResponse._get_object_from_a_file('ccompany_info.dict')
+        data = {
+            'company_item': company_item,
+            'company_dict': company_dict,
+        }
+        return FakeResponse._fake_response_from_file(filename, url, meta=meta, data=data)
 
     @staticmethod
     def get_404_response():
@@ -238,6 +249,17 @@ class TestInfoempleoCompaniesSpider(TestCase):
                 self.assertTrue(yielded.meta.get('is_registered'))
             count = count + 1
         self.assertEqual(count, data.get('_companies'))
+
+    def test_extract_company_info(self):
+        response, data = FakeResponse.get_company_response()
+        company_dict = self.spider._get_company_info(response)
+        self.assertEqual(company_dict, data.get('company_dict'))
+
+    def test_parse_item(self):
+        response, data = FakeResponse.get_company_response()
+        gen = self.spider.parse_item(response)
+        for ci in gen:
+            self.assertEqual(ci, data.get('company_item'))
 
     def test_get_company_reference(self):
         reference = 181984

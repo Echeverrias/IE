@@ -57,21 +57,16 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
             return link
 
     def parse_item(self, response):
-        if not response.url.startswith("https://www.infoempleo.com"):
-            with open('company warning', 'a') as f:
-                f.write('* ' + link)
-                f.write('')
-        else:
-            company_dict = self._get_company_info(response)
-            company_item = CompanyItem(company_dict)
-            yield company_item
+        company_dict = self._get_company_info(response)
+        company_item = CompanyItem(company_dict)
+        yield company_item
 
     def _extract_info(self, response, xpath):
         try:
             info = response.xpath(xpath).extract_first() or ''
         except Exception as e:
             logging.error(f'Error: __extract_info error: {e}')
-            info = ''#None
+            info = ''
         return info
 
     def _get_company_info(self, response):
