@@ -8,6 +8,8 @@ from django_mysql.models import ListCharField
 from utilities import languages_utilities
 from simple_history.models import HistoricalRecords
 from .managers import JobManager, CompanyManager
+import logging
+logging.getLogger().setLevel(logging.INFO)
 
 class Country(models.Model):
     id = models.AutoField(primary_key=True)
@@ -112,7 +114,6 @@ class City (models.Model):
         ordering = ['name']
 
     def save(self, *args, **kwargs):
-        print('save')
         try:
             self.slug = slugify(self.name)
         except:
@@ -138,6 +139,10 @@ class Company(models.Model):
                             on_delete=models.CASCADE,
                             related_name='companies',
                             null = True, blank = True, verbose_name="ciudad")
+    province = models.ForeignKey(Province,
+                            on_delete=models.CASCADE,
+                            related_name='companies',
+                            null = True, blank = True, verbose_name="provincia")
     country = models.ForeignKey(Country,
                              on_delete=models.CASCADE,
                              related_name='companies',
@@ -465,4 +470,4 @@ class Job(models.Model):
             job_ = Job.objects.get(id=job.id)
             job_.cities.add(city)
         except Exception as e:
-            print(f'Error in Job.add_city: {e}')
+            logging.warn(f'Error in add_city: {e}')
