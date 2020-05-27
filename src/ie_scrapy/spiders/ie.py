@@ -27,7 +27,7 @@ class InfoempleoSpider(Spider):
 
     name = 'ie'
     allowed_domains = ['infoempleo.com']
-    # start_urls = ["https://www.infoempleo.com/trabajo/area-de-empresa_legal/"]
+    start_urls_ = ["https://www.infoempleo.com/trabajo/area-de-empresa_legal/"]
     start_urls = [
         "https://www.infoempleo.com/trabajo/area-de-empresa_sanidad-salud-y-servicios-sociales/",
         "https://www.infoempleo.com/trabajo/area-de-empresa_educacion-formacion/",
