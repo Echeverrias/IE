@@ -66,15 +66,14 @@ SPIDER_MIDDLEWARES = {
 RANDOM_UA_PER_PROXY = True
 PROXY_POOL_ENABLED = True
 RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429, 400, 403] # added 400 to default codes
+
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware':None,
-    'ie_scrapy.middlewares.CheckDownloaderMiddleware': None,
+    'ie_scrapy.middlewares.CheckDownloaderMiddleware': 250,
     'scrapy_proxy_pool.middlewares.ProxyPoolMiddleware': 300,
     'scrapy_proxy_pool.middlewares.BanDetectionMiddleware': 320,
     'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 420,
     'ie_scrapy.middlewares.PUADownloaderMiddleware': 550,
-    'ie_scrapy.middlewares.ERDownloaderMiddleware': 650,
-
 }
 
 
