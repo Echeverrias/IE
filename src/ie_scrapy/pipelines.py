@@ -802,6 +802,12 @@ class StoragePipeline(object):
             upgrade['area'] = company.area + [area]
         if item.get('category') and company.category != item.get('category'):
             upgrade['category'] = item.get('category')
+        if item.get('city') and company.city != item.get('city'):
+            upgrade['city'] = item.get('city')
+        if item.get('province') and company.province != item.get('province'):
+            upgrade['province'] = item.get('province')
+        if item.get('country') and company.city != item.get('country'):
+            upgrade['country'] = item.get('country')
         return upgrade
 
     def _update_company(self, company, item):

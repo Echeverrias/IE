@@ -564,15 +564,21 @@ class TestStoragePipeline(TestCase):
                         'offers': 397,
                         'resume': '',
                         'is_registered': True,
+                        'city': None,
+                        'province': None,
+                        'country': None,
                         }
         item = {
             'category': 'Recursos Humanos_',
             'description': 'new description',
-            'link': 'https://www.infoempleo.com/colaboradoras/hays/presentacion/_',
+            'link': 'https://www.infoempleo.com/colaboradoras/hays/presentacion/______',
             'name': 'XXXXXXXX',
             'offers': 900,
             'resume': 'new resume',
-            'is_registered': True,
+            'is_registered': False,
+            'city': self.almeria_city,
+            'province': self.almeria,
+            'country': self.espana,
         }
         # The name and the link dont suffer upgrade
         upgrade = {
@@ -580,6 +586,9 @@ class TestStoragePipeline(TestCase):
             'description': 'new description',
             'offers': 900,
             'resume': 'new resume',
+            'city': self.almeria_city,
+            'province': self.almeria,
+            'country': self.espana,
         }
         company = Company.objects.create(**company_dict)
         self.assertEqual(self.sp._get_company_upgrade(company, item), upgrade)
