@@ -21,8 +21,8 @@ CITIES_CSV = os.path.join(CSV_PATH, f'city{SUFFIX}.csv')
 BLANK_COLUMN = 'Unnamed: 0'
 
 ERROR_HELP_MSG = """
-    1. Have you done the migrations to your database with python manage.py makemigrations and python manage.py migrate?'
-    2. Have you configured your database in settings.py?
+    1. Have you configured your database in settings.py?
+    2. Have you done the migrations to your database with python manage.py makemigrations and python manage.py migrate?'
 """
 
 def _get_df(path):
@@ -46,36 +46,29 @@ def _get_model_df(smodel):
 
 def _insert_countries(countries_csv=COUNTRIES_CSV):
     Country.objects.all().delete()
-    entries = []
     countries_df = _get_df(countries_csv)
     for e in countries_df.T.to_dict().values():
-        entries.append(Country(**e))
-    Country.objects.bulk_create(entries)
+        Country(**e).save()
 
 def _insert_communities(communities_csv = COMMUNITIES_CSV):
     Community.objects.all().delete()
-    entries = []
     provinces_df = _get_df(communities_csv)
     for e in provinces_df.T.to_dict().values():
         country_id = e['country_id']
         country = Country.objects.get(id=country_id)
         e['country'] = country
-        entries.append(Community(**e))
-    Community.objects.bulk_create(entries)
+        Community(**e).save()
 
 def _insert_provinces(provinces_csv=PROVINCES_CSV):
     Province.objects.all().delete()
-    entries = []
     provinces_df = _get_df(provinces_csv)
     spain = Country.objects.filter(name="España")[0]
     for e in provinces_df.T.to_dict().values():
         e['country'] = spain
-        entries.append(Province(**e))
-    Province.objects.bulk_create(entries)
+        Province(**e).save()
 
 def _insert_cities(cities_csv=CITIES_CSV):
     City.objects.all().delete()
-    entries = []
     cities_df = _get_df(cities_csv)
     cities_df.drop(['slug'], axis=1, inplace=True)
     cities_df.dropna(how='any', inplace=True)
@@ -100,8 +93,7 @@ def _insert_cities(cities_csv=CITIES_CSV):
                 e['province'] = None
         else:
             e['province'] = None
-        entries.append(City(**e))
-    City.objects.bulk_create(entries)
+        City(**e).save()
     spain = Country.objects.get(name="España")
     City.objects.get_or_create(name='Ceuta', defaults={'country': spain})
     City.objects.get_or_create(name='Melilla', defaults={'country': spain})
@@ -118,7 +110,7 @@ def insert_locations():
     _insert_communities()
     _insert_provinces()
     _insert_cities()
-    logging.info('The locations tables have been initializing')
+    logging.info('The locations tables have been initialized')
 
 def insert_languages():
     Language.objects.all().delete()
@@ -127,10 +119,8 @@ def insert_languages():
             try:
                 Language.objects.get_or_create(name=l, level=l_)
             except Exception as e:
-                print('Error:')
-                print(f"name={l}, level={l_}")
-                print(e)
-    logging.info('The language table has been initializing')
+                logging.exception(f'Error creating language {l}')
+    logging.info('The language table has been initialized')
 
 def is_language_table_empty():
     try:
@@ -173,7 +163,7 @@ def initialize_database():
         initialize_language_table()
         initialize_location_tables()
     else:
-        logging.info('The database has been initializing')
+        logging.info('The database has been initialized')
 
 class Command(BaseCommand):
     help = "Initializing language and locations tables"
