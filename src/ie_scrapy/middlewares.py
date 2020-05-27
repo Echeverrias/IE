@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-
-
 from scrapy import signals, Request
 from scrapy.http import HtmlResponse #%
 from scrapy.exceptions import IgnoreRequest
@@ -12,7 +10,6 @@ from time import time as now
 from dateutil.relativedelta import relativedelta
 from .keys import START_URL, TOTAL_RESULTS
 from job.models import Job, Company
-from utilities.debug_ import write_in_a_file #%
 
 
 class CheckDownloaderMiddleware(object):
@@ -46,7 +43,6 @@ class PUADownloaderMiddleware(object):
     ua = None
 
     def _make_the_request_again(self, request, response=None):
-        write_in_a_file('Process exception', {'url': request.url, 'retry': request.meta.get('retry', 0)}, 'exception_.txt')
         n = PUADownloaderMiddleware.max_retry
         if ('robots' in request.url) and request.meta.get('retry', 0) > 5:
             raise IgnoreRequest(f'The request {request.url} has been failed {n} times')
@@ -91,11 +87,9 @@ class PUADownloaderMiddleware(object):
 
     def process_exception(self, request, exception, spider):
         if type(exception) == IgnoreRequest or request.meta.get('ignore'):
-            write_in_a_file('Process exception', {'url': request.url, 'exception': exception}, 'ignored_.txt')
             request.meta.get('retry', 0)
             return None
         else:
-            write_in_a_file('Process exception', {'url': request.url, 'exception': exception}, 'exception_.txt')
             self._check_proxy_and_ua(request, spider)
             result = self._make_the_request_again(request)
             return result
@@ -103,9 +97,7 @@ class PUADownloaderMiddleware(object):
     def process_response(self, request, response, spider):
         self._check_proxy_and_ua(request, spider, response)
         if response.status == 200:
-            write_in_a_file('Process response', {'url': request.url}, 'ok.txt')
             return response
         else:
-            write_in_a_file('Process response', {'url': request.url, 'status': response.status}, 'not ok.txt')
             result = self._make_the_request_again(request, response)
             return result
