@@ -457,23 +457,29 @@ class TestStoragePipeline(TestCase):
             'expiration_date': None,
             'created_at': cls.before_yesterday,
         }
-        espana = Country.objects.create(name='España')
-        mexico = Country.objects.create(name='Mexico')
-        almeria = Province.objects.create(id=1, name='Almería')
-        jaen = Province.objects.create(id=2, name='Jaén')
-        leon = Province.objects.create(id=3, name='León')
-        espana.provinces.add(almeria)
-        espana.provinces.add(jaen)
-        espana.provinces.add(leon)
-        albanchez = City.objects.create(name='Albanchez', country=espana)
-        olula_del_rio = City.objects.create(name='Olula del río', country=espana)
-        albanchez_de_magina = City.objects.create(name='Albanchez de Mágina', country=espana)
-        leon_ = City.objects.create(name='León', country=espana)
-        leon__ = City.objects.create(name='León', country=mexico)
-        almeria.cities.add(albanchez)
-        almeria.cities.add(olula_del_rio)
-        jaen.cities.add(albanchez_de_magina)
-        leon.cities.add(leon_)
+        cls.espana = Country.objects.create(name='España')
+        cls.mexico = Country.objects.create(name='Mexico')
+        cls.almeria = Province.objects.create(id=1, name='Almería')
+        cls.jaen = Province.objects.create(id=2, name='Jaén')
+        cls.leon = Province.objects.create(id=3, name='León')
+        cls.alava = Province.objects.create(id=4, name='Álava')
+        cls.espana.provinces.add(cls.almeria)
+        cls.espana.provinces.add(cls.jaen)
+        cls.espana.provinces.add(cls.leon)
+        cls.espana.provinces.add(cls.alava)
+        cls.albanchez = City.objects.create(name='Albanchez', country=cls.espana)
+        cls.olula_del_rio = City.objects.create(name='Olula del río', country=cls.espana)
+        cls.albanchez_de_magina = City.objects.create(name='Albanchez de Mágina', country=cls.espana)
+        cls.villabuena_de_alava = City.objects.create(name='Villabuena de Álava', country=cls.espana)
+        cls.almeria_city = City.objects.create(name='Almería', country=cls.espana)
+        cls.leon_ = City.objects.create(name='León', country=cls.espana)
+        cls.leon__ = City.objects.create(name='León', country=cls.mexico)
+        cls.almeria.cities.add(cls.albanchez)
+        cls.almeria.cities.add(cls.olula_del_rio)
+        cls.almeria.cities.add(cls.almeria_city)
+        cls.jaen.cities.add(cls.albanchez_de_magina)
+        cls.alava.cities.add(cls.villabuena_de_alava)
+        cls.leon.cities.add(cls.leon_)
 
     def test_the_job_updated_has_been_updated(self):
         # Only check if the any info of the offer has changed, but not the state.
@@ -512,18 +518,21 @@ class TestStoragePipeline(TestCase):
         almeria = Province.objects.get(name='Almería')
         jaen = Province.objects.get(name='Jaén')
         leon = Province.objects.get(name='León')
+        alava = Province.objects.get(name='Álava')
         albanchez = City.objects.get(name='Albanchez', country=espana)
         olula_del_rio = City.objects.get(name='Olula del río', country=espana)
         albanchez_de_magina = City.objects.get(name='Albanchez de Mágina', country=espana)
+        villanueva_de_alava = City.objects.get(name='Villabuena de Álava', country=espana)
         leon_ = City.objects.get(name='León', country=espana)
         leon__ = City.objects.get(name='León', country=mexico)
-        self.assertEqual(self.sp._get_city('Albanchez', almeria, espana), albanchez)
-        self.assertEqual(self.sp._get_city('Albanchez', None, None), albanchez)
-        self.assertIsNone(self.sp._get_city('León', None, None))
-        self.assertEqual(self.sp._get_city('Albanchez de Magina', None, None), albanchez_de_magina)
-        self.assertEqual(self.sp._get_city('Olula', almeria, espana), olula_del_rio)
-        self.assertIsNotNone(self.sp._get_city('???', almeria, espana))
-        self.assertIsNone(self.sp._get_city('España', None, espana))
+        self.assertEqual(self.sp._get_city('Albanchez', self.almeria, self.espana), self.albanchez)
+        self.assertEqual(self.sp._get_city('Albanchez', None, None), self.albanchez)
+        self.assertIsNone(self.sp._get_city('León', None, None)) # León can be a city from Mexico or Spain
+        self.assertEqual(self.sp._get_city('Albanchez de Magina', None, None), self.albanchez_de_magina)
+        self.assertEqual(self.sp._get_city('Olula', self.almeria, self.espana), self.olula_del_rio)
+        self.assertIsNotNone(self.sp._get_city('XXX city', self.almeria, self.espana))
+        self.assertIsNone(self.sp._get_city('España', None, self.espana))
+        self.assertIsNone(self.sp._get_city('Álava', None, self.espana)) # Álava is a province, not a city
 
     def test_get_location(self):
         espana = Country.objects.get(name='España')
@@ -575,5 +584,38 @@ class TestStoragePipeline(TestCase):
         company = Company.objects.create(**company_dict)
         self.assertEqual(self.sp._get_company_upgrade(company, item), upgrade)
 
+    def test_set_locations_from_location(self):
+        company_dict = {
+            '_location': self.espana.name,
+            'city': None,
+            'country': None,
+            'province': None,
+         }
+        ci = CompanyItem(**company_dict)
+        self.sp._set_locations_from_location(ci)
+        self.assertIsNone(ci['city'])
+        self.assertIsNone(ci['province'])
+        self.assertEqual(ci['country'], self.espana)
+        ci['_location'] = self.villabuena_de_alava.name
+        ci['province'] = None
+        ci['country'] = None
+        self.sp._set_locations_from_location(ci)
+        self.assertEqual(ci['city'], self.villabuena_de_alava)
+        self.assertEqual(ci['province'], self.alava)
+        self.assertEqual(ci['country'], self.espana)
+        ci['_location'] = self.almeria.name
+        ci['province'] = None
+        ci['country'] = None
+        self.sp._set_locations_from_location(ci)
+        self.assertEqual(ci['city'], self.almeria_city)
+        self.assertEqual(ci['province'], self.almeria)
+        self.assertEqual(ci['country'], self.espana)
+        ci['_location'] = self.alava.name
+        ci['province'] = None
+        ci['country'] = None
+        self.sp._set_locations_from_location(ci)
+        self.assertIsNone(ci['city'])
+        self.assertEqual(ci['province'], self.alava)
+        self.assertEqual(ci['country'], self.espana)
 
 
