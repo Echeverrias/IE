@@ -6,7 +6,6 @@ import re
 from ..items import JobItem, CompanyItem
 from ..pipelines import CleaningPipeline, StoragePipeline
 import ie_scrapy.keys as key
-from core.management.commands.initdb import initialize_database
 import time
 import logging
 logging.getLogger().setLevel(logging.INFO)
@@ -67,10 +66,6 @@ class InfoempleoSpider(Spider):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s', spider.name)
-        try:
-            initialize_database()
-        except Exception as e:
-            logging.exception('Error with initialize_database')
 
     def spider_closed(self, spider):
         spider.logger.info('Spider closed: %s', spider.name)

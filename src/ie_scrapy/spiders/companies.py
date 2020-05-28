@@ -4,7 +4,6 @@ from scrapy import signals
 import re
 import os
 from ..items import CompanyItem
-from core.management.commands.initdb import initialize_database
 import logging
 logging.getLogger().setLevel(logging.INFO)
 
@@ -22,10 +21,6 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s', spider.name)
-        try:
-            initialize_database()
-        except Exception as e:
-            logging.exception('Error with initialize_database')
 
     def spider_closed(self, spider):
         spider.logger.info('Spider closed: %s', spider.name)
