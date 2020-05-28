@@ -74,6 +74,16 @@ div.row{
     width:auto;
 }
 
+div.mr{
+    margin-right: 8.25rem;
+}
+
+@media (min-width: 1200px)
+div.container {
+    max-width: 1700px;
+}
+
+
 
 
 
