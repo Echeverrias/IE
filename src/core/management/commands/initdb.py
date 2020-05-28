@@ -9,6 +9,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 class InitializingDataInTablesException(Exception):
     pass
+
 FILE = __file__
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(BASE_DIR,'data', 'csv')
@@ -54,7 +55,7 @@ def _insert_communities(communities_csv = COMMUNITIES_CSV):
     Community.objects.all().delete()
     provinces_df = _get_df(communities_csv)
     for e in provinces_df.T.to_dict().values():
-        country_id = e['country_id']
+        country_id = int(e['country_id'])
         country = Country.objects.get(id=country_id)
         e['country'] = country
         Community(**e).save()
@@ -70,36 +71,40 @@ def _insert_provinces(provinces_csv=PROVINCES_CSV):
 def _insert_cities(cities_csv=CITIES_CSV):
     City.objects.all().delete()
     cities_df = _get_df(cities_csv)
-    breakpoint()
-    cities_df.drop(['slug'], axis=1, inplace=True)
+    try:
+        cities_df.drop(['slug'], axis=1, inplace=True)
+    except:
+        pass
     cities_df.dropna(how='any', inplace=True)
     for e in cities_df.T.to_dict().values():
-        country_id = e['country_id']
+        country = None
+        country_id = int(e['country_id'])
         if country_id and (not math.isnan(country_id)):
             try:
-                country = None
                 country = Country.objects.get(id=int(country_id))
+                e['country'] = country
             except Exception as e:
                 logging.exception(f'Error "{e}"  in country_id:{country_id}')
                 continue
         else:
             continue
-        province_id = e['province_id']
+        province = None
+        province_id = int(e['province_id'])
         if province_id and (not math.isnan(province_id)):
             try:
-                province = None
                 province = Province.objects.get(id=int(province_id))
+                e['province'] = province
             except Exception as e:
                 logging.exception(f'Error "{e}" in province_id:{province_id}')
-                e['province'] = None
+                continue
         else:
-            e['province'] = None
+            continue
         del(e['country_id'])
         del(e['province_id'])
-        c = City(**e)
-        c.country = country
-        c.province = province
-        c.save()
+        City(**e).save()
+        #c.country = country
+        #c.province = province
+        #c.save()
     spain = Country.objects.get(name="España")
     City.objects.get_or_create(name='Ceuta', defaults={'country': spain})
     City.objects.get_or_create(name='Melilla', defaults={'country': spain})
@@ -166,7 +171,7 @@ def initialize_database():
     """
     Initialize Language Country, Community, Province, City tables
     """
-    _delete_locations() #%
+    _delete_locations()
     if not has_been_the_database_initializing():
         initialize_language_table()
         initialize_location_tables()
