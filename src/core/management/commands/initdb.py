@@ -66,6 +66,9 @@ def _insert_provinces(provinces_csv=PROVINCES_CSV):
     spain = Country.objects.filter(name="España")[0]
     for e in provinces_df.T.to_dict().values():
         e['country'] = spain
+        community = Community.objects.get(id=int(e['community_id']))
+        e['community'] = community
+        del (e['community_id'])
         Province(**e).save()
 
 def _insert_cities(cities_csv=CITIES_CSV):
@@ -105,6 +108,7 @@ def _insert_cities(cities_csv=CITIES_CSV):
     spain = Country.objects.get(name="España")
     City.objects.get_or_create(name='Ceuta', defaults={'country': spain})
     City.objects.get_or_create(name='Melilla', defaults={'country': spain})
+
 
 def _delete_locations():
     Country.objects.all().delete()
