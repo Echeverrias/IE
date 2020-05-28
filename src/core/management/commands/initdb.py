@@ -102,9 +102,6 @@ def _insert_cities(cities_csv=CITIES_CSV):
         del(e['country_id'])
         del(e['province_id'])
         City(**e).save()
-        #c.country = country
-        #c.province = province
-        #c.save()
     spain = Country.objects.get(name="España")
     City.objects.get_or_create(name='Ceuta', defaults={'country': spain})
     City.objects.get_or_create(name='Melilla', defaults={'country': spain})
@@ -171,7 +168,6 @@ def initialize_database():
     """
     Initialize Language Country, Community, Province, City tables
     """
-    _delete_locations()
     if not has_been_the_database_initializing():
         initialize_language_table()
         initialize_location_tables()
