@@ -683,6 +683,17 @@ class StoragePipeline(object):
         return languages
 
     def _get_city(self, city_name, province=None, country=None):
+        """
+        Try to get a city from job.models.City and if the city doesn't exist in the model the function will try to create it.
+        If country is equal 'España' the function expects that province argument will not be None.
+        If there are more than one city in the model and province argument is None, the city wouldn't be create.
+        If the city doesn't exist in the model and country argument is None, the city wouldn't be create.
+
+        :param city_name: a string.
+        :param province: job.models.Province
+        :param country: Country.models.Province
+        :return:
+        """
         if not city_name:
             return None
         city = None
@@ -692,7 +703,9 @@ class StoragePipeline(object):
                 cities_qs = City.objects.filter(country=country, province=province, name__iexact=city_name)
             else:
                 cities_qs = City.objects.filter(country=country, name__iexact=city_name)
-            if cities_qs:
+            if cities_qs and cities_qs.count() > 1:
+                return None
+            elif cities_qs:
                 city = cities_qs[0]
             else: # not iexact city found so second search with icontains
                 if province:
@@ -719,7 +732,9 @@ class StoragePipeline(object):
             return None
         elif country : # a foreign city:
             cities_qs = City.objects.filter(name__iexact=city_name,  country=country)
-            if cities_qs:
+            if cities_qs and cities_qs.count() > 1:
+                return None
+            elif cities_qs:
                 city = cities_qs[0]
             else:
                 city, is_a_new_city = City.objects.get_or_create(name=city_name, country=country)
@@ -744,20 +759,21 @@ class StoragePipeline(object):
 
     def _get_province (self, province_name):
         if province_name:
-            try:
-                return Province.objects.get(name=province_name)
-            except:
-                try:
-                    return Province.objects.get(slug=slugify(province_name))
-                except:
-                    return None
+            qs = Province.objects.filter(name=province_name)
+            if not qs:
+                qs = Province.objects.filter(slug=province_name)
+            return qs[0] if qs else None
+        else:
+            return None
 
     def _get_country (self, country_name):
         if country_name:
-            try:
-                return Country.objects.get(slug=slugify(country_name))
-            except Exception as e:
-                pass
+            qs = Country.objects.filter(name=country_name)
+            if not qs:
+                qs = Country.objects.filter(slug=country_name)
+            return qs[0] if qs else None
+        else:
+            return None
 
     def _get_location(self, city_names, province_name, country_name):
         country = None
@@ -774,6 +790,11 @@ class StoragePipeline(object):
             cities.append(self._get_city(city_name, province, country))
         # Deleting the null cities:
         cities = list(filter(lambda c: c, cities))
+        if cities:
+            if not country:
+                country = cities[0].country
+            if not province:
+                province = cities[0].province
         return cities, province, country
 
     def _get_company_upgrade(self, company, item):
@@ -830,6 +851,19 @@ class StoragePipeline(object):
         elif city:
             country = city.country
             province = city.province
+        elif not city:
+            if not country:
+                qs = Country.objects.filter(cities__name__iexact=location) # Example: alamillo of Granada and alamillo of Ciudad Real in Spain
+                country_names = [c.name for c in qs]
+                country_names = set(country_names)
+                country = qs[0] if len(country_names) == 1 else None
+            if not province:
+                qs = Province.objects.filter(cities__name__icontains=location)
+                province_names = [c.name for c in qs]
+                province_names = set(province_names)
+                province = qs[0] if len(province_names) == 1 else None
+                if province:
+                    country = province.country
         item['city'] = city
         item['province'] = province
         item['country'] = country
