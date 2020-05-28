@@ -859,7 +859,7 @@ class StoragePipeline(object):
                 country = qs[0] if len(country_names) == 1 else None
             if not province:
                 qs = Province.objects.filter(cities__name__icontains=location)
-                province_names = [c.name for c in qs]
+                province_names = [p.name for p in qs]
                 province_names = set(province_names)
                 province = qs[0] if len(province_names) == 1 else None
                 if province:
