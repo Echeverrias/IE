@@ -33,22 +33,23 @@ You need to install:
 You need to create an empty database.
 
 ### Running the project
-1. Download the [IE](xxx) project. You can download it as a zip or clone it.
+1. Download the base branch from the [IE project](https://github.com/Echeverrias/IE.git), you can download it as a zip or clone it with <b>git clone -b base https://github.com/Echeverrias/IE.git</b>
 2. Yo have to set your database. Open de src/ie_django/settings.py file and configure the variable 'DATABASES'<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/db_settings.png" width="350"></div>
 <br><p align="center"><i>Figure 7</i></p><br>
-3. Open the terminal, go to the root folder project and install the virtual environment.<br>
+3. Open the terminal, go to the project root folder and install the virtual environment.<br>
 4. Activate the virtual environment.<br>
-5. Go to the 'src' folder and install all the requirements with <b>pip install -r requirements.txt</b><br>
-6. Execute <b>python manage.py makemigrations</b> to create the migrations.<br>
+5. Install all the requirements with <b>pip install -r requirements.txt</b><br>
+6. Go to the 'src' folder and execute <b>python manage.py makemigrations</b> to create the migrations.<br>
 7. Execute <b>python manage.py migrate</b> to create the tables in the database.<br>
 8. Execute <b>python manage.py initdb</b> to initialize language table and locations tables.<br>
 9. Execute <b>python manage.py createsuperuser</b> to create a default user with administrator permission.<br>
-10. Execute <b>python manage.py runserver</b> to run the app.<br>
-11. The application starts in the url <a href="http://localhost:8080/">http://localhost:8080/</a><br>
+10. Execute <b>python manage.py createsuperuser</b> to create a default user with administrator permission.<br>
+11. Execute <b>python manage.py collectstatic</b> to move all the static files to the staticfiles folder.<br>
+12. The application starts in the url <a href="http://localhost:8080/">http://localhost:8080/</a><br>
 
 ## Running the tests
- Open the terminal, go to the src project folder end execute <b>python manage.py test</b> to run all the tests.
+ Open the terminal, go to the project src folder end execute <b>python manage.py test</b> to run all the tests.
  You also can run a specific test with <b>python manage.py test <<i>app_name</i>.tests><.<i>test_name</i>></b>
  
 ## Development
