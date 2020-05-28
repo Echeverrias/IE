@@ -12,6 +12,7 @@ import logging
 import os, signal
 from .models import Task
 from job.models import Job
+import time
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -115,6 +116,7 @@ class SpiderProcess():
         logging.error(f"Some error in the spider: {args}")
 
     def _empty_queue(self, q):
+        time.sleep(1)
         while True:
             try:
                 q.get(block=False)
@@ -201,7 +203,8 @@ class SpiderProcess():
             self._process.terminate()
             self._process.join(120)  # ! IMPORTANT after .terminate -> .join
             try:
-                os.kill(self._process.pid, signal.SIGTERM)
+                pass
+                #os.kill(self._process.pid, signal.SIGTERM)
             except Exception:
                 logging.exception(f"Error killing the process {self._process.pid}")
         except Exception as e:
