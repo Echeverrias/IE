@@ -1,51 +1,51 @@
-capital_id,community_id,community_number,country_id,id,name,slug
-2150,,,6,15,A Coruña,a-coruna
-46,,,6,1,Álava,alava
-54,,,6,2,Albacete,albacete
-152,,,6,3,Alicante,alicante
-292,,,6,4,Almería,almeria
-5009,,,6,33,Asturias,asturias
-395,,,6,5,Ávila,avila
-644,,,6,6,Badajoz,badajoz
-881,,,6,8,Barcelona,barcelona
-1220,,,6,9,Burgos,burgos
-1580,,,6,10,Cáceres,caceres
-1776,,,6,11,Cádiz,cadiz
-5823,,,6,39,Cantabria,cantabria
-1844,,,6,12,Castellón,castellon
-1978,,,6,13,Ciudad Real,ciudad-real
-2065,,,6,14,Córdoba,cordoba
-2285,,,6,16,Cuenca,cuenca
-2526,,,6,17,Girona,girona
-2747,,,6,18,Granada,granada
-2947,,,6,19,Guadalajara,guadalajara
-3159,,,6,20,Guipúzcoa,guipuzcoa
-3257,,,6,21,Huelva,huelva
-3396,,,6,22,Huesca,huesca
-836,,,6,7,Islas Baleares,illes-balears
-3545,,,6,23,Jaén,jaen
-4124,,,6,26,La Rioja,la-rioja
-5252,,,6,35,Las Palmas,las-palmas
-3676,,,6,24,León,leon
-3918,,,6,25,Lleida,lleida
-4238,,,6,27,Lugo,lugo
-4356,,,6,28,Madrid,madrid
-4523,,,6,29,Málaga,malaga
-4588,,,6,30,Murcia,murcia
-4815,,,6,31,Navarra,navarra
-4925,,,6,32,Ourense,ourense
-5137,,,6,34,Palencia,palencia
-5312,,,6,36,Pontevedra,pontevedra
-5588,,,6,37,Salamanca,salamanca
-5732,,,6,38,Santa Cruz de Tenerife,santa-cruz-de-tenerife
-6024,,,6,40,Segovia,segovia
-6152,,,6,41,Sevilla,sevilla
-6307,,,6,42,Soria,soria
-6499,,,6,43,Tarragona,tarragona
-6721,,,6,44,Teruel,teruel
-6934,,,6,45,Toledo,toledo
-7219,,,6,46,Valencia,valencia
-7415,,,6,47,Valladolid,valladolid
-7489,,,6,48,Vizcaya,vizcaya
-7821,,,6,49,Zamora,zamora
-8113,,,6,50,Zaragoza,zaragoza
+id,country_id,community_id,slug,name,community_number,capital_id
+15,6,,a-coruna,A Coruña,,2150
+1,6,,alava,Álava,,46
+2,6,,albacete,Albacete,,54
+3,6,,alicante,Alicante,,152
+4,6,,almeria,Almería,,292
+33,6,,asturias,Asturias,,5009
+5,6,,avila,Ávila,,395
+6,6,,badajoz,Badajoz,,644
+8,6,,barcelona,Barcelona,,881
+9,6,,burgos,Burgos,,1220
+10,6,,caceres,Cáceres,,1580
+11,6,,cadiz,Cádiz,,1776
+39,6,,cantabria,Cantabria,,5823
+12,6,,castellon,Castellón,,1844
+13,6,,ciudad-real,Ciudad Real,,1978
+14,6,,cordoba,Córdoba,,2065
+16,6,,cuenca,Cuenca,,2285
+17,6,,girona,Girona,,2526
+18,6,,granada,Granada,,2747
+19,6,,guadalajara,Guadalajara,,2947
+20,6,,guipuzcoa,Guipúzcoa,,3159
+21,6,,huelva,Huelva,,3257
+22,6,,huesca,Huesca,,3396
+7,6,,islas-baleares,Islas Baleares,,836
+23,6,,jaen,Jaén,,3545
+26,6,,la-rioja,La Rioja,,4124
+35,6,,las-palmas,Las Palmas,,5252
+24,6,,leon,León,,3676
+25,6,,lleida,Lleida,,3918
+27,6,,lugo,Lugo,,4238
+28,6,,madrid,Madrid,,4356
+29,6,,malaga,Málaga,,4523
+30,6,,murcia,Murcia,,4588
+31,6,,navarra,Navarra,,4815
+32,6,,ourense,Ourense,,4925
+34,6,,palencia,Palencia,,5137
+36,6,,pontevedra,Pontevedra,,5312
+37,6,,salamanca,Salamanca,,5588
+38,6,,santa-cruz-de-tenerife,Santa Cruz de Tenerife,,5732
+40,6,,segovia,Segovia,,6024
+41,6,,sevilla,Sevilla,,6152
+42,6,,soria,Soria,,6307
+43,6,,tarragona,Tarragona,,6499
+44,6,,teruel,Teruel,,6721
+45,6,,toledo,Toledo,,6934
+46,6,,valencia,Valencia,,7219
+47,6,,valladolid,Valladolid,,7415
+48,6,,vizcaya,Vizcaya,,7489
+49,6,,zamora,Zamora,,7821
+50,6,,zaragoza,Zaragoza,,8113

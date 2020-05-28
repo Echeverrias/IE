@@ -70,14 +70,15 @@ def _insert_provinces(provinces_csv=PROVINCES_CSV):
 def _insert_cities(cities_csv=CITIES_CSV):
     City.objects.all().delete()
     cities_df = _get_df(cities_csv)
+    breakpoint()
     cities_df.drop(['slug'], axis=1, inplace=True)
     cities_df.dropna(how='any', inplace=True)
     for e in cities_df.T.to_dict().values():
         country_id = e['country_id']
         if country_id and (not math.isnan(country_id)):
             try:
+                country = None
                 country = Country.objects.get(id=int(country_id))
-                e['country'] = country
             except Exception as e:
                 logging.exception(f'Error "{e}"  in country_id:{country_id}')
                 continue
@@ -86,14 +87,19 @@ def _insert_cities(cities_csv=CITIES_CSV):
         province_id = e['province_id']
         if province_id and (not math.isnan(province_id)):
             try:
+                province = None
                 province = Province.objects.get(id=int(province_id))
-                e['province'] = province
             except Exception as e:
                 logging.exception(f'Error "{e}" in province_id:{province_id}')
                 e['province'] = None
         else:
             e['province'] = None
-        City(**e).save()
+        del(e['country_id'])
+        del(e['province_id'])
+        c = City(**e)
+        c.country = country
+        c.province = province
+        c.save()
     spain = Country.objects.get(name="España")
     City.objects.get_or_create(name='Ceuta', defaults={'country': spain})
     City.objects.get_or_create(name='Melilla', defaults={'country': spain})
@@ -149,8 +155,9 @@ def initialize_language_table():
 
 def initialize_location_tables():
     if are_location_tables_empty():
-        thread = threading.Thread(target= insert_locations)
-        thread.start()
+        #thread = threading.Thread(target= insert_locations)
+        #thread.start()
+        insert_locations()
 
 def has_been_the_database_initializing():
     return (not is_language_table_empty()) and (not are_location_tables_empty())
@@ -159,6 +166,7 @@ def initialize_database():
     """
     Initialize Language Country, Community, Province, City tables
     """
+    _delete_locations() #%
     if not has_been_the_database_initializing():
         initialize_language_table()
         initialize_location_tables()

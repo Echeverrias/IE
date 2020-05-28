@@ -1,45 +1,46 @@
-id,name
-12,Alemania
-32,Andorra
-36,Argelia
-33,Austria
-11,Bélgica
-24,Brasil
-30,Camerún
-20,Canadá
-18,China
-34,Colombia
-5,Dinamarca
-15,Emiratos Árabes Unidos
-6,España
-23,Estados Unidos
-35,Etiopía
-37,Filipinas
-9,Francia
-44,Ghana
-1,Gran Bretaña
-42,Guinea Bissau
-43,Guinea Ecuatorial
-7,Holanda
-21,India
-4,Irlanda
-22,Italia
-26,Jordania
-40,Kazajistan
-16,Luxemburgo
-38,Malasia
-8,Malta
-19,Marruecos
-13,México
-41,Mónaco
-2,Nigeria
-27,Noruega
-28,Nueva Zelanda
-10,Panamá
-31,Paraguay
-3,Portugal
-14,Rumanía
-39,Rusia
-17,Suecia
-29,Suiza
-25,Uruguay
+id,name,slug
+12,Alemania,alemania
+32,Andorra,andorra
+36,Argelia,argelia
+33,Austria,austria
+11,Bélgica,belgica
+24,Brasil,brasil
+30,Camerún,camerun
+20,Canadá,canada
+18,China,china
+34,Colombia,colombia
+5,Dinamarca,dinamarca
+15,Emiratos Árabes Unidos,emiratos-arabes-unidos
+6,España,espana
+23,Estados Unidos,estados-unidos
+35,Etiopía,etiopia
+37,Filipinas,filipinas
+9,Francia,francia
+44,Ghana,ghana
+1,Gran Bretaña,gran-bretana
+667,Grecia,grecia
+42,Guinea Bissau,guinea-bissau
+43,Guinea Ecuatorial,guinea-ecuatorial
+7,Holanda,holanda
+21,India,india
+4,Irlanda,irlanda
+22,Italia,italia
+26,Jordania,jordania
+40,Kazajistan,kazajistan
+16,Luxemburgo,luxemburgo
+38,Malasia,malasia
+8,Malta,malta
+19,Marruecos,marruecos
+13,México,mexico
+41,Mónaco,monaco
+2,Nigeria,nigeria
+27,Noruega,noruega
+28,Nueva Zelanda,nueva-zelanda
+10,Panamá,panama
+31,Paraguay,paraguay
+3,Portugal,portugal
+14,Rumanía,rumania
+39,Rusia,rusia
+17,Suecia,suecia
+29,Suiza,suiza
+25,Uruguay,uruguay
