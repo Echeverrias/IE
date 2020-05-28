@@ -24,7 +24,7 @@ You can make searches ,using filters, of the available offer jobs:<br><br>
 
 ## Getting Started
 ### Prerequisites
-You need to install:
+You need to have installed:
 
 - [Python](https://www.python.org/downloads/)
 - [VirtualEnv](https://virtualenv.pypa.io/en/latest/index.html)
@@ -34,7 +34,7 @@ You need to create an empty database.
 
 ### Running the project
 1. Download the base branch from the [IE project](https://github.com/Echeverrias/IE.git), you can download it as a zip or clone it with <b>git clone -b base https://github.com/Echeverrias/IE.git</b>
-2. Yo have to set your database. Open de src/ie_django/settings.py file and configure the variable 'DATABASES'<br><br>
+2. You have to set your database. Open the src/ie_django/settings.py file and configure the variable 'DATABASES'<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/db_settings.png" width="350"></div>
 <br><p align="center"><i>Figure 7</i></p><br>
 3. Open the terminal, go to the project root folder and install the virtual environment.<br>
