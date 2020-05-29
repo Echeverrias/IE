@@ -71,7 +71,6 @@ class Province(models.Model):
                                 null=True, verbose_name="comunidad autónoma")
     slug = models.CharField(max_length=30)
     name = models.CharField(max_length=30, verbose_name="nombre")
-    community_number = models.IntegerField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Provincia"
