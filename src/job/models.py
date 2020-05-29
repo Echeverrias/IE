@@ -36,7 +36,6 @@ class Community(models.Model):
     id = models.IntegerField(primary_key=True)
     slug = models.CharField(max_length=30)
     name = models.CharField(max_length=30, verbose_name="nombre")
-    capital_id = models.IntegerField(null=True)
     country = models.ForeignKey(Country,
                                 on_delete=models.CASCADE,
                                 related_name='communities',
@@ -73,7 +72,6 @@ class Province(models.Model):
     slug = models.CharField(max_length=30)
     name = models.CharField(max_length=30, verbose_name="nombre")
     community_number = models.IntegerField(null=True, blank=True)
-    capital_id = models.IntegerField(null=True)
 
     class Meta:
         verbose_name = "Provincia"
