@@ -161,9 +161,8 @@ def initialize_language_table():
 
 def initialize_location_tables():
     if are_location_tables_empty():
-        #thread = threading.Thread(target= insert_locations)
-        #thread.start()
-        insert_locations()
+        thread = threading.Thread(target= insert_locations)
+        thread.start()
 
 def has_been_the_database_initializing():
     return (not is_language_table_empty()) and (not are_location_tables_empty())
