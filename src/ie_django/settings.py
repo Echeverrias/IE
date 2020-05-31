@@ -8,7 +8,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '=26*4qpc02wu@6$#cvz#&3kx7=-nob7zn#_e3)9@=@^8-76)og'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS =  ['localhost', '127.0.0.1', '*']
 
 DJANGO_APPS = [
@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'ie_django.wsgi.application'
 DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'temp2',
+            'NAME': 'm31',
             'USER': 'jaea',
             'PASSWORD': 'root',
             'HOST': 'localhost',
@@ -127,7 +127,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATIC_URL = '/staticfiles/'
+STATIC_URL = '/static/'
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
