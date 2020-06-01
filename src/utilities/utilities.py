@@ -16,7 +16,7 @@ Colors_list = get_random_colors_list(50)
 
 def get_a_list_of_enumerates_from_string(string):
     try:
-        l = re.split(', |; |,|;| y | and | o | or | y/o |\n', string)
+        l = re.split(', |; |,|;| y | and | o | or | y/o | - |\n', string)
         l = [i.strip() for i in l]
         return l
     except TypeError as e:
