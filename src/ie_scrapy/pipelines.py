@@ -128,7 +128,10 @@ class CleaningPipeline():
                 city = parenthesis[0].capitalize() + " " + city
             if city and city.isupper():
                 city = city.title()
-            alrededores = re.compile(r'(a|A)ldedores( de )?|(a|A)lredores( de )?|(a|A)lredor( de )?|(a|A)lrededores( de )?|(a|A)ldedor( de )?|(a|A)lrededor( de )?')
+            alrededores = re.compile(
+                r'((a|A)ldedores|(a|A)lredores|(a|A)lredor|(a|A)lrededores|(a|A)ldedor|(a|A)lrededor|'
+                r'(c|C)erca|(d|D)iversas (ciudades|localidades|ubicaciones))'
+                r'( )?(de |del |en el |en |por tod(a|o) )?(((s|S)ur|(n|N)orte|(e|E)ste|(o|O)este|(c|C)entro) de )?')
             city = alrededores.sub('', city)
             city = city.replace('etc.', "").replace('etc', "").replace("Extranjero", "").replace("extranjero", "").strip()
             city = '' if len(city) == 1 else city # city.replace('.', "").replace('-', "")
