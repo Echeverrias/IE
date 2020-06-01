@@ -80,10 +80,10 @@ WSGI_APPLICATION = 'ie_django.wsgi.application'
 DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'm31',
-            'USER': 'jaea',
+            'NAME': 'ie',
+            'USER': 'root',
             'PASSWORD': 'root',
-            'HOST': 'localhost',
+            'HOST': 'db',
             'PORT': '3306',
         }
 }
@@ -138,4 +138,4 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'staticfiles')
