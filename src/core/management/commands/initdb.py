@@ -58,6 +58,10 @@ def _insert_communities(communities_csv = COMMUNITIES_CSV):
         country_id = int(e['country_id'])
         country = Country.objects.get(id=country_id)
         e['country'] = country
+        try:
+            del (e['capital_id'])
+        except:
+            pass
         Community(**e).save()
 
 def _insert_provinces(provinces_csv=PROVINCES_CSV):
@@ -69,6 +73,10 @@ def _insert_provinces(provinces_csv=PROVINCES_CSV):
         community = Community.objects.get(id=int(e['community_id']))
         e['community'] = community
         del (e['community_id'])
+        try:
+            del (e['capital_id'])
+        except:
+            pass
         Province(**e).save()
 
 def _insert_cities(cities_csv=CITIES_CSV):
