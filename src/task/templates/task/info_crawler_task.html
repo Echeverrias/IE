@@ -2,7 +2,7 @@
 {% load custom_extras %}
 <div class="remnant">
     {% for task in tasks %}
-        <h4 class="title">La tarea {{ task.type }} {{task.name}} ({{ task.pid }}) está ejecutandose</h4>
+        <h4 class="title">La tarea {{ task.type }} {{task.name}} ({{ task.pid }}) está ejecutándose</h4>
         <h5 class="title">Inicio de la tarea: {{ task.created_at|date:'d-m-Y' }} {{ task.started_at|time:"H:i" }}</h5>
         {% if scraped_items_number > 0 %}
             <p id="count" class="title">Se han procesado <span>{{ scraped_items_number }}</span> items</p>
