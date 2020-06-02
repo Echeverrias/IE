@@ -32,6 +32,8 @@ You need to have installed:
 
 You need to create an empty database.
 
+Or if you want to run the proyect with [Docker](https://www.docker.com/get-started) you need to have it installed.
+
 ### Running the project
 1. Download the base branch from the [IE project](https://github.com/Echeverrias/IE.git), you can download it as a zip or clone it with <b>git clone -b base https://github.com/Echeverrias/IE.git</b>
 2. You have to set your database. Open the src/ie_django/settings.py file and configure the variable 'DATABASES'<br><br>
@@ -39,14 +41,17 @@ You need to create an empty database.
 <br><p align="center"><i>Figure 7</i></p><br>
 3. Open the terminal, go to the project root folder and install the virtual environment.<br>
 4. Activate the virtual environment.<br>
-5. Install all the requirements with <b>pip install -r requirements.txt</b><br>
-6. Go to the 'src' folder and execute <b>python manage.py makemigrations</b> to create the migrations.<br>
+5. Go to the 'src' folder and install all the requirements with <b>pip install -r requirements.txt</b><br>
+6. Execute <b>python manage.py makemigrations</b> to create the migrations.<br>
 7. Execute <b>python manage.py migrate</b> to create the tables in the database.<br>
 8. Execute <b>python manage.py initdb</b> to initialize language table and locations tables.<br>
 9. Execute <b>python manage.py createsuperuser</b> to create a default user with administrator permission.<br>
-10. Execute <b>python manage.py createsuperuser</b> to create a default user with administrator permission.<br>
-11. Execute <b>python manage.py collectstatic</b> to move all the static files to the staticfiles folder.<br>
-12. The application starts in the url <a href="http://localhost:8080/">http://localhost:8080/</a><br>
+10. Execute <b>python manage.py collectstatic</b> to move all the static files to the staticfiles folder.<br>
+11. The application starts in the url <a href="http://localhost:8000/">http://localhost:8000/</a><br>
+
+### Running the project with Docker
+Open the terminal and, in the root folder, execute <b>docker-compose up</b>, the application will start in the url <a href="http://localhost:8000/">http://localhost:8000/</a><br>. The data will be stored in a MySQL database called 'ie' accesible at the 3307 port. There is an admin user created by default, its username is 'root' and its password is 'root'.
+
 
 ## Running the tests
  Open the terminal, go to the project src folder end execute <b>python manage.py test</b> to run all the tests.
