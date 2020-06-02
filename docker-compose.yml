@@ -5,7 +5,7 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - "8000:8000"
+      - "8000:80"
     volumes:
       - ./config/nginx/conf.d:/etc/nginx/conf.d
       - ./staticfiles:/staticfiles
@@ -24,8 +24,6 @@ services:
       - ./mysql:/var/lib/mysql
   web:
     build: .
-    ports:
-      - "5000:5000"
     command: >
        sh -c "/wait
        && python ./src/manage.py makemigrations
@@ -33,7 +31,7 @@ services:
        && python ./src/manage.py initadmin root root@ie.com root
        && python ./src/manage.py initdb
        && cd src
-       && gunicorn ie_django.wsgi:application --bind 0.0.0.0:5000"
+       && gunicorn ie_django.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/IE
       - ./staticfiles:/IE/staticfiles
