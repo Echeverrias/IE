@@ -8,7 +8,7 @@ services:
       - "8000:80"
     volumes:
       - ./config/nginx/conf.d:/etc/nginx/conf.d
-      - ./staticfiles:/staticfiles
+      - static_volume:/staticfiles
     depends_on:
       - web
 
@@ -21,7 +21,7 @@ services:
        MYSQL_ROOT_PASSWORD: 'root'
     restart: always
     volumes:
-      - ./mysql:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
   web:
     build: .
     command: >
@@ -34,7 +34,7 @@ services:
        && gunicorn ie_django.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/IE
-      - ./staticfiles:/IE/staticfiles
+      - static_volume:/IE/staticfiles
     depends_on:
       - db
     environment:
@@ -42,3 +42,7 @@ services:
       - WAIT_HOSTS_TIMEOUT=300
       - WAIT_SLEEP_INTERVAL=30
       - WAIT_HOST_CONNECT_TIMEOUT=30
+
+volumes:
+  static_volume:
+  mysql_data:
