@@ -31,7 +31,6 @@ services:
        && python manage.py initdb
        && gunicorn ie_django.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - ./src:/IE/src
       - static_volume:/IE/staticfiles
     depends_on:
       - db
