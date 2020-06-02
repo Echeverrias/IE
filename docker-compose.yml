@@ -23,6 +23,8 @@ services:
       - mysql_data:/var/lib/mysql
   web:
     build: ./src
+    expose:
+      - 8000
     command: >
        sh -c "/wait
        && python manage.py makemigrations
