@@ -20,19 +20,19 @@
                         <button id="stop" class="btn btn-primary" type="submit">Parar araña</button>
                 </form>
                 -->
-                {% if not model or model == 'job' %}
-                <form id="run-job-spider" action="{{'job'|get_action_form:model}}" method="GET"  {% if is_running %}hidden{% endif %} >
-                        <input type="hidden" name="crawl" value="True">
-                        <button id="start-job-spider" class="btn btn-primary" type="submit">Ejecutar 'Jobs Spider'</button>
-                </form>
-                {% endif %}
-                <br>
                 {% if not model or model == 'company' %}
                 <form id="run-company-spider" action="{{'company'|get_action_form:model}}"method="GET"  {% if is_running %}hidden{% endif %} >
                         <input type="hidden" name="crawl" value="True">
                         <button id="start-company-spider" class="btn btn-primary" type="submit">Ejecutar 'Companies Spider'</button>
                 </form>
                  {% endif %}
+                <br>
+                {% if not model or model == 'job' %}
+                <form id="run-job-spider" action="{{'job'|get_action_form:model}}" method="GET"  {% if is_running %}hidden{% endif %} >
+                        <input type="hidden" name="crawl" value="True">
+                        <button id="start-job-spider" class="btn btn-primary" type="submit">Ejecutar 'Jobs Spider'</button>
+                </form>
+                {% endif %}
         </div>
 </div>
 {% endblock %}
