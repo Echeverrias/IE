@@ -27,8 +27,8 @@ class Command(BaseCommand):
                 User.objects.create_superuser(username, email, password)
                 logging.info(f'Created user {username}')
             except IntegrityError:
-                logging.warn(f'An user with that username already exists')
+                raise CommandError(f'An user with that username already exists')
             except Exception as e:
-                logging.error(f'{e}')
+                raise CommandError(f'{e}')
         except Exception as e:
             raise CommandError(str(e))
