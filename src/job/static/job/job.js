@@ -6,17 +6,42 @@ $(document).ready(function() {
 
         $(".job-inline div.card-body").addClass('hidden')
 
+        function cleanInlineJobs(){
+            $(".job-inline div.card-body").addClass('hidden')
+            $('.job-inline').removeClass('lowlight')
+        }
+        function toggleInlineJob(currentTarget){
+            var id = currentTarget.id
+            $('#' + id + ' div.card-body').toggleClass('hidden');
+            $('#' + id).toggleClass('lowlight');
+            $('#' + id + ' div.card').toggleClass('lowlight');
+        }
+
         $(".job-inline").click(function(event) {
             try{
-                $(".job-inline div.card-body").addClass('hidden')
-                $('.job-inline').removeClass('lowlight')
-                $('#' + this.id + ' div.card-body').toggleClass('hidden');
-                $('#' + this.id).toggleClass('lowlight');
-                $('#' + this.id + ' div.card').toggleClass('lowlight');
+                if (!this.className.includes('lowlight')){
+                    cleanInlineJobs();
+                }
+                toggleInlineJob(this);
             }
             catch(e){
             }
+            finally{
+                event.stopPropagation();
+            }
         });
+
+        $('form').click(function(e){
+            e.stopPropagation();
+        })
+
+        $("body").click(function(event) {
+            try{
+                 cleanInlineJobs();
+            }
+            catch(e){
+            }
+        })
 
         $("div.job-inline").hover(function(event) {
             $(this).toggleClass('highlight');
