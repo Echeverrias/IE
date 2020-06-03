@@ -34,12 +34,19 @@ $(document).ready(function(){
         }
     }
 
+    function handle_error(error){
+        stop_ajax_request();
+        $('#main-loader').hide();
+        console.log(error)
+        display_msg('Error: La conexión ha sido rechazada');
+    }
+
     function get_info_running_crawler(){
        console.log('Ajax request')
        $.ajax({
             'url': '/task/scraping/?AJAX',
             'success': show_info_running_crawler,
-            'error': e => console.error(e)
+            'error': e => handle_error(e)
         })
         return false
     }
