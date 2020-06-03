@@ -8,6 +8,8 @@ $(document).ready(function() {
 
         $(".job-inline").click(function(event) {
             try{
+                $(".job-inline div.card-body").addClass('hidden')
+                $('.job-inline').removeClass('lowlight')
                 $('#' + this.id + ' div.card-body').toggleClass('hidden');
                 $('#' + this.id).toggleClass('lowlight');
                 $('#' + this.id + ' div.card').toggleClass('lowlight');
@@ -35,6 +37,8 @@ $(document).ready(function() {
            $(this).removeClass('highlight');
         });
 
-
+        $('a').click(function(e){
+            e.stopPropagation();
+        });
 
 });
