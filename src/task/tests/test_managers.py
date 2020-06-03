@@ -37,7 +37,7 @@ class TestTask(TestCase):
     def test_get_latest_crawler_tasks(self):
         l = Task.objects.get_latest_crawler_tasks()
         l_ = self.latest_crawler_tasks
-        self.assertEqual(len(l), len(l_))
+        self.assertEqual(l.count(), len(l_))
         for task, task_ in zip(l,l_):
             self.assertEqual(task, task_)
 
@@ -48,6 +48,6 @@ class TestTask(TestCase):
     def test_get_latest_finished_crawler_tasks(self):
         l = Task.objects.get_latest_finished_crawler_tasks()
         l_ = self.latest_finished_crawler_tasks
-        self.assertEqual(len(l), len(l_))
+        self.assertEqual(l.count(), len(l_))
         for task, task_ in zip(l, l_):
             self.assertEqual(task, task_)

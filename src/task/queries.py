@@ -17,30 +17,32 @@ class TaskQuerySet(models.QuerySet):
         try:
             return self.crawler_tasks().latest('created_at')
         except Exception as e:
-            print(e)
             return None
 
     def get_latest_crawler_tasks(self):
         try:
             distinct = self.crawler_tasks().values('name').order_by('name').annotate(name_count=Count('name'))
             names = [name.get('name') for name in distinct]
-            return [self.crawler_tasks().filter(name=name).latest('created_at') for name in names]
+            tasks =  [self.crawler_tasks().filter(name=name).latest('created_at') for name in names]
+            pks = [task.pk for task in tasks if task]
+            qs =  self.filter(pk__in=pks).order_by('created_at')
+            return qs
         except Exception as e:
-            print(e)
-            return []
+            return self.none()
 
     def get_latest_finished_crawler_task(self):
         try:
             return self.finished_crawler_tasks().latest('created_at')
         except Exception as e:
-            print(e)
             return None
 
     def get_latest_finished_crawler_tasks(self):
         try:
             distinct = self.crawler_tasks().values('name').order_by('name').annotate(name_count=Count('name'))
             names = [name.get('name') for name in distinct]
-            return [ self.finished_crawler_tasks().filter(name=name).latest('created_at') for name in names]
+            tasks =  [ self.finished_crawler_tasks().filter(name=name).latest('created_at') for name in names]
+            pks = [task.pk for task in tasks if task]
+            qs = self.filter(pk__in=pks).order_by('created_at')
+            return qs
         except Exception as e:
-            print(e)
-            return []
+            return self.none()
