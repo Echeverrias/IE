@@ -78,6 +78,10 @@ div.mr{
     margin-right: 8.25rem;
 }
 
+li.page-link.active{
+    background: lightgrey;
+}
+
 @media (min-width: 1200px)
 div.container {
     max-width: 1700px;
