@@ -1,6 +1,11 @@
 import os
 import subprocess
 from subprocess import Popen
+import environ
+
+env = environ.Env()
+
+environ.Env.read_env()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -8,7 +13,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '=26*4qpc02wu@6$#cvz#&3kx7=-nob7zn#_e3)9@=@^8-76)og'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=True)
 ALLOWED_HOSTS =  ['localhost', '127.0.0.1', '*']
 
 DJANGO_APPS = [
@@ -80,11 +85,11 @@ WSGI_APPLICATION = 'ie_django.wsgi.application'
 DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': '',
-            'USER': '',
-            'PASSWORD': '',
-            'HOST': 'localhost',
-            'PORT': '3306',
+            'NAME': env('DATABASE_NAME'),
+            'USER': env('DATABASE_USER'),
+            'PASSWORD': env('DATABASE_PASSWORD'),
+            'HOST': env.str('DATABASE_HOST', default='localhost'),
+            'PORT': env.str('DATABASE_PORT', default='3306'),
         }
 }
 

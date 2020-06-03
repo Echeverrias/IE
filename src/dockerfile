@@ -8,14 +8,11 @@ ENV PYTHONUNBUFFERED 1
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN sed -i -e "s/'NAME': ''/'NAME': 'ie'/g" ./ie_django/settings.py
-RUN sed -i -e "s/'USER': ''/'USER': 'root'/g" ./ie_django/settings.py
-RUN sed -i -e "s/'PASSWORD': ''/'PASSWORD': 'root'/g" ./ie_django/settings.py
-RUN sed -i -e "s/'HOST': 'localhost'/'HOST': 'db'/g" ./ie_django/settings.py
 RUN apt-get update
 RUN apt-get install --yes --no-install-recommends apt-utils
 RUN pip install --upgrade pip
 RUN apt-get -q update && apt-get -qy install netcat
+RUN apt-get install dos2unix
 RUN pip install -r requirements.txt
 RUN python manage.py collectstatic --no-input --clear
 
@@ -25,6 +22,5 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERS
 RUN chmod +x /wait
 
 RUN chmod +x /IE/src/entrypoint.sh
-RUN apt-get install dos2unix
 RUN dos2unix /IE/src/entrypoint.sh
 ENTRYPOINT ["/IE/src/entrypoint.sh"]
