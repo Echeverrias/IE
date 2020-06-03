@@ -82,6 +82,10 @@ li.page-link.active{
     background: lightgrey;
 }
 
+.job-inline .card-body{
+    padding-top:0;
+}
+
 @media (min-width: 1200px)
 div.container {
     max-width: 1700px;
