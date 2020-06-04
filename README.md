@@ -48,7 +48,12 @@ Or if you want to run the proyect with [Docker](https://www.docker.com/get-start
 11. The application starts in the url <a href="http://localhost:8000/">http://localhost:8000/</a><br>
 
 ### Running the project with Docker
-Open the terminal and, in the root folder, execute <b>docker-compose up</b>, the application will start in the url <a href="http://localhost:8000/">http://localhost:8000/</a>. The data will be stored in a MySQL database called 'ie' accesible at the 3307 port. There is an admin user created by default, its username is 'root' and its password is 'root'.
+1. Download the base branch from the [IE project](https://github.com/Echeverrias/IE.git), you can download it as a zip or clone it with <b>git clone -b base https://github.com/Echeverrias/IE.git</b>
+2. Open the terminal and, in the root folder, execute <b>docker-compose up</br>
+3. The application will start in the url <a href="http://localhost:8000/">http://localhost:8000/</a><br><br>
+
+The data will be stored in a MySQL database called 'ie' accesible at the 3307 port. 
+There is an admin user created by default, its username is 'root' and its password is 'root'.
 
 
 ## Running the tests
