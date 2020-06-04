@@ -1,12 +1,12 @@
-# Web Scrapping App
+# Web Scraping App
 
-This is an app to do web scrapping on the website 'IE', to get the data of the job offers and store it in a data base.<br><br><br>
+This is an app to do web scraping on the website 'IE', to get the data of the job offers and store it in a data base.<br><br><br>
 
 You can register in it:<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/signup.png" width="500"></div>
 <br><p align="center"><i>Figure 1</i></p><br><br>
 
-You can start a web scrapping process (the extracted data will be stored in a data base)<br><br>
+You can start a web scraping process (the extracted data will be stored in a data base)<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/run_crawler.png" width="500"></div>
 <br><p align="center"><i>Figure 2</i></p><br/><br/>
 
