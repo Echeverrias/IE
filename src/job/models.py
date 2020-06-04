@@ -432,12 +432,7 @@ class Job(models.Model):
         ordering = ['-created_at', 'name']
 
     def __str__(self):
-        city = ""
-        try:
-            city = " - %s" % ( self.cities.all().first())
-        except:
-            pass
-        return "%s - %s%s" % (self.name, self.type, city)
+        return f'{self.name}'
 
     def save(self, *args, **kwargs):
         now = timezone.localtime(timezone.now())
