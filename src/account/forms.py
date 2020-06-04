@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ValidationError
 from django.core import exceptions
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -67,3 +67,20 @@ class RegisterForm(UserCreationForm):
             raise ValidationError('El email está asociado a otro usuario')
         else:
             return email
+
+
+class LoginForm(AuthenticationForm):
+
+
+    username = forms.CharField(label=_("Nombre de usuario"),
+                               error_messages={'required': _('Introduce el nombre de usuario.'),
+                                })
+    password = forms.CharField(label=_("Contraseña"),
+                                error_messages={
+                                    'required': _('Introduce la contraseña.'),
+                                    'invalid': _('La contraseña no es válida.'),
+                                })
+
+    class Meta:
+        model = User
+        fields = ('username', 'password')

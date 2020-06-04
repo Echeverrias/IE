@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import views as auth_views
-from .forms import RegisterForm
+from .forms import RegisterForm, LoginForm
 
 def register_view(request):
     template_name = "account/register.html"
@@ -19,11 +19,14 @@ def register_view(request):
     context = {'form': form}
     return render(request, template_name, context)
 
+class LoginView_(auth_views.LoginView):
+    authentication_form = LoginForm
+
 def login_view(request, **kwargs):
     if request.user.is_authenticated:
         return redirect('/home/')
     else:
-        return auth_views.LoginView.as_view(template_name="account/login.html")(request)
+        return auth_views.LoginView.as_view(authentication_form=LoginForm, template_name="account/login.html")(request)
 
 
 
