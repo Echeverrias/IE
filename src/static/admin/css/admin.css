@@ -6,69 +6,10 @@ li.nav-item.admin a.nav-link{
     color: rgba(255,255,255,.5)
 }
 
-#ie-job .card{
-    padding: 1em;
+#admin-container #content{
+    width: 100%;
 }
 
-#ie-job .highlight {
-    background: yellow;
- }
-
-#ie-job .lowlight {
-    background: #FFFFAD;
- }
-
-#ie-ob div.card-body{
-    display:none;
-}
-
-
-#ie-job div.job div.card{
-    border:none
-}
-
-#ie-job div.job.details div.card div.card-body{
-    display:block;
-}
-
-#ie-job div.job.details div.card{
-    border: 1px solid rgba(0,0,0,.125)
-}
-
-#ie-job .ie-btn{
-    background: #dee2e6;
-    cursor: pointer;
-}
-
-
-#btn-filters.ie-btn.highlight{
-    background: #6c757d;
-}
-
-div.ie-job ul.list li.active{
-    background: #dee2e6;
-}
-
-
-#filters{
-    margin:1em;
-}
-
-div.inline{
-    margin:0em 2em;
-}
-
-div.row{
-    margin:3em 0em;
-}
-
-.pagination nav{
-     margin:auto;
-}
-
-#id_date{
-    width:auto;
-}
 
 
 
