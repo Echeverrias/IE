@@ -22,12 +22,14 @@ class Command(BaseCommand):
             try:
                 validate_email(email)
             except exceptions.ValidationError as e:
-                raise CommandError('The email is not valid')
+                #raise CommandError('The email is not valid')
+                logging.warn('The email is not valid')
             try:
                 User.objects.create_superuser(username, email, password)
                 logging.info(f'Created user {username}')
             except IntegrityError:
-                raise CommandError(f'An user with that username already exists')
+                #raise CommandError(f'An user with that username already exists')
+                logging.warn(f'An user with that username already exists')
             except Exception as e:
                 raise CommandError(f'{e}')
         except Exception as e:
