@@ -11,7 +11,7 @@ admin.site.site_title = "Infoempleo";
 
 @admin.register(Job)
 class JobAdmin(ImportExportModelAdmin):
-    list_display = ['name', 'state', 'type', 'contract', 'working_day', 'category_level', 'area', 'company', '_location']
+    list_display = ['name', 'state', 'type', 'contract', 'working_day', 'category_level', 'area', '_location']
     list_filter =  ['type','contract','working_day', 'nationality', 'area']
     search_fields = ['name', 'id', 'functions', 'requirements', 'it_is_offered']
     readonly_fields = ['created_at', 'updated_at', 'checked_at']
