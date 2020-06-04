@@ -84,3 +84,19 @@ class LoginForm(AuthenticationForm):
     class Meta:
         model = User
         fields = ('username', 'password')
+
+    def _translate_errors(self):
+        d = {
+            'Please enter a correct username and password. Note that both fields may be case-sensitive.': 'Nombre de usuario y/o contraseña incorrectas.',
+        }
+        errors = self.errors.get('__all__', None)
+        if errors:
+            errors_ = [d.get(error, error) for error in errors]
+            self.errors['__all__'] = errors_
+
+    def _post_clean(self):
+        try:
+            super(LoginForm, self)._post_clean()
+            self._translate_errors()
+        except Exception as e:
+            raise e
