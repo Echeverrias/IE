@@ -129,7 +129,7 @@ class Company(models.Model):
     name = models.CharField(null=True, blank=True, max_length=300, verbose_name="nombre")
     link = models.URLField(null=True)
     reference = models.IntegerField(null=True, blank=True, verbose_name="nº de referencia")
-    is_registered = models.BooleanField(null=True, blank=True, verbose_name="empresa colaboradora")
+    is_registered = models.BooleanField(default=False, blank=True, verbose_name="empresa colaboradora")
     description = models.TextField(null=True, verbose_name="descripción")
     resume = models.CharField(max_length=300, null=True, blank=True, verbose_name="resumen")
     city = models.ForeignKey(City,
