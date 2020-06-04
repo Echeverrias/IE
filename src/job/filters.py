@@ -1,6 +1,6 @@
 from django.utils.translation import ugettext_lazy as _
 import django_filters
-from .models import Job
+from .models import Job, Province, Country
 from django.db.models import Q, F
 from datetime import date
 from django import forms
@@ -35,8 +35,8 @@ class JobFilter(django_filters.FilterSet):
     text = django_filters.CharFilter(method='search_text', label='Texto')
     minimum_salary = django_filters.NumberFilter(lookup_expr='gte', label='Salario mínimo')
     cities = django_filters.CharFilter(field_name="cities", lookup_expr='name__icontains', label='Ciudad')
-    province = django_filters.CharFilter(field_name="cities", lookup_expr='province__name__icontains', label='Provincia')
-    country = django_filters.CharFilter(field_name="cities", lookup_expr='country__name__icontains', label='País')
+    province = django_filters.filters.ModelChoiceFilter(queryset=Province.objects.exclude(jobs=None))
+    country = django_filters.filters.ModelChoiceFilter(queryset=Country.objects.exclude(jobs=None))
     datepicker = django_filters.DateFilter(method='after_date',
                                            label="Fecha posterior",
                                            widget=forms.SelectDateWidget(
