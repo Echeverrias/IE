@@ -38,7 +38,7 @@ $(document).ready(function(){
         stop_ajax_request();
         $('#main-loader').hide();
         console.log(error)
-        display_msg('Error: La conexión ha sido rechazada');
+        display_msg('Error: La conexión ha sido rechazada', 'h4', 'title alert alert-danger');
     }
 
     function get_info_running_crawler(){
@@ -65,8 +65,8 @@ $(document).ready(function(){
         $('#main-loader').addClass(velocity);
     }
 
-    function display_msg(msg){
-        html = '<h4 class="title">' + msg + '</h4>' ;
+    function display_msg(msg, tag, classes){
+        html = `<${tag} class="${classes}">  ${msg}  </${tag}>` ;
         $('.sub-container').html(html);
     }
 
@@ -90,7 +90,7 @@ $(document).ready(function(){
         $("#run-job-spider").hide();
         $("#run-company-spider").hide();
         msg = 'Iniciando el proceso ...';
-        display_msg(msg);
+        display_msg(msg, 'h4', 'title');
         show_loader('fast');
     }
 
@@ -103,7 +103,7 @@ $(document).ready(function(){
             console.log("stop...")
             $("#stop-crawler").hide();
             msg = 'Parando la araña...';
-            display_msg(msg);
+            display_msg(msg, 'h4', 'title');
             $('#main-loader').show();
             waiting_for_stop(msg);
             change_loader_velocity('slow');
