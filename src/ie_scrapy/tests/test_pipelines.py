@@ -682,33 +682,41 @@ class TestStoragePipeline(TestCase):
                         'link': 'https://www.infoempleo.com/colaboradoras/hays/presentacion/',
                         'name': 'Hays Recruiting Experts Worldwide',
                         'offers': 397,
+                        'area': ['Recursos Humanos'],
                         'resume': '',
                         'is_registered': True,
                         'city': None,
                         'province': None,
                         'country': None,
                         }
-        item = {
+        item_dict = {
             'category': 'Recursos Humanos_',
             'description': 'new description',
             'link': 'https://www.infoempleo.com/colaboradoras/hays/presentacion/______',
             'name': 'XXXXXXXX',
             'offers': 900,
             'resume': 'new resume',
+            'area': 'Tecnología',
             'is_registered': False,
             'city': self.almeria_city,
             'province': self.almeria,
             'country': self.espana,
         }
+        item = CompanyItem(item_dict)
         # The name and the link dont suffer upgrade
         upgrade = {
-            'category': 'Recursos Humanos_',
             'description': 'new description',
-            'offers': 900,
             'resume': 'new resume',
+            'offers': 900,
+            'area': ['Recursos Humanos', 'Tecnología'],
+            'category': 'Recursos Humanos_',
             'city': self.almeria_city,
             'province': self.almeria,
             'country': self.espana,
         }
         company = Company.objects.create(**company_dict)
+        print(self.sp._get_company_upgrade(company, item))
+        print('----------------------------')
+        print(upgrade)
+        print('+++++++++++++++++++++++')
         self.assertEqual(self.sp._get_company_upgrade(company, item), upgrade)
