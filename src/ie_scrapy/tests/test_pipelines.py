@@ -366,6 +366,31 @@ class TestCleaningPipeline(TestBase):
         }
         ci = CompanyItem(**d)
         self.assertEqual(self.cp._clean_company_name(ci), "")
+        d = {
+            'name': "Empresa importante",
+            'link': "",
+            'resume': "R.E.N.F.E.",
+            'description': "..."
+        }
+        ci = CompanyItem(**d)
+        self.assertEqual(self.cp._clean_company_name(ci), "R.E.N.F.E.")
+        d = {
+            'name': "Empresa importante",
+            'link': "",
+            'resume': "\rOrganiqFoods ",
+            'description': "..."
+        }
+        ci = CompanyItem(**d)
+        self.assertEqual(self.cp._clean_company_name(ci), "OrganiqFoods")
+        d = {
+            'name': "Empresa importante",
+            'link': "",
+            'resume': "Asesoría",
+            'description': "..."
+        }
+        ci = CompanyItem(**d)
+        self.assertEqual(self.cp._clean_company_name(ci), "")
+
 
     def test_clean_company_category(self):
         # If the company has link it will be have category and the pipeline wouldn't call _clean_compnay_description

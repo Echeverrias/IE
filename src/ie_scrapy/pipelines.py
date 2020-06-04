@@ -390,7 +390,7 @@ class CleaningPipeline():
 
         def _get_company_name_in_resume(resume):
             try:
-                if resume.isupper() or resume.startswith('Grupo'):
+                if resume.startswith('Grupo') or (" " not in resume.strip() and sum(1 for c in resume if c.isupper()) > 1):
                     return resume
                 else:
                     try:
@@ -410,7 +410,6 @@ class CleaningPipeline():
         def _get_company_name_in_description(description):
 
             def _get_company_name_from_description_start(string_titled):
-
                 words = string_titled.split(" ")
                 words = words[1:] if words[0].istitle() and not words[1].istitle() else words
                 string = (" ").join(words)
@@ -458,7 +457,7 @@ class CleaningPipeline():
 
         name = ''
         if not company_item.get('link') and not company_item.get('is_registered'):
-            name = _get_company_name_in_resume(company_item.get('resume')) if company_item.get('resume') else ''
+            name = _get_company_name_in_resume(self.clean_string(company_item.get('resume'))) if company_item.get('resume') else ''
             if not name:
                 name = _get_company_name_in_description(company_item.get('description')) if company_item.get('description') else ''
         elif company_item.get('name'):
