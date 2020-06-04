@@ -11,6 +11,7 @@ import functools
 import re
 import time
 import datetime
+import os
 from job.models import Job, Company, Country, City, Province, Language
 from utilities.languages_utilities import get_languages_and_levels_pairs
 from utilities.utilities import (
@@ -591,11 +592,20 @@ class CleaningPipeline():
             category = self.clean_string(company_item['category'], True)
         return category
 
+    def _clean_company_reference(self, link):
+        try:
+            reference = os.path.basename(os.path.dirname(link))
+            reference = int(reference) if reference.isnumeric() else None
+        except:
+            reference = None
+        return reference
+
     def _clean_company(self, item):
         item['name'] = self._clean_company_name(item)
         if item.get('is_registered'):
             item['is_registered'] = True
         item['link'] = self._clean_url(item.get('link'))
+        item['reference'] = self._clean_company_reference(item.get('reference'))
         item['resume'] = self.clean_string(item.get('resume'))
         item['description'] = self._clean_company_description(item.get('description'))
         item['category'] = self._clean_company_category(item)

@@ -5,12 +5,34 @@ from job.models import Job, Company, Country, Province, City, Language
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 import time
+import os
+import pickle
 
-class TestCleaningPipeline(TestCase):
+BASE_DIR = os.path.dirname(__file__)
+
+class TestBase(TestCase):
+
+    @staticmethod
+    def _get_object_from_a_file(file_name):
+        file_path = os.path.join(BASE_DIR, 'data', file_name)
+        if file_name.endswith('.html'):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                object = f.read().replace('\n', '\r\n')
+        else:
+            with open(file_path, 'rb') as f:
+                object = pickle.load(f)
+        return object
+
+class TestCleaningPipeline(TestBase):
 
     @classmethod
     def setUpTestData(cls):
         cls.cp = CleaningPipeline()
+        cls.company_item = TestCleaningPipeline._get_object_from_a_file('company_item.item')
+
+
+
+    ############### JOB TESTS ################################################################################
 
     def test_clean_job_date(self):
         today = timezone.localtime(timezone.now()).date()
@@ -169,27 +191,23 @@ class TestCleaningPipeline(TestCase):
         self.assertEqual(self.cp._set_job_dates_from_state(item),
                          {'state': Job.STATE_CLOSED, 'first_publication_date': None, 'last_update_date': None})
 
+    ############### COMPANY TESTS ################################################################################
+
     def test_clean_company(self):
-        company_dict = {'_location': 'Madrid',
-                        'category': '   Recursos Humanos  ',
-                        'description': '\r\n               ',
-                        'link': '/colaboradoras/hays/presentacion/',
-                        'name': '\r\n    Hays Recruiting Experts Worldwide',
-                        'offers': '\r\n Ver todas sus ofertas (397)',
-                        'resume': '\r\n'}
-
-        clean_company_dict = {'_location': 'Madrid',
-                              'category': 'Recursos Humanos',
-                              'description': '',
-                              'link': 'https://www.infoempleo.com/colaboradoras/hays/presentacion/',
-                              'name': 'Hays Recruiting Experts Worldwide',
-                              'offers': 397,
-                              'resume': '',
-                              }
-
-        ci = CompanyItem(company_dict)
-        clean_ci = self.cp.process_item(ci, None)
-        self.assertEqual(clean_ci.get_dict(), clean_company_dict)
+        clean_company_dict = {
+            '_location': 'Barcelona',
+            'area': 'Informática y Telecomunicaciones',
+            'category': 'Recursos Humanos',
+            'description': '',
+            'is_registered': True,
+            'link': 'https://www.infoempleo.com/ofertasempresa/acs-informaticos/29700/',
+            'name': 'A.C.S. Informáticos',
+            'offers': 4,
+            'reference': 29700,
+            'resume': ''
+        }
+        clean_item = CompanyItem(clean_company_dict)
+        self.assertEqual(self.cp.process_item(self.company_item, None), clean_item)
 
     def test_clean_job(self):
 
@@ -414,6 +432,16 @@ class TestCleaningPipeline(TestCase):
         }
         ci = CompanyItem(**d)
         self.assertEqual(self.cp._clean_company_category(ci), "Colectividades")
+
+    def test_clean_company_reference(self):
+        reference = 181984
+        url = f'https://www.infoempleo.com/ofertasempresa/sens-iberica/{reference}/'
+        self.assertEqual(self.cp._clean_company_reference(url), reference)
+        url = f"https://www.infoempleo.com/colaboradoras/adecco/presentacion/"
+        self.assertIsNone(self.cp._clean_company_reference(url))
+        url = ""
+        self.assertIsNone(self.cp._clean_company_reference(url))
+
 
 
 class TestStoragePipeline(TestCase):

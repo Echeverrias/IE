@@ -156,6 +156,8 @@ class InfoempleoSpider(Spider):
         company_dict = {
             'link': self._extract_info(response,
                                        "//div[@class='main-title']//ul[@class='details inline'][1]//li/a/@href"),
+            'reference': self._extract_info(response,
+                                       "//div[@class='main-title']//ul[@class='details inline'][1]//li/a/@href"),
             'name': self._get_company_name(response),
             'description': self._get_company_description(response),
             'resume': self._extract_info(response,

@@ -68,7 +68,7 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
         company_dict = {
             'link': response.url,
             'name': self._get_company_name(response) or response.meta['name'],
-            'reference': self._get_company_reference(response),
+            'reference': response.url,
             'is_registered': True,
             'area': response.meta['area'],
             'description': self._get_company_description(response),
@@ -112,9 +112,3 @@ class InfoempleoCompaniesSpider(scrapy.Spider):
                     company_name.lower() in name.lower() or name.lower() in company_name.lower()):
                 company_name = f'{company_name} - {name.strip()}'
         return company_name
-
-    def _get_company_reference(self, response):
-        link = response.url
-        reference = os.path.basename(os.path.dirname(link))
-        reference = int(reference) if reference.isnumeric() else None
-        return reference

@@ -70,7 +70,7 @@ class FakeResponse():
     def get_offer_response():
         url = 'https://www.infoempleo.com/ofertasdetrabajo/operarioa-metal/mostoles/2459763/'
         filename = "offer.html"
-        meta = {"start_url":  'https://www.infoempleo.com/trabajo/area-de-empresa_legal/'}
+        meta = {"start_url":  "https://www.infoempleo.com/trabajo/area-de-empresa_ingenieria-y-produccion/"}
         company_dict = FakeResponse._get_object_from_a_file('company_info.dict')
         job_dict = FakeResponse._get_object_from_a_file('job_info.dict')
         job_item = FakeResponse._get_object_from_a_file('job_item.item')
@@ -78,10 +78,13 @@ class FakeResponse():
         domain = 'https://www.infoempleo.com'
         link = company_dict['link']
         company_dict['link'] = domain + link if domain not in link else link
+        reference = company_dict['reference']
+        company_dict['reference'] = domain + reference if domain not in reference else reference
         link = job_dict['link']
         job_dict['link'] = domain + link if domain not in link else link
         job_item['link'] = job_dict['link']
         job_item['company']['link'] = company_dict['link']
+        job_item['company']['reference'] = company_dict['reference']
         data = {
             'company_dict': company_dict,
             'job_dict': job_dict,
@@ -210,6 +213,9 @@ class TestInfoempleoSpider(TestCase):
     def test_extract_company_info(self):
         response, data = FakeResponse.get_offer_response()
         company_dict = self.ie._get_company_info(response)
+        print(company_dict)
+        print('------.................')
+        print(data.get('company_dict'))
         self.assertEqual(company_dict, data.get('company_dict'))
 
     def test_extract_job_info(self):
@@ -221,6 +227,9 @@ class TestInfoempleoSpider(TestCase):
         response, data = FakeResponse.get_offer_response()
         gen = self.ie.parse_item(response)
         for ji in gen:
+            print(ji)
+            print('____________')
+
             self.assertEqual(ji, data.get('job_item'))
 
 
@@ -241,8 +250,6 @@ class TestInfoempleoCompaniesSpider(TestCase):
                 self.assertTrue(yielded.get('name'))
                 self.assertTrue(yielded.get('is_registered'))
             else:
-                if not(('ofertasempresa' in yielded.url or 'colaboradoras' in yielded.url)):
-                    breakpoint()
                 self.assertTrue('ofertasempresa' in yielded.url or 'colaboradoras' in yielded.url)
                 self.assertTrue(yielded.meta.get('area'))
                 self.assertTrue(yielded.meta.get('name'))
@@ -261,15 +268,6 @@ class TestInfoempleoCompaniesSpider(TestCase):
         gen = self.spider.parse_item(response)
         for ci in gen:
             self.assertEqual(ci, data.get('company_item'))
-
-    def test_get_company_reference(self):
-        reference = 181984
-        url = f'https://www.infoempleo.com/ofertasempresa/sens-iberica/{reference}/'
-        response = FakeResponse.get_basic_response(url)
-        self.assertEqual(self.spider._get_company_reference(response), reference)
-        url = f"https://www.infoempleo.com/colaboradoras/adecco/presentacion/"
-        response = FakeResponse.get_basic_response(url)
-        self.assertIsNone(self.spider._get_company_reference(response))
 
     def test_clean_company_url(self):
         self.assertIsNone(self.spider._clean_company_url('/'))
