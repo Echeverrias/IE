@@ -204,9 +204,9 @@ class SpiderProcess():
             self._process.join(120)  # ! IMPORTANT after .terminate -> .join
             try:
                 pass
-                #os.kill(self._process.pid, signal.SIGTERM)
+                os.kill(self._process.pid, signal.SIGTERM)
             except Exception:
-                logging.exception(f"Error killing the process {self._process.pid}")
+                logging.info(f"The process {self._process.pid} is not alive")
         except Exception as e:
             logging.exception("Error in _reset_process")
         finally:
