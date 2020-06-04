@@ -45,11 +45,11 @@ Or if you want to run the proyect with [Docker](https://www.docker.com/get-start
 8. Execute <b>python manage.py initdb</b> to initialize language table and locations tables.<br>
 9. Execute <b>python manage.py createsuperuser</b> to create a default user with administrator permission.<br>
 10. Execute <b>python manage.py collectstatic</b> to move all the static files to the staticfiles folder.<br>
-11. The application starts in the url <a href="http://localhost:8000/">http://localhost:8000/</a><br>
+11. The application will start in the url <a href="http://localhost:8000/">http://localhost:8000/</a><br>
 
 ### Running the project with Docker
 1. Download the base branch from the [IE project](https://github.com/Echeverrias/IE.git), you can [download](https://github.com/Echeverrias/IE/archive/base.zip) it as a zip or clone it with <b>git clone -b base https://github.com/Echeverrias/IE.git</b>
-2. Open the terminal and, in the root folder, execute <b>docker-compose up</b><br>
+2. Open the terminal, go to the project root folder and execute <b>docker-compose up</b><br>
 3. The application will start in the url <a href="http://localhost:8000/">http://localhost:8000/</a><br><br>
 
 The data will be stored in a MySQL database called 'ie' accesible at the 3307 port.<br>
