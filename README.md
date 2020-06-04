@@ -71,9 +71,9 @@ The entity relationship diagram (ERD) defined to shows the relationships of enti
 
 ## Built with
 * Python 3.7.5
-* MySQL 8.0.2.0
 * Django 3.0.5
 * Scrapy 2.0.1
+* MySQL 8.0.2.0
 
 # Authors
 * Juan Antonio Echeverrías Aranda
