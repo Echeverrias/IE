@@ -99,16 +99,5 @@ class PUADownloaderMiddleware(object):
         if response.status == 200:
             return response
         else:
-            #%
-            if response.status == 302:
-                with open('302.txt' ,'a') as f:
-                    f.write('Request:')
-                    f.write(str(request))
-                    f.write('\n')
-                    f.write('Response:')
-                    f.write(str(response))
-                    f.write('\n')
-                    f.write('\n')
-                breakpoint()
             result = self._make_the_request_again(request, response)
             return result
