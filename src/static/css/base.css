@@ -76,6 +76,9 @@ form input.form-control.datetimepicker-input.date{
     color: rgba(255,255,255,.5);
 }
 
+.navbar-dark .nav-item .navbar-brand:hover{
+    color: #e9eaea;
+}
 
 .no-margin{
     margin: 0;

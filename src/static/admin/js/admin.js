@@ -2,26 +2,27 @@ $(document).ready(function() {
 
     // CHANGING THE TITLE
 
-    var breadcrumbs = $('.breadcrumbs')
-    if (breadcrumbs){
+    if ($('.breadcrumbs a')[0]){
         try{
             $('.breadcrumbs a')[0].innerText = "Panel de administración"
-
-            var text = breadcrumbs.text();
+            var text =  $('.breadcrumbs').text();
             var new_text = "";
             if (text){
                 var a = text.split('›');
                 var model_name = a[a.length - 1];
                 new_text = model_name;
             }
-            else{
-                new_text = "Panel de administración";
-            }
-            var title = $('#content h1');
-            title.text(new_text);
         }
         catch(e){}
     }
+    else{
+        new_text = "Panel de administración";
+    }
+    try{
+        var title = $('#content h1');
+        title.text(new_text);
+    }
+    catch(e){}
 
 
     // FILTERS TRANSLATION
@@ -43,7 +44,7 @@ $(document).ready(function() {
     }
 
     try{
-        $("#changelist-search input[type=submit]:nth-child(3)").value='Buscar'
+        $("#changelist-search input[type=submit]:nth-child(3)")[0].value='Buscar'
     }
     catch(e){}
 
