@@ -23,14 +23,14 @@
                 {% if not model or model == 'company' %}
                 <form id="run-company-spider" action="{{'company'|get_action_form:model}}"method="GET"  {% if is_running %}hidden{% endif %} >
                         <input type="hidden" name="crawl" value="True">
-                        <button id="start-company-spider" class="btn btn-primary" type="submit">Ejecutar 'Companies Spider'</button>
+                        <button id="start-company-spider" class="btn btn-primary" type="submit">Obtener empresas colaboradoras</button>
                 </form>
                  {% endif %}
                 <br>
                 {% if not model or model == 'job' %}
                 <form id="run-job-spider" action="{{'job'|get_action_form:model}}" method="GET"  {% if is_running %}hidden{% endif %} >
                         <input type="hidden" name="crawl" value="True">
-                        <button id="start-job-spider" class="btn btn-primary" type="submit">Ejecutar 'Jobs Spider'</button>
+                        <button id="start-job-spider" class="btn btn-primary" type="submit">Obtener ofertas de empleo</button>
                 </form>
                 {% endif %}
         </div>
