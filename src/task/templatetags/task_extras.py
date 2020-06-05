@@ -18,3 +18,11 @@ def get_action_form(model, model_response):
         return '.'
     else:
         return '../' + model
+
+@register.filter(name='verbose_item')
+def verbose_item(task):
+    d = {
+        'ie': 'ofertas de empleo',
+        'companies': 'empresas',
+    }
+    return  d.get(task.name, '')

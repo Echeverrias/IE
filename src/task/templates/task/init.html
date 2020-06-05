@@ -10,7 +10,7 @@
     <ul>
         {% for task in tasks %}
         <li>
-            <h4>{{task.type}} {{task.name}} ({{task.pid}}) iniciada el {{ task.started_at|date:'d/m/Y' }} y con estado {{task.state|lower}}</h4>
+            <h4>{{task.type}} {{task.name}} ({{task.pid}}) {{task.state|lower}} ({{ task.started_at|date:'d/m/Y' }} {{ task.started_at|time:"h:i a" }}{% if task.finished_at %} - {{ task.finished_at|date:'d/m/Y' }} {{ task.finished_at|time:"h:i a" }}{% endif %})</h4>
         </li>
         {% endfor %}
     </ul>
