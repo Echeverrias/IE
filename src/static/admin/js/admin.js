@@ -38,4 +38,9 @@ $(document).ready(function() {
         }
     }
 
+    try{
+        $("#changelist-search input[type=submit]:nth-child(3)").value='Buscar'
+    }
+    catch(e){}
+
 })
