@@ -390,7 +390,7 @@ class CleaningPipeline():
 
         def _get_company_name_in_resume(resume):
             try:
-                if resume.startswith('Grupo') or (" " not in resume.strip() and sum(1 for c in resume if c.isupper()) > 1):
+                if resume.isupper() or resume.startswith('Grupo') or (" " not in resume and sum(1 for c in resume if c.isupper()) > 1):
                     return resume
                 else:
                     try:
