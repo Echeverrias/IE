@@ -2,22 +2,26 @@ $(document).ready(function() {
 
     // CHANGING THE TITLE
 
-    try{
-        var breadcrumbs = $('.breadcrumbs');
-        var text = breadcrumbs.text();
-        var new_text = "";
-        if (text){
-            var a = text.split('›');
-            var model_name = a[a.length - 1];
-            new_text = model_name;
+    var breadcrumbs = $('.breadcrumbs')
+    if (breadcrumbs){
+        try{
+            $('.breadcrumbs a')[0].innerText = "Panel de administración"
+
+            var text = breadcrumbs.text();
+            var new_text = "";
+            if (text){
+                var a = text.split('›');
+                var model_name = a[a.length - 1];
+                new_text = model_name;
+            }
+            else{
+                new_text = "Panel de administración";
+            }
+            var title = $('#content h1');
+            title.text(new_text);
         }
-        else{
-            new_text = "Panel de administración";
-        }
-        var title = $('#content h1');
-        title.text(new_text);
+        catch(e){}
     }
-    catch(e){}
 
 
     // FILTERS TRANSLATION
