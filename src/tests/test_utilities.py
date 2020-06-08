@@ -114,6 +114,7 @@ class TestUtilities(TestCase):
         self.assertEqual(u.get_coincidences("123456789123", ['1','3', '100']), ['1','3','1','3'])
         self.assertEqual(u.get_coincidences("123456789123", ['1','3', '100'], unique_values=True), ['1','3'])
         self.assertEqual(u.get_coincidences("123456789123", ['100']), [])
+        self.assertEqual(u.get_coincidences("ABCD", ['a', 'b']), [])
 
     def test_replace_multiple(self):
         self.assertEqual(u.replace_multiple('1234', ['1','3'], 'x'), 'x2x4')

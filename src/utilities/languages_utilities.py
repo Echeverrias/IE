@@ -23,7 +23,7 @@ def fix_languages(text):
 
 def get_languages(text):
     languages = LANGUAGES
-    coincidences = get_coincidences(text, languages, True)
+    coincidences = get_coincidences(text.lower(), languages, True)
     return coincidences
 
 def get_level_language_equivalent(level, default_level=None):
@@ -71,11 +71,11 @@ def get_raw_levels(text):
     coincidences = get_coincidences(text.lower(), levels)
     return coincidences
 
-def get_levels_language(text, default_value='B2'):
-    raw_levels = get_raw_levels(text) or [default_value]
-    return get_levels_language_equivalent(raw_levels, default_value)
+def get_levels_language(text, default_level='B2'):
+    raw_levels = get_raw_levels(text) or [default_level]
+    return get_levels_language_equivalent(raw_levels, default_level)
 
-def get_languages_and_levels_pairs(text):
+def get_languages_and_levels_pairs(text, default_level='B2'):
     """
     Look for languages and their levels in the argument 'text'
     :param text: a string
@@ -141,12 +141,5 @@ def get_languages_and_levels_pairs(text):
             levels = [get_levels_language(text, 'B1')[0] for text in languages_]
             pairs = list(zip(languages, levels))
         else:
-            with open('../languages_p.txt', 'a') as f:
-                f.write(text + '\n')
-                f.write(str(languages) + '\n')
-                f.write(text_ + '\n')
-                f.write(str(lng) + '\n')
-                f.write(str(languages_) + '\n')
-                f.write('\n')
-                f.write('\n')
+            pairs = [(language, default_level) for language in languages]
     return pairs
