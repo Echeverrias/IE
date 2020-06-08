@@ -652,7 +652,7 @@ class CleaningPipeline():
             clean_item = self._cleaning[item.get_model_name()](item)
             return clean_item
         except Exception as e:
-            logging-exception()
+            logging.exception(f'Error: CleaningPipeline.process_item({str(item)})')
             return item
 
 
@@ -1020,5 +1020,5 @@ class StoragePipeline(object):
             self._storage[item.get_model_name()](item)
             return item
         except Exception as e:
-            logging.exception(f'Error: {e}')
+            logging.exception(f'Error: StotagePipelins.process_item{str(item)}')
             return item
