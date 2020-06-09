@@ -35,7 +35,7 @@ You need to create an empty database.
 Or if you want to run the proyect with [Docker](https://www.docker.com/get-started) you need to have it installed.
 
 ### Running the project
-1. Download the base branch from the [IE project](https://github.com/Echeverrias/IE.git), you can [download](https://github.com/Echeverrias/IE/archive/base.zip) it as a zip or clone it with <b>git clone -b base https://github.com/Echeverrias/IE.git</b>
+1. Download the [IE v.1.0.0](https://github.com/Echeverrias/IE/releases/tag/v1.0.0)</b>
 2. You have to set your database. Open the IE/src/ie_django/.env file and set the value of the environment variables.<br>
 3. Open the terminal, go to the project root folder and install the virtual environment.<br>
 4. Activate the virtual environment.<br>
@@ -48,7 +48,7 @@ Or if you want to run the proyect with [Docker](https://www.docker.com/get-start
 11. The application will start in the url <a href="http://localhost:8000/">http://localhost:8000/</a><br>
 
 ### Running the project with Docker
-1. Download the base branch from the [IE project](https://github.com/Echeverrias/IE.git), you can [download](https://github.com/Echeverrias/IE/archive/base.zip) it as a zip or clone it with <b>git clone -b base https://github.com/Echeverrias/IE.git</b>
+1. Download the [IE v.1.0.0](https://github.com/Echeverrias/IE/releases/tag/v1.0.0)</b>
 2. Open the terminal, go to the project root folder and execute <b>docker-compose up</b><br>
 3. The application will start in the url <a href="http://localhost:8000/">http://localhost:8000/</a><br><br>
 
