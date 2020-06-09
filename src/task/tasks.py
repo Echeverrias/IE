@@ -212,9 +212,7 @@ class SpiderProcess():
             logging.exception("Error in _reset_process")
         finally:
             self._process = None
-         #   self._id_task = None
             self._is_resetting = False
-        #self._count = 0
 
     def start(self, spider, user=None, **kwargs):
         """
