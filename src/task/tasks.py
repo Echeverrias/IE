@@ -152,8 +152,10 @@ class SpiderProcess():
             except Exception:
                 break
         now = timezone.localtime(timezone.now())
+        actual_task = self.get_actual_task()
+        state = Task.STATE_FINISHED if actual_task.state == Task.STATE_RUNNING else actual_task.state
         data = {
-            'state': Task.STATE_FINISHED,
+            'state': state,
             'description': f'CrawlerProcess finished at {str(now)}',
             'result': self._count if self._count > 0 else self._get_last_jobs(),
             'finished_at': now
