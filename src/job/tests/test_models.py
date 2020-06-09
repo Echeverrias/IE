@@ -4,7 +4,6 @@ from datetime import datetime
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 
-print(__file__)
 class TestJob(TestCase):
 
     @classmethod
