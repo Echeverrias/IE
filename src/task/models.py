@@ -51,7 +51,7 @@ class Task(models.Model):
         ordering = ['-created_at', 'state']
 
     def __str__(self):
-        return f'Task {self.type} {self.name} ({self.pid}) - {self.state} - creada el: {self.created_at} - actualizada el: {self.updated_at}'
+        return f'Task {self.type} {self.name} ({self.pid}) - {self.created_at.date()}  - {self.state}'
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -67,4 +67,3 @@ class Task(models.Model):
     @property
     def is_completed(self):
         return self.state == Task.STATE_FINISHED
-

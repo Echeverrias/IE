@@ -11,8 +11,9 @@ from multiprocessing import  Queue, Process
 import logging
 import os, signal
 from .models import Task
-from job.models import Job
+from job.models import Job, Company
 import time
+import platform
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -24,7 +25,6 @@ class SpiderProcess():
     @staticmethod
     def get_instance():
         """ Static access method. """
-        print(SpiderProcess.__instance)
         if SpiderProcess.__instance == None:
             SpiderProcess()
         return SpiderProcess.__instance
@@ -155,7 +155,7 @@ class SpiderProcess():
         data = {
             'state': Task.STATE_FINISHED,
             'description': f'CrawlerProcess finished at {str(now)}',
-            'result': self._count if self._count >0 else None,
+            'result': self._count if self._count > 0 else self._get_last_jobs(),
             'finished_at': now
         }
         self._update_task(self._id_task, data)
@@ -178,6 +178,7 @@ class SpiderProcess():
         self._process = Process(target=self._crawl, args=(spider, self._qis_scraping,))
         task = Task.objects.create(user=user, name=spider.name, state=Task.STATE_PENDING, type=Task.TYPE_CRAWLER)
         self._id_task = task.pk
+        self._count = 0
 
 
     def _start_process(self):
@@ -211,9 +212,9 @@ class SpiderProcess():
             logging.exception("Error in _reset_process")
         finally:
             self._process = None
-            self._id_task = None
+         #   self._id_task = None
             self._is_resetting = False
-        self._count = 0
+        #self._count = 0
 
     def start(self, spider, user=None, **kwargs):
         """
@@ -229,11 +230,11 @@ class SpiderProcess():
             task = self.get_actual_task()
             if task and (task.state == Task.STATE_RUNNING) and (not self._is_resetting):
                 # The process has finished and we have to update the state
-                self._stop()
+                self.stop()
             self._init_process(spider, user)
             self._start_process()
 
-    def _stop(self, state=Task.STATE_INCOMPLETE):
+    def stop(self, state=Task.STATE_INCOMPLETE):
         if not self._is_resetting:
             now = timezone.localtime(timezone.now())
             data = {
@@ -243,7 +244,7 @@ class SpiderProcess():
                 'finished_at': now
             }
             self._update_task(self._id_task, data)
-            self._reset_process(state)
+            self._reset_process()
 
     def _update_last_db_task_if_is_incomplete(self, last_db_task, actual_task):
         """
@@ -284,8 +285,26 @@ class SpiderProcess():
 
     def get_scraped_items_number(self):
         try:
-            count = self._qitems_number.get(block=True, timeout=5)
+            count = self._qitems_number.get(block=True, timeout=3)
             self._count = count
         except Exception:
-            pass
-        return self._count
+            d = {'count': self._count, 'is_scraping':self.is_scraping()}
+            with open('tasks.txt', 'a')as f:
+                f.write(str(d))
+                f.write('\n')
+            if self.is_scraping() and ('windows' in platform.system().lower()):
+                self._count =  self._get_last_jobs()
+        finally:
+            return self._count
+
+    def _get_last_jobs(self):
+        actual_task = self.get_actual_task()
+        if actual_task:
+            start_task_date = actual_task.started_at
+            name = actual_task.name
+            qs = Job.objects.all() if name == 'ie' else Company.objects.all()
+            count = qs.filter(checked_at__gt=start_task_date).count()
+            self._update_task(self._id_task, {'result': count})
+            return count
+        else:
+            return 555

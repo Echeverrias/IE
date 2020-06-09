@@ -1,8 +1,8 @@
 {% load task_extras %}
 <div class="remnant">
     {% for task in tasks %}
-        <h4 class="title">La tarea {{ task.type }} {{task.name}} ({{ task.pid }}) ha terminado</h4>
-        {% if task.result %}<h5 class="title">{{ task|verbose_item }} procesadas: {{ task.result }}</h5>{% endif %}
+        <h4 class="title">La tarea {{ task.type }} {{task.name}} ({{ task.pid }}) {% if task.state == "Terminada" %} ha terminado{% else %} se ha parado{% endif %}</h4>
+        {% if task.result %}<h5 class="title">{{ task|verbose_item|capfirst }} procesadas: {{ task.result }}</h5>{% endif %}
         <h5 class="title">Inicio de la tarea: {{ task.created_at|date:'d-m-Y' }} {{ task.created_at|time:"H:i" }}</h5>
         <h5 class="title">Fin de la tarea: {{ task.finished_at|date:'d-m-Y' }} {{ task.finished_at|time:"H:i" }}</h5>
         <div id="state" data-state="{{task.state}}" hidden></div>

@@ -7,6 +7,7 @@ from job.models import Job, Company
 from task.tasks import SpiderProcess
 from .fake_tasks import FakeSpiderProcess
 from scrapy.spiders import Spider
+import time
 
 class FakeSpider(Spider):
    name = "fake_spider"
@@ -36,6 +37,7 @@ class TestSpiderProcess(TestCase):
          Must return the actual task (the running task)
       """
       Task.objects.create(name="old task finished", state=Task.STATE_FINISHED, type=Task.TYPE_CRAWLER)
+      time.sleep(1)
       data = self.sp.simulate_running_process()
       self.assertEqual(self.sp.get_latest_task(), data['task'])
 
@@ -44,6 +46,7 @@ class TestSpiderProcess(TestCase):
          Must return the last task from the db
       """
       Task.objects.create(name="old task", state=Task.STATE_FINISHED, type=Task.TYPE_CRAWLER)
+      time.sleep(1)
       task = Task.objects.create(name="latest task", state=Task.STATE_FINISHED, type=Task.TYPE_CRAWLER)
       self.assertEqual(self.sp.get_latest_task(), task)
 
@@ -115,7 +118,17 @@ class TestSpiderProcess(TestCase):
       self.sp.simulate_running_process()
       self.sp._reset_process()
       self.assertIsNone(self.sp._process)
-      self.assertIsNone(self.sp._id_task)
+      self.assertEqual(self.sp._qitems_number.qsize(), 0)
+      self.assertEqual(self.sp._qis_scraping.qsize(), 0)
+      self.assertFalse(self.sp._is_resetting)
+      self.assertFalse(self.sp.is_scraping())
+
+   def test_stop(self):
+      self.sp.simulate_running_process()
+      self.sp.stop()
+      task = self.sp.get_actual_task()
+      self.assertEqual(task.state, Task.STATE_INCOMPLETE)
+      self.assertIsNone(self.sp._process)
       self.assertEqual(self.sp._qitems_number.qsize(), 0)
       self.assertEqual(self.sp._qis_scraping.qsize(), 0)
       self.assertFalse(self.sp._is_resetting)

@@ -1,5 +1,6 @@
 from django.test import TestCase
 from task.models import Task
+import time
 
 class TestTask(TestCase):
 
@@ -7,7 +8,9 @@ class TestTask(TestCase):
     def setUpTestData(cls):
         # The fake tasks will be create by field name order
         ct1 = Task.objects.create(type=Task.TYPE_CRAWLER, state=Task.STATE_FINISHED, name='company')
+        time.sleep(1)
         ct2 = Task.objects.create(type=Task.TYPE_CRAWLER, state=Task.STATE_FINISHED, name='job')
+        time.sleep(1)
         ct3 = Task.objects.create(type=Task.TYPE_CRAWLER, state=Task.STATE_RUNNING, name='job')
         cls.crawler_tasks = [ct1, ct2, ct3]
         cls.finished_crawler_tasks = [ct1, ct2]

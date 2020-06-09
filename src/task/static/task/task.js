@@ -38,7 +38,15 @@ $(document).ready(function(){
         stop_ajax_request();
         $('#main-loader').hide();
         console.log(error)
-        display_msg('Error: La conexión ha sido rechazada', 'h4', 'title alert alert-danger');
+        if (error.status === 500){
+            display_msg('Error: Se ah producido un error en el servidor', 'h4', 'title alert alert-danger');
+        }
+        else if (error.status === 0){
+            display_msg('Error: La conexión ha sido rechazada', 'h4', 'title alert alert-danger');
+        }
+        else{
+            display_msg('Error', 'h4', 'title alert alert-danger');
+        }
     }
 
     function get_info_running_crawler(){
@@ -53,8 +61,10 @@ $(document).ready(function(){
 
     function show_loader(velocity=''){
         console.log('show loader')
-        $('#main-loader').removeClass();
-        $('#main-loader').addClass("loader " + velocity);
+        if (velocity){
+            change_loader_velocity(velocity);
+        }
+        $('#main-loader').show();
         $('#main-loader').removeAttr('hidden');
     }
 
@@ -102,11 +112,10 @@ $(document).ready(function(){
         $('#stop').click((e) => {
             console.log("stop...")
             $("#stop-crawler").hide();
-            msg = 'Parando la araña...';
+            msg = 'Parando el proceso...';
             display_msg(msg, 'h4', 'title');
-            $('#main-loader').show();
-            waiting_for_stop(msg);
             change_loader_velocity('slow');
+            waiting_for_stop(msg);
         })
     }
      catch(e){
