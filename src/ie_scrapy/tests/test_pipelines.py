@@ -740,8 +740,4 @@ class TestStoragePipeline(TestCase):
             'country': self.espana,
         }
         company = Company.objects.create(**company_dict)
-        print(self.sp._get_company_upgrade(company, item))
-        print('----------------------------')
-        print(upgrade)
-        print('+++++++++++++++++++++++')
         self.assertEqual(self.sp._get_company_upgrade(company, item), upgrade)
