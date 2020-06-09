@@ -10,6 +10,8 @@ from time import time as now
 from dateutil.relativedelta import relativedelta
 from .keys import START_URL, TOTAL_RESULTS
 from job.models import Job, Company
+import logging
+logging.getLogger().setLevel(logging.INFO)
 
 
 class CheckDownloaderMiddleware(object):
@@ -38,7 +40,7 @@ class CheckDownloaderMiddleware(object):
 
 class PUADownloaderMiddleware(object):
 
-    max_retry = 100
+    max_retry = 80
     proxy = None
     ua = None
 
@@ -49,6 +51,7 @@ class PUADownloaderMiddleware(object):
         elif (response and response.status == 404) and (request.meta.get('retry', 0) > 5):
             raise IgnoreRequest(f'The request {request.url} has been failed {n} times with status {response.status}')
         elif request.meta.get('retry', 0) < n:
+            logging.info(f'Retrying {request.url} request for {request.meta.get("retry", 0)} time')
             retry = request.meta['retry'] + 1 if request.meta.get('retry') else 1
             meta = {**request.meta, 'retry': retry}
             request =  Request(url=request.url, meta=meta, headers=request.headers, callback=request.callback,
@@ -79,17 +82,22 @@ class PUADownloaderMiddleware(object):
         """
         Set the last valid proxy and user agent in the request
         """
+        logging.info(f'Initial proxy {request.meta.get("proxy_source")}')
         if PUADownloaderMiddleware.proxy:
             request.meta.update({'proxy_source': PUADownloaderMiddleware.proxy})
             request.meta.update({'proxy':
                                      f'{PUADownloaderMiddleware.proxy.type}://{PUADownloaderMiddleware.proxy.host}:{PUADownloaderMiddleware.proxy.port}'})
             request.headers.update({b'User-Agent': [PUADownloaderMiddleware.ua]})
+        logging.info(f'Final proxy {request.meta.get("proxy_source")}')
 
     def process_exception(self, request, exception, spider):
         if type(exception) == IgnoreRequest or request.meta.get('ignore'):
+            logging.info(f'Ignoring {request.url} request with proxy {request.meta.get("proxy_source")}')
             request.meta.get('retry', 0)
             return None
         else:
+            logging.info(f'Exception in {request.url} request')
+            logging.info(f'Exception {exception}')
             self._check_proxy_and_ua(request, spider)
             result = self._make_the_request_again(request)
             return result
@@ -97,6 +105,7 @@ class PUADownloaderMiddleware(object):
     def process_response(self, request, response, spider):
         self._check_proxy_and_ua(request, spider, response)
         if response.status == 200:
+            logging.info(f'Request {request.url} processed with proxy {request.meta.get("proxy_source")}')
             return response
         else:
             result = self._make_the_request_again(request, response)
