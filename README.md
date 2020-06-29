@@ -45,7 +45,7 @@ Or if you want to run the proyect with [Docker](https://www.docker.com/get-start
 8. Execute <b>python manage.py initdb</b> to initialize language table and locations tables.<br>
 9. Execute <b>python manage.py createsuperuser</b> to create a default user with administrator permission.<br>
 10. Execute <b>python manage.py collectstatic</b> to move all the static files to the staticfiles folder.<br>
-11. The application will start in the url <a href="http://localhost:8000/">http://localhost:8000/</a><br>
+11. Execute <b>python manage.py runserver</b> and the application will start in the url <a href="http://localhost:8000/">http://localhost:8000/</a><br>
 
 ### Running the project with Docker
 1. Download the [IE v.1.0.0](https://github.com/Echeverrias/IE/releases/tag/v1.0.0)</b>
@@ -54,7 +54,6 @@ Or if you want to run the proyect with [Docker](https://www.docker.com/get-start
 
 The data will be stored in a MySQL database called 'ie' accesible at the 3307 port.<br>
 There is an admin user created by default, its username is 'root' and its password is 'root'.
-
 
 ## Running the tests
  Open the terminal, go to the project src folder end execute <b>python manage.py test</b> to run all the tests.
@@ -73,7 +72,6 @@ The entity relationship diagram (ERD) defined to shows the relationships of enti
 * Python 3.7.5
 * Django 3.0.5
 * Scrapy 2.0.1
-* MySQL 8.0.2.0
 
 # Authors
 * Juan Antonio Echeverrías Aranda
