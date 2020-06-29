@@ -60,7 +60,7 @@ There is an admin user created by default, its username is 'root' and its passwo
  You also can run a specific test with <b>python manage.py test <<i>app_name</i>.tests><.<i>test_name</i>></b>
  
 ## Development
-The app is developed in [Python](https://www.python.org) and uses the frameworks [Scrapy](https://scrapy.org/) for do the web scrapping of the website and [Django](https://www.djangoproject.com/) for build the web app.<br><br>
+The app is developed in [Python](https://www.python.org) and uses the frameworks [Scrapy](https://scrapy.org/) for do the web scraping of the website and [Django](https://www.djangoproject.com/) for build the web app.<br><br>
 <div align="center"><img src="https://github.com/Echeverrias/IE/blob/base/screenshots/sytem_arquitecture.png" width="450"></div>
 <br><p align="center"><i>Figure 8</i></p><br><br>
 
@@ -73,7 +73,7 @@ The entity relationship diagram (ERD) defined to shows the relationships of enti
 * Django 3.0.5
 * Scrapy 2.0.1
 
-# Authors
+# Author
 * Juan Antonio Echeverrías Aranda
 
 # License
