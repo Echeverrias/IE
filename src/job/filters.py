@@ -86,8 +86,6 @@ class JobFilter(django_filters.FilterSet):
         return queryset
 
     def between_dates(self, queryset, field_name, *args, **kwargs):
-        print('between dates')
-        print(args)
         try:
             if args:
                 slice=args[0] # django_filters.DateFromToRangeFilter return a slice with the dates

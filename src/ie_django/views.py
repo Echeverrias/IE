@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 
 def home_view(request):
     template_name = "index.html"
-    return render(request, template_name) #% Delete for production
     if not request.user.is_authenticated:
         return redirect('login')
     else:
@@ -11,5 +10,5 @@ def home_view(request):
 def handler404(request, exception):
     return render(request, '404.html', status=404)
 
-def handler500(request):
+def handler500(request, exception):
     return render(request, '500.html', status=500)

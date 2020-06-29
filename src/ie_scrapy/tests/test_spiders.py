@@ -213,9 +213,6 @@ class TestInfoempleoSpider(TestCase):
     def test_extract_company_info(self):
         response, data = FakeResponse.get_offer_response()
         company_dict = self.ie._get_company_info(response)
-        print(company_dict)
-        print('------.................')
-        print(data.get('company_dict'))
         self.assertEqual(company_dict, data.get('company_dict'))
 
     def test_extract_job_info(self):
@@ -227,9 +224,6 @@ class TestInfoempleoSpider(TestCase):
         response, data = FakeResponse.get_offer_response()
         gen = self.ie.parse_item(response)
         for ji in gen:
-            print(ji)
-            print('____________')
-
             self.assertEqual(ji, data.get('job_item'))
 
 
