@@ -40,6 +40,7 @@ services:
       - DATABASE_PASSWORD=root
       - DATABASE_HOST=db
       - DATABASE_PORT=3306
+      - DEBUG=False
 
 volumes:
   static_volume:
