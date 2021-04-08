@@ -32,7 +32,7 @@ You need to have installed:
 
 You need to create an empty database.
 
-Or if you want to run the proyect with [Docker](https://www.docker.com/get-started) you need to have it installed.
+Or if you want to run the project with [Docker](https://www.docker.com/get-started) you need to have it installed.
 
 ### Running the project
 1. Download the [IE v.1.0.0](https://github.com/Echeverrias/IE/releases/tag/v1.0.0)</b>
