@@ -3,7 +3,7 @@ django-filter==2.2.0
 django-import-export==2.0.2
 django-mysql==3.4.0
 django-simple-history==2.10.0
-Scrapy==2.0.1
+Scrapy==2.6.2
 scrapy-djangoitem==1.1.1
 scrapy-proxy-pool==0.1.9
 scrapy-user-agents==0.1.1
